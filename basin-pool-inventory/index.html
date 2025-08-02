@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basin Pool Co. - Individual Item Inventory Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="save-indicator" id="saveIndicator">✓ Auto-saved</div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="backup-controls">
+                <button class="backup-btn" onclick="exportData()">💾 Backup</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                <button class="backup-btn" onclick="document.getElementById('importFile').click()">📂 Restore</button>
+                <button class="backup-btn" onclick="clearAllData()">🗑️ Clear All</button>
+                <button class="backup-btn" onclick="syncToCloud()">☁️ Sync</button>
+            </div>
+            
+            <h1>🏊 Basin Pool Co.</h1>
+            <p>Individual Item Inventory & Deposit Calculator</p>
+            
+            <div class="version-info">
+                v4.0 - Cloud Edition
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>Total Items</h3>
+                    <div class="total" id="totalItems">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Verified</h3>
+                    <div class="total" id="verifiedItems">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>One-Time Tools</h3>
+                    <div class="total" id="oneTimeTotal">$0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Per-Job Materials</h3>
+                    <div class="total" id="perJobTotal">$0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Cliff's Materials</h3>
+                    <div class="total" id="cliffMaterials">$0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Deposit</h3>
+                    <div class="total" id="totalDeposit">$0</div>
+                </div>
+            </div>
+
+            <!-- CLIFF'S LEAN STARTUP SECTION -->
+            <div class="section lean-startup">
+                <h2>Cliff's Installation - Lean Startup Materials</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cliffTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="section-summary">
+                    <strong>Cliff's Installation Total: <span id="cliff-total">$0</span></strong>
+                    <p>Complete premium 8ft package with salt water, heating, and all accessories</p>
+                </div>
+            </div>
+
+            <!-- ONE-TIME TOOLS SECTION -->
+            <div class="section tools">
+                <h2>One-Time Tool Purchases</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Tool/Equipment</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="toolsTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- FUTURE INVENTORY TANKS -->
+            <div class="section tanks">
+                <h2>Future Inventory - Additional Tanks</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Tank Size</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tanksTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PUMP SYSTEMS -->
+            <div class="section pumps">
+                <h2>Additional Pump Systems</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Pump System</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pumpsTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SALT WATER SYSTEMS INVENTORY -->
+            <div class="section salt">
+                <h2>Salt Water Systems Inventory</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saltTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- HEATING SYSTEMS INVENTORY -->
+            <div class="section heating">
+                <h2>Heating Systems Inventory</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="heatingTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- STANDARD HARDWARE INVENTORY -->
+            <div class="section hardware">
+                <h2>Standard Hardware Inventory (Per Job Components)</h2>
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Est. Price</th>
+                            <th>Actual</th>
+                            <th>Qty</th>
+                            <th>Usage</th>
+                            <th>Supplier Link</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hardwareTable">
+                        <!-- Content will be loaded by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="deposit-summary">
+                <h2>💰 Total Deposit Calculation</h2>
+                <div class="deposit-row">
+                    <span>One-Time Tools:</span>
+                    <span id="depositOneTime">$0</span>
+                </div>
+                <div class="deposit-row">
+                    <span>Per-Job Materials:</span>
+                    <span id="depositPerJob">$0</span>
+                </div>
+                <div class="deposit-row">
+                    <span>Cliff's Materials:</span>
+                    <span id="depositCliff">$0</span>
+                </div>
+                <div class="deposit-row">
+                    <span><strong>TOTAL REQUIRED DEPOSIT:</strong></span>
+                    <span id="depositTotal">$0</span>
+                </div>
+            </div>
+
+            <div class="inventory-summary">
+                <h2>📊 Inventory Status Summary</h2>
+                <div class="inventory-row">
+                    <span>Items Verified:</span>
+                    <span><span id="verifiedCount">0</span> / <span id="totalCount">0</span></span>
+                </div>
+                <div class="inventory-row">
+                    <span>Items Pending:</span>
+                    <span id="pendingCount">0</span>
+                </div>
+                <div class="inventory-row">
+                    <span>Items Partial:</span>
+                    <span id="partialCount">0</span>
+                </div>
+            </div>
+
+            <div class="notes-section">
+                <h3>📝 Project Notes</h3>
+                <textarea class="notes-area" id="projectNotes" placeholder="Add general project notes here..."></textarea>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="export-btn" onclick="exportToCSV()">📊 Export CSV</button>
+                <button class="export-btn" onclick="exportData()">💾 Export JSON</button>
+                <button class="export-btn" onclick="printReport()">🖨️ Print Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

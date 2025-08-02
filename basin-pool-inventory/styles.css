@@ -1,0 +1,650 @@
+/* Basin Pool Co. Inventory Tracker Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    font-size: 16px;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Header Styles */
+.header {
+    background: linear-gradient(45deg, #2c3e50, #34495e);
+    color: white;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.version-info {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+}
+
+.backup-controls {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.backup-btn {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.3s;
+}
+
+.backup-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+}
+
+/* Content Styles */
+.content {
+    padding: 30px;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card h3 {
+    font-size: 0.95em;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.summary-card .total {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+/* Section Styles */
+.section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 5px solid #667eea;
+    position: relative;
+}
+
+.section h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+}
+
+.section h2::before {
+    margin-right: 10px;
+    font-size: 1.1em;
+}
+
+/* Section Icons */
+.tools h2::before { content: "='"; }
+.tanks h2::before { content: "<Ê"; }
+.pumps h2::before { content: "™"; }
+.hardware h2::before { content: "=à"; }
+.electrical h2::before { content: "¡"; }
+.plumbing h2::before { content: "=°"; }
+.chemicals h2::before { content: ">ê"; }
+.heating h2::before { content: "=%"; }
+.shade h2::before { content: ""; }
+.siteprep h2::before { content: "<×"; }
+.salt h2::before { content: "<
+"; }
+.safety h2::before { content: ">º"; }
+.lean-startup h2::before { content: "=€"; }
+
+/* Special Lean Startup Section */
+.lean-startup {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-left: 5px solid #f5576c;
+}
+
+.lean-startup h2 {
+    color: white;
+}
+
+.section-summary {
+    background: rgba(255,255,255,0.9);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.section-summary p {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Table Styles */
+.item-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.item-table th {
+    background: #34495e;
+    color: white;
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.item-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #ecf0f1;
+    font-size: 0.85em;
+    vertical-align: middle;
+}
+
+.item-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Input Styles */
+.price-input {
+    width: 80px;
+    padding: 6px;
+    border: 2px solid #bdc3c7;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85em;
+    transition: border-color 0.3s;
+}
+
+.price-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}
+
+.qty-input {
+    width: 60px;
+    padding: 6px;
+    border: 2px solid #bdc3c7;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+.link-input {
+    width: 100%;
+    padding: 6px;
+    border: 2px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 0.8em;
+    transition: border-color 0.3s;
+}
+
+.link-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}
+
+.notes-input {
+    width: 100%;
+    padding: 6px;
+    border: 2px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+/* Usage Type Badges */
+.usage-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-align: center;
+    min-width: 70px;
+    display: inline-block;
+}
+
+.usage-type.one-time {
+    background: #e74c3c;
+    color: white;
+}
+
+.usage-type.per-job {
+    background: #f39c12;
+    color: white;
+}
+
+.usage-type.reusable {
+    background: #27ae60;
+    color: white;
+}
+
+.usage-type.consumable {
+    background: #8e44ad;
+    color: white;
+}
+
+/* Status Badges */
+.status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-align: center;
+    min-width: 70px;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.status.verified {
+    background: #27ae60;
+    color: white;
+}
+
+.status.partial {
+    background: #f39c12;
+    color: white;
+}
+
+.status.pending {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Summary Sections */
+.deposit-summary {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin-top: 25px;
+    border: 3px solid #e74c3c;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+}
+
+.deposit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.deposit-row:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.2em;
+    background: #e74c3c;
+    color: white;
+    border-radius: 8px;
+    margin-top: 15px;
+    padding: 15px;
+}
+
+.inventory-summary {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 2px solid #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.inventory-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.inventory-row:last-child {
+    border-bottom: none;
+}
+
+/* Export Buttons */
+.export-btn {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+/* Notes Section */
+.notes-section {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.notes-area {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.9em;
+}
+
+/* Save Indicator */
+.save-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.save-indicator.show {
+    opacity: 1;
+}
+
+/* Responsive Design - Tablet */
+@media (max-width: 1200px) {
+    .container {
+        margin: 15px;
+    }
+    
+    .content {
+        padding: 20px;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    
+    .item-table th, .item-table td {
+        padding: 8px 6px;
+        font-size: 0.8em;
+    }
+    
+    .price-input, .qty-input {
+        width: 60px;
+        font-size: 0.8em;
+    }
+}
+
+/* Responsive Design - Mobile */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .container {
+        margin: 5px;
+        border-radius: 10px;
+    }
+    
+    .header {
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 2em;
+    }
+    
+    .header p {
+        font-size: 1em;
+    }
+    
+    .content {
+        padding: 15px;
+    }
+    
+    .backup-controls {
+        position: static;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .version-info {
+        position: static;
+        margin-top: 10px;
+        display: inline-block;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .summary-card {
+        padding: 15px;
+    }
+    
+    .summary-card h3 {
+        font-size: 0.85em;
+    }
+    
+    .summary-card .total {
+        font-size: 1.4em;
+    }
+    
+    .section {
+        padding: 15px;
+    }
+    
+    .section h2 {
+        font-size: 1.1em;
+    }
+    
+    /* Mobile Table Styles */
+    .item-table {
+        font-size: 0.7em;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .item-table th {
+        padding: 8px 4px;
+        font-size: 0.75em;
+    }
+    
+    .item-table td {
+        padding: 6px 4px;
+        font-size: 0.75em;
+    }
+    
+    .price-input, .qty-input {
+        width: 50px;
+        padding: 4px;
+        font-size: 0.7em;
+    }
+    
+    .link-input, .notes-input {
+        min-width: 100px;
+        font-size: 0.7em;
+    }
+    
+    .usage-type, .status {
+        font-size: 0.65em;
+        padding: 2px 6px;
+        min-width: 50px;
+    }
+    
+    .deposit-summary, .inventory-summary {
+        padding: 15px;
+    }
+    
+    .deposit-row, .inventory-row {
+        font-size: 0.9em;
+    }
+    
+    .export-btn {
+        padding: 10px 15px;
+        font-size: 0.8em;
+        margin: 5px;
+    }
+    
+    .notes-area {
+        height: 80px;
+        font-size: 0.8em;
+    }
+}
+
+/* Very Small Mobile */
+@media (max-width: 480px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .backup-controls {
+        gap: 5px;
+    }
+    
+    .backup-btn {
+        padding: 6px 10px;
+        font-size: 0.75em;
+    }
+    
+    /* Stack table headers and data for very small screens */
+    .item-table, .item-table thead, .item-table tbody, .item-table th, .item-table td, .item-table tr {
+        display: block;
+    }
+    
+    .item-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .item-table tr {
+        background: white;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .item-table td {
+        border: none;
+        position: relative;
+        padding-left: 30%;
+        padding-bottom: 10px;
+        white-space: normal;
+    }
+    
+    .item-table td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 6px;
+        width: 25%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        color: #34495e;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .container {
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .backup-controls, .export-btn, .save-indicator {
+        display: none;
+    }
+    
+    .section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .item-table {
+        font-size: 0.8em;
+    }
+}
