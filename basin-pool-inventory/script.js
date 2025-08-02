@@ -1,4 +1,4 @@
-// Basin Pool Co. Inventory Tracker - Main JavaScript
+// Basin Pool Co. Inventory Tracker - Real-time Collaborative Edition
 
 // Global state management
 let inventoryData = {
@@ -12,22 +12,157 @@ let inventoryData = {
     projectNotes: ''
 };
 
+// Firebase and collaboration variables
+let database = null;
+let currentUser = null;
+let isFirebaseReady = false;
+let dataRef = null;
+let presenceRef = null;
+let connectionStatus = 'connecting';
+
 // Auto-save timer
 let autoSaveTimer = null;
 let cloudSyncTimer = null;
+let lastUpdateTimestamp = 0;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    generateUserId();
     initializeData();
-    loadFromLocalStorage();
+    
+    // Check if Firebase is available
+    if (CONFIG.FIREBASE_SYNC.ENABLED && window.database) {
+        initializeFirebase();
+    } else {
+        // Fallback to local storage
+        loadFromLocalStorage();
+        startAutoSave();
+    }
+    
     setupEventListeners();
     renderAllSections();
     updateSummary();
-    startAutoSave();
+    showConnectionStatus();
+    
     if (CONFIG.CLOUD_SYNC.ENABLED) {
         startCloudSync();
     }
 });
+
+// Generate unique user ID
+function generateUserId() {
+    currentUser = {
+        id: 'user_' + Math.random().toString(36).substr(2, 9),
+        name: 'User ' + Math.floor(Math.random() * 1000),
+        color: getRandomColor(),
+        joinedAt: Date.now()
+    };
+}
+
+function getRandomColor() {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// Initialize Firebase real-time database
+function initializeFirebase() {
+    try {
+        database = window.database;
+        dataRef = Firebase.ref(database, 'inventory');
+        presenceRef = Firebase.ref(database, 'presence');
+        
+        // Set up real-time data listener
+        Firebase.onValue(dataRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const firebaseData = snapshot.val();
+                if (firebaseData.lastUpdated > lastUpdateTimestamp) {
+                    lastUpdateTimestamp = firebaseData.lastUpdated;
+                    inventoryData = firebaseData.data;
+                    renderAllSections();
+                    updateSummary();
+                    loadProjectNotes();
+                    showSaveIndicator('Synced from cloud');
+                }
+            }
+        }, (error) => {
+            console.error('Firebase read error:', error);
+            connectionStatus = 'disconnected';
+            showConnectionStatus();
+            // Fallback to local storage
+            loadFromLocalStorage();
+        });
+        
+        // Set up presence system
+        if (CONFIG.FIREBASE_SYNC.PRESENCE_ENABLED) {
+            setupPresence();
+        }
+        
+        // Handle connection state
+        const connectedRef = Firebase.ref(database, '.info/connected');
+        Firebase.onValue(connectedRef, (snapshot) => {
+            if (snapshot.val() === true) {
+                connectionStatus = 'connected';
+                isFirebaseReady = true;
+                console.log('Firebase connected');
+            } else {
+                connectionStatus = 'disconnected';
+                console.log('Firebase disconnected');
+            }
+            showConnectionStatus();
+        });
+        
+        console.log('Firebase real-time collaboration initialized');
+        
+    } catch (error) {
+        console.error('Firebase initialization failed:', error);
+        connectionStatus = 'disconnected';
+        showConnectionStatus();
+        // Fallback to local storage
+        loadFromLocalStorage();
+        startAutoSave();
+    }
+}
+
+// Set up user presence tracking
+function setupPresence() {
+    if (!presenceRef || !currentUser) return;
+    
+    const userPresenceRef = Firebase.ref(database, `presence/${currentUser.id}`);
+    
+    // Set user as online
+    Firebase.set(userPresenceRef, {
+        ...currentUser,
+        online: true,
+        lastSeen: Firebase.serverTimestamp()
+    });
+    
+    // Remove user when they disconnect
+    Firebase.onDisconnect(userPresenceRef).remove();
+    
+    // Listen for presence changes
+    Firebase.onValue(presenceRef, (snapshot) => {
+        updatePresenceDisplay(snapshot.val());
+    });
+}
+
+// Update presence display
+function updatePresenceDisplay(presenceData) {
+    const presenceContainer = document.getElementById('userPresence');
+    const presenceUsers = document.getElementById('presenceUsers');
+    
+    if (!presenceData || !presenceContainer || !presenceUsers) return;
+    
+    const onlineUsers = Object.values(presenceData).filter(user => user.online);
+    
+    if (onlineUsers.length > 0) {
+        presenceContainer.style.display = 'flex';
+        presenceUsers.innerHTML = onlineUsers.map(user => 
+            `<span class="presence-user" style="background-color: ${user.color}20; border-color: ${user.color};">${user.name}</span>`
+        ).join('');
+    } else {
+        presenceContainer.style.display = 'none';
+    }
+}
 
 // Initialize default inventory data
 function initializeData() {
@@ -296,7 +431,11 @@ function scheduleAutoSave() {
     }
     
     autoSaveTimer = setTimeout(() => {
-        saveToLocalStorage();
+        if (isFirebaseReady && dataRef) {
+            saveToFirebase();
+        } else {
+            saveToLocalStorage();
+        }
         showSaveIndicator();
     }, 1000); // Save 1 second after last change
 }
@@ -304,12 +443,48 @@ function scheduleAutoSave() {
 function startAutoSave() {
     if (CONFIG.AUTO_SAVE.ENABLED) {
         setInterval(() => {
-            saveToLocalStorage();
+            if (isFirebaseReady && dataRef) {
+                saveToFirebase();
+            } else {
+                saveToLocalStorage();
+            }
         }, CONFIG.AUTO_SAVE.INTERVAL);
     }
 }
 
-// Local storage functions
+// Firebase save function
+function saveToFirebase() {
+    if (!isFirebaseReady || !dataRef) {
+        saveToLocalStorage();
+        return;
+    }
+    
+    try {
+        const dataToSave = {
+            data: inventoryData,
+            lastUpdated: Date.now(),
+            lastUpdatedBy: currentUser.id,
+            version: CONFIG.APP.VERSION
+        };
+        
+        lastUpdateTimestamp = dataToSave.lastUpdated;
+        
+        Firebase.set(dataRef, dataToSave).then(() => {
+            console.log('Data saved to Firebase');
+            showSaveIndicator('Synced to cloud');
+        }).catch((error) => {
+            console.error('Firebase save error:', error);
+            showNotification('Failed to sync to cloud', 'error');
+            // Fallback to local storage
+            saveToLocalStorage();
+        });
+    } catch (error) {
+        console.error('Failed to save to Firebase:', error);
+        saveToLocalStorage();
+    }
+}
+
+// Local storage functions (fallback)
 function saveToLocalStorage() {
     try {
         const dataToSave = {
@@ -547,10 +722,53 @@ function clearAllData() {
     }
 }
 
+// Connection status display
+function showConnectionStatus() {
+    let statusElement = document.getElementById('connectionStatus');
+    
+    if (!statusElement) {
+        statusElement = document.createElement('div');
+        statusElement.id = 'connectionStatus';
+        statusElement.className = 'connection-status';
+        document.body.appendChild(statusElement);
+    }
+    
+    statusElement.className = `connection-status ${connectionStatus}`;
+    
+    const statusText = {
+        'connected': '🟢 Connected',
+        'disconnected': '🔴 Offline',
+        'connecting': '🟡 Connecting...',
+        'reconnecting': '🟡 Reconnecting...'
+    };
+    
+    statusElement.textContent = statusText[connectionStatus] || '⚪ Unknown';
+    
+    // Auto-hide connected status after 3 seconds
+    if (connectionStatus === 'connected') {
+        setTimeout(() => {
+            if (statusElement && connectionStatus === 'connected') {
+                statusElement.style.display = 'none';
+            }
+        }, 3000);
+    } else {
+        statusElement.style.display = 'block';
+    }
+}
+
+// Load project notes into UI
+function loadProjectNotes() {
+    const notesElement = document.getElementById('projectNotes');
+    if (notesElement && inventoryData.projectNotes) {
+        notesElement.value = inventoryData.projectNotes;
+    }
+}
+
 // Notification system
-function showSaveIndicator() {
+function showSaveIndicator(message = '✓ Auto-saved') {
     const indicator = document.getElementById('saveIndicator');
     if (indicator) {
+        indicator.textContent = message;
         indicator.classList.add('show');
         setTimeout(() => {
             indicator.classList.remove('show');

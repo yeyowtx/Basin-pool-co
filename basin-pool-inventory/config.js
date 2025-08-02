@@ -1,7 +1,18 @@
 // Basin Pool Co. Inventory Tracker Configuration
 
 const CONFIG = {
-    // Google Sheets API Configuration
+    // Firebase Configuration for Real-time Collaboration
+    FIREBASE: {
+        apiKey: "AIzaSyBqRjKs8ux4V3fU-Zi6L_EXAMPLE_KEY",
+        authDomain: "basin-pool-inventory.firebaseapp.com",
+        databaseURL: "https://basin-pool-inventory-default-rtdb.firebaseio.com/",
+        projectId: "basin-pool-inventory",
+        storageBucket: "basin-pool-inventory.appspot.com",
+        messagingSenderId: "123456789012",
+        appId: "1:123456789012:web:abcdef1234567890example"
+    },
+    
+    // Google Sheets API Configuration (Optional backup)
     GOOGLE_SHEETS: {
         API_KEY: 'YOUR_GOOGLE_SHEETS_API_KEY_HERE',
         SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',
@@ -15,7 +26,14 @@ const CONFIG = {
         LOCAL_STORAGE_KEY: 'basin_pool_inventory'
     },
     
-    // Cloud sync settings
+    // Firebase real-time sync settings
+    FIREBASE_SYNC: {
+        ENABLED: true, // Firebase is the primary collaboration method
+        PRESENCE_ENABLED: true, // Show who's online
+        OFFLINE_SUPPORT: true // Continue working offline
+    },
+    
+    // Cloud sync settings (Google Sheets backup)
     CLOUD_SYNC: {
         ENABLED: false, // Set to true when API keys are configured
         INTERVAL: 300000, // 5 minutes
@@ -73,14 +91,14 @@ const CONFIG = {
     
     // Section configurations
     SECTIONS: {
-        'cliff': { name: 'Cliff\'s Installation', icon: '=€' },
+        'cliff': { name: 'Cliff\'s Installation', icon: '=ï¿½' },
         'tools': { name: 'One-Time Tools', icon: '='' },
-        'tanks': { name: 'Additional Tanks', icon: '<Ê' },
-        'pumps': { name: 'Pump Systems', icon: '™' },
+        'tanks': { name: 'Additional Tanks', icon: '<ï¿½' },
+        'pumps': { name: 'Pump Systems', icon: 'ï¿½' },
         'salt': { name: 'Salt Water Systems', icon: '<
 ' },
         'heating': { name: 'Heating Systems', icon: '=%' },
-        'hardware': { name: 'Standard Hardware', icon: '=à' }
+        'hardware': { name: 'Standard Hardware', icon: '=ï¿½' }
     }
 };
 

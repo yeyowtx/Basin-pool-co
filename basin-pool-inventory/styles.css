@@ -52,6 +52,59 @@ body {
     font-size: 0.9em;
 }
 
+.user-presence {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.presence-users {
+    display: flex;
+    gap: 5px;
+}
+
+.presence-user {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.connection-status {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    z-index: 1001;
+    transition: all 0.3s;
+}
+
+.connection-status.connected {
+    background: #27ae60;
+    color: white;
+}
+
+.connection-status.disconnected {
+    background: #e74c3c;
+    color: white;
+}
+
+.connection-status.reconnecting {
+    background: #f39c12;
+    color: white;
+}
+
 .backup-controls {
     position: absolute;
     top: 15px;
@@ -135,19 +188,19 @@ body {
 
 /* Section Icons */
 .tools h2::before { content: "='"; }
-.tanks h2::before { content: "<Ê"; }
-.pumps h2::before { content: "™"; }
-.hardware h2::before { content: "=à"; }
-.electrical h2::before { content: "¡"; }
-.plumbing h2::before { content: "=°"; }
-.chemicals h2::before { content: ">ê"; }
+.tanks h2::before { content: "<ï¿½"; }
+.pumps h2::before { content: "ï¿½"; }
+.hardware h2::before { content: "=ï¿½"; }
+.electrical h2::before { content: "ï¿½"; }
+.plumbing h2::before { content: "=ï¿½"; }
+.chemicals h2::before { content: ">ï¿½"; }
 .heating h2::before { content: "=%"; }
 .shade h2::before { content: ""; }
-.siteprep h2::before { content: "<×"; }
+.siteprep h2::before { content: "<ï¿½"; }
 .salt h2::before { content: "<
 "; }
-.safety h2::before { content: ">º"; }
-.lean-startup h2::before { content: "=€"; }
+.safety h2::before { content: ">ï¿½"; }
+.lean-startup h2::before { content: "=ï¿½"; }
 
 /* Special Lean Startup Section */
 .lean-startup {
