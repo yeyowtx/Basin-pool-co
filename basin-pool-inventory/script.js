@@ -83,6 +83,12 @@ function initializeFirebase() {
                     loadProjectNotes();
                     showSaveIndicator('Synced from cloud');
                 }
+            } else {
+                // Firebase is empty, save default data to it
+                console.log('Firebase is empty, initializing with default data');
+                saveToFirebase();
+                renderAllSections();
+                updateSummary();
             }
         }, (error) => {
             console.error('Firebase read error:', error);
