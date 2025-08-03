@@ -265,7 +265,7 @@ body {
     font-size: 1.1em;
 }
 
-/* Section Icons */
+/* Clean Section Icons */
 .tools h2::before { content: "🔧"; }
 .tanks h2::before { content: "🏊"; }
 .pumps h2::before { content: "⚙️"; }
@@ -279,19 +279,6 @@ body {
 .salt h2::before { content: "🌊"; }
 .safety h2::before { content: "🦺"; }
 .lean-startup h2::before { content: "🚀"; }
-.tanks h2::before { content: "<�"; }
-.pumps h2::before { content: "�"; }
-.hardware h2::before { content: "=�"; }
-.electrical h2::before { content: "�"; }
-.plumbing h2::before { content: "=�"; }
-.chemicals h2::before { content: ">�"; }
-.heating h2::before { content: "=%"; }
-.shade h2::before { content: ""; }
-.siteprep h2::before { content: "<�"; }
-.salt h2::before { content: "<
-"; }
-.safety h2::before { content: ">�"; }
-.lean-startup h2::before { content: "=�"; }
 
 /* Special Lean Startup Section */
 .lean-startup {
@@ -316,7 +303,7 @@ body {
     color: #666;
 }
 
-/* Table Styles */
+/* Table Styles - Fixed for Desktop */
 .item-table {
     width: 100%;
     border-collapse: collapse;
@@ -962,9 +949,10 @@ body {
         padding: 8px;
     }
     
-    /* Mobile Table Styles */
+    /* Mobile Table Styles - FIXED */
     .item-table {
         font-size: 0.7em;
+        /* Removed problematic overflow styles */
     }
     
     .item-table th {
