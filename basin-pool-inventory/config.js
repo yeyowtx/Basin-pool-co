@@ -91,14 +91,13 @@ const CONFIG = {
     
     // Section configurations
     SECTIONS: {
-        'cliff': { name: 'Cliff\'s Installation', icon: '=�' },
-        'tools': { name: 'One-Time Tools', icon: '='' },
-        'tanks': { name: 'Additional Tanks', icon: '<�' },
-        'pumps': { name: 'Pump Systems', icon: '�' },
-        'salt': { name: 'Salt Water Systems', icon: '<
-' },
-        'heating': { name: 'Heating Systems', icon: '=%' },
-        'hardware': { name: 'Standard Hardware', icon: '=�' }
+        'cliff': { name: 'Cliff Installation', icon: 'rocket' },
+        'tools': { name: 'One-Time Tools', icon: 'wrench' },
+        'tanks': { name: 'Additional Tanks', icon: 'pool' },
+        'pumps': { name: 'Pump Systems', icon: 'gear' },
+        'salt': { name: 'Salt Water Systems', icon: 'wave' },
+        'heating': { name: 'Heating Systems', icon: 'fire' },
+        'hardware': { name: 'Standard Hardware', icon: 'tools' }
     }
 };
 
