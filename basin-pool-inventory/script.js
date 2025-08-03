@@ -30,6 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
     generateUserId();
     initializeData();
     
+    // Always render the initial data first
+    renderAllSections();
+    updateSummary();
+    
     // Check if Firebase is available
     if (CONFIG.FIREBASE_SYNC.ENABLED && window.database) {
         initializeFirebase();
@@ -40,8 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     setupEventListeners();
-    renderAllSections();
-    updateSummary();
     showConnectionStatus();
     
     if (CONFIG.CLOUD_SYNC.ENABLED) {
