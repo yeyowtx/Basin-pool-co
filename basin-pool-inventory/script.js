@@ -8,6 +8,7 @@ let inventoryData = {
     pumps: [],
     salt: [],
     heating: [],
+    siteprep: [],
     hardware: [],
     projectNotes: '',
     roiTracking: {
@@ -206,12 +207,27 @@ function initializeData() {
 
     // One-Time Tools (template with $0 prices)
     inventoryData.tools = [
+        // Tank Installation Tools
         { name: 'Hole Saw Set (1.5", 2", 3")', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Tank fittings' },
         { name: 'Cordless Drill (if needed)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'May already have' },
         { name: 'Step Bit Set', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Clean holes' },
         { name: 'Level (4ft)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Tank leveling' },
         { name: 'Socket Set & Wrenches', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'Pump assembly' },
-        { name: 'Shop Vacuum (wet/dry)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Cleanup' }
+        { name: 'Shop Vacuum (wet/dry)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Cleanup' },
+        
+        // Professional Excavation & Site Prep Tools
+        { name: 'Mini Excavator Rental (per day)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Large pad excavation' },
+        { name: 'Trenching Shovel', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Hand excavation' },
+        { name: 'Mattock/Pick', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Hard soil breaking' },
+        { name: 'Hand Tamper (steel)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Caliche compaction' },
+        { name: 'Plate Compactor Rental', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Professional compaction' },
+        { name: 'Transit Level (for leveling)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Precise pad leveling' },
+        { name: 'Measuring Tape (100ft)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Pad layout' },
+        { name: 'String Line & Stakes', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Layout marking' },
+        { name: 'Chalk Line', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Precise marking' },
+        { name: 'Wheelbarrow', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Material transport' },
+        { name: 'Rubber Mallet', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Paver installation' },
+        { name: 'Circular Saw', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Edging cuts' }
     ];
 
     // Additional Tanks (template with $0 prices)
@@ -241,6 +257,38 @@ function initializeData() {
         { name: 'Gas Line Kits (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Propane connections' },
         { name: 'Mounting Kits (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Brackets, bolts' },
         { name: 'Temp Controllers (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Digital displays' }
+    ];
+
+    // Site Preparation & Premium Pad Installation (template with $0 prices)
+    inventoryData.siteprep = [
+        // Excavation & Leveling
+        { name: 'Excavation & Leveling (6ft = 8x8)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '8ft x 8ft pad area' },
+        { name: 'Excavation & Leveling (8ft = 10x10)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '10ft x 10ft pad area' },
+        { name: 'Excavation & Leveling (10ft = 12x12)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12ft x 12ft pad area' },
+        
+        // Foundation Materials
+        { name: 'Caliche Base (per cubic yard)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Hand compacted solid foundation' },
+        { name: 'Landscape Fabric (100ft roll)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Full coverage weed prevention' },
+        
+        // Professional Edging
+        { name: 'Pressure Treated Edging 2x8', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Professional border definition' },
+        { name: 'Pressure Treated Stakes', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Secure edging installation' },
+        { name: 'Construction Screws (3.5")', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Edging assembly' },
+        
+        // Premium Finishing
+        { name: '12"x12"x1.5" Pavers (per sq ft)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Premium 2ft border finish' },
+        { name: '3/4" Limestone (per cubic yard)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Drainage & aesthetics backfill' },
+        
+        // Future-Proofed Trenching
+        { name: 'Trenching for Water Lines', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Pool pump water lines' },
+        { name: 'Trenching for Gas Lines', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Water heater gas & water' },
+        { name: '12V Lighting Conduit Run', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12V lighting infrastructure' },
+        { name: 'Audio Conduit Run', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Outdoor audio preparation' },
+        
+        // Optional Add-ons
+        { name: 'French Drain System', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Custom drainage (quote separately)' },
+        { name: 'Drain Pipe (4" perforated)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'French drain installation' },
+        { name: 'Drain Gravel (per cubic yard)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'French drain surround' }
     ];
 
     // Standard Hardware (template with $0 prices)
@@ -303,6 +351,7 @@ function renderAllSections() {
     renderSection('pumps', inventoryData.pumps, 'pumpsTable');
     renderSection('salt', inventoryData.salt, 'saltTable');
     renderSection('heating', inventoryData.heating, 'heatingTable');
+    renderSection('siteprep', inventoryData.siteprep, 'siteprepTable');
     renderSection('hardware', inventoryData.hardware, 'hardwareTable');
 }
 
@@ -977,6 +1026,7 @@ function addNewItem(section) {
         'pumps': 'pumpsTable',
         'salt': 'saltTable',
         'heating': 'heatingTable',
+        'siteprep': 'siteprepTable',
         'hardware': 'hardwareTable'
     };
     
@@ -1021,6 +1071,7 @@ function deleteItem(section, index) {
             'pumps': 'pumpsTable',
             'salt': 'saltTable',
             'heating': 'heatingTable',
+            'siteprep': 'siteprepTable',
             'hardware': 'hardwareTable'
         };
         

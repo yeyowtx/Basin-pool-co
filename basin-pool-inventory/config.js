@@ -104,6 +104,7 @@ const CONFIG = {
         'pumps': { name: 'Pump Systems', icon: 'gear' },
         'salt': { name: 'Salt Water Systems', icon: 'wave' },
         'heating': { name: 'Heating Systems', icon: 'fire' },
+        'siteprep': { name: 'Site Preparation & Pad Installation', icon: 'construction' },
         'hardware': { name: 'Standard Hardware', icon: 'tools' }
     }
 };
