@@ -85,7 +85,8 @@ function initializeFirebase() {
                 const firebaseData = snapshot.val();
                 if (firebaseData.lastUpdated > lastUpdateTimestamp) {
                     lastUpdateTimestamp = firebaseData.lastUpdated;
-                    inventoryData = firebaseData.data;
+                    // Merge Firebase data with default template to ensure new sections exist
+                    inventoryData = mergeWithDefaultData(firebaseData.data);
                     renderAllSections();
                     updateSummary();
                     loadProjectNotes();
@@ -298,6 +299,46 @@ function initializeData() {
         { name: 'Suction Fittings', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Main drains' },
         { name: 'Pool Hoses (25ft pairs)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: '1.5 inch diameter' }
     ];
+}
+
+// Merge Firebase data with default template to ensure new sections exist
+function mergeWithDefaultData(firebaseData) {
+    // Create fresh template data without affecting global inventoryData
+    const templateData = getDefaultInventoryData();
+    
+    // Start with template data to ensure all sections exist
+    const mergedData = JSON.parse(JSON.stringify(templateData));
+    
+    // Merge Firebase data, preserving any existing user data
+    if (firebaseData) {
+        Object.keys(firebaseData).forEach(section => {
+            if (section === 'projectNotes' || section === 'roiTracking') {
+                // Preserve user-specific data
+                mergedData[section] = firebaseData[section];
+            } else if (Array.isArray(firebaseData[section]) && Array.isArray(mergedData[section])) {
+                // For array sections, merge existing user data with template
+                // Keep user data if it exists, otherwise use template
+                if (firebaseData[section].length > 0) {
+                    mergedData[section] = firebaseData[section];
+                }
+                // If Firebase data doesn't have a section that exists in template, keep template
+            }
+        });
+    }
+    
+    console.log('Merged data with new sections:', Object.keys(mergedData));
+    return mergedData;
+}
+
+// Get default inventory data without affecting global state
+function getDefaultInventoryData() {
+    // Use existing initializeData to get template, but preserve global state
+    const savedData = JSON.parse(JSON.stringify(inventoryData));
+    initializeData();
+    const templateData = JSON.parse(JSON.stringify(inventoryData));
+    inventoryData = savedData; // Restore global state
+    
+    return templateData;
 }
 
 // Setup event listeners
