@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Basin Pool Co. - Individual Item Inventory Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles_fixed.css">
 </head>
 <body>
     <div class="save-indicator" id="saveIndicator">✓ Auto-saved</div>
@@ -42,21 +42,36 @@
                     <h3>Verified</h3>
                     <div class="total" id="verifiedItems">0</div>
                 </div>
-                <div class="summary-card">
-                    <h3>One-Time Tools</h3>
+                <div class="summary-card investment-card">
+                    <h3>💰 Initial Investment</h3>
+                    <div class="total" id="initialInvestment">$0</div>
+                    <small>First Install (Cliff's)</small>
+                </div>
+                <div class="summary-card tools-card">
+                    <h3>🔨 One-Time Tools</h3>
                     <div class="total" id="oneTimeTotal">$0</div>
+                    <small>Equipment Purchase</small>
                 </div>
-                <div class="summary-card">
-                    <h3>Per-Job Materials</h3>
+                <div class="summary-card materials-card">
+                    <h3>📦 Per-Job Materials</h3>
                     <div class="total" id="perJobTotal">$0</div>
+                    <small>Recurring Costs</small>
                 </div>
-                <div class="summary-card">
-                    <h3>Cliff's Materials</h3>
-                    <div class="total" id="cliffMaterials">$0</div>
+                <div class="summary-card revenue-card">
+                    <h3>💵 Revenue Tracking</h3>
+                    <div class="total" id="totalRevenue">$0</div>
+                    <small><input type="number" id="revenueInput" placeholder="Enter job revenue" style="width: 120px; padding: 4px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;"></small>
                 </div>
-                <div class="summary-card">
-                    <h3>Total Deposit</h3>
+                <div class="summary-card roi-card">
+                    <h3>📈 ROI Progress</h3>
+                    <div class="total" id="roiPercentage">0%</div>
+                    <small id="roiStatus">Break-even pending</small>
+                    <button onclick="resetROI()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.7em; margin-top: 5px; cursor: pointer;">Reset ROI</button>
+                </div>
+                <div class="summary-card deposit-card">
+                    <h3>💳 Total Deposit</h3>
                     <div class="total" id="totalDeposit">$0</div>
+                    <small>Required Capital</small>
                 </div>
             </div>
 
@@ -67,19 +82,22 @@
                     <thead>
                         <tr>
                             <th>Item</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="cliffTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('cliff')">➕ Add Item</button>
+                </div>
                 <div class="section-summary">
                     <strong>Cliff's Installation Total: <span id="cliff-total">$0</span></strong>
                     <p>Complete premium 8ft package with salt water, heating, and all accessories</p>
@@ -93,19 +111,22 @@
                     <thead>
                         <tr>
                             <th>Tool/Equipment</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="toolsTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('tools')">➕ Add Tool</button>
+                </div>
             </div>
 
             <!-- FUTURE INVENTORY TANKS -->
@@ -115,19 +136,22 @@
                     <thead>
                         <tr>
                             <th>Tank Size</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="tanksTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('tanks')">➕ Add Tank</button>
+                </div>
             </div>
 
             <!-- PUMP SYSTEMS -->
@@ -137,19 +161,22 @@
                     <thead>
                         <tr>
                             <th>Pump System</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="pumpsTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('pumps')">➕ Add Pump System</button>
+                </div>
             </div>
 
             <!-- SALT WATER SYSTEMS INVENTORY -->
@@ -159,19 +186,22 @@
                     <thead>
                         <tr>
                             <th>Component</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="saltTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('salt')">➕ Add Salt Water Component</button>
+                </div>
             </div>
 
             <!-- HEATING SYSTEMS INVENTORY -->
@@ -181,19 +211,22 @@
                     <thead>
                         <tr>
                             <th>Component</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="heatingTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('heating')">➕ Add Heating Component</button>
+                </div>
             </div>
 
             <!-- STANDARD HARDWARE INVENTORY -->
@@ -203,23 +236,66 @@
                     <thead>
                         <tr>
                             <th>Component</th>
-                            <th>Est. Price</th>
-                            <th>Actual</th>
+                            <th>Price</th>
                             <th>Qty</th>
                             <th>Usage</th>
+                            <th>Location</th>
                             <th>Supplier Link</th>
                             <th>Status</th>
-                            <th>Notes</th>
+                            <th>Notes & Actions</th>
                         </tr>
                     </thead>
                     <tbody id="hardwareTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
+                <div class="add-item-container">
+                    <button class="add-item-btn" onclick="addNewItem('hardware')">➕ Add Hardware Component</button>
+                </div>
+            </div>
+
+            <div class="roi-summary">
+                <h2>📊 Business Investment & ROI Analysis</h2>
+                <div class="roi-explanation">
+                    <div class="roi-column">
+                        <h3>💼 Initial Investment Breakdown</h3>
+                        <div class="roi-row">
+                            <span>🏊 Cliff's Install (First Project):</span>
+                            <span id="roiCliffTotal">$0</span>
+                        </div>
+                        <div class="roi-row">
+                            <span>🔨 One-Time Tools & Equipment:</span>
+                            <span id="roiToolsTotal">$0</span>
+                        </div>
+                        <div class="roi-row total-investment">
+                            <span><strong>Total Initial Investment:</strong></span>
+                            <span id="roiInitialTotal">$0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="roi-column">
+                        <h3>💰 Revenue & ROI Tracking</h3>
+                        <div class="roi-row">
+                            <span>📈 Total Revenue Earned:</span>
+                            <span id="roiRevenueTotal">$0</span>
+                        </div>
+                        <div class="roi-row">
+                            <span>🎯 Jobs Completed:</span>
+                            <span id="roiJobsCount">0</span>
+                        </div>
+                        <div class="roi-row roi-highlight">
+                            <span><strong>Current ROI:</strong></span>
+                            <span id="roiCurrentPercent">0%</span>
+                        </div>
+                        <div class="roi-status-text" id="roiStatusText">
+                            Enter job revenue to track your return on investment
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="deposit-summary">
-                <h2>💰 Total Deposit Calculation</h2>
+                <h2>💳 Working Capital Requirements</h2>
                 <div class="deposit-row">
                     <span>One-Time Tools:</span>
                     <span id="depositOneTime">$0</span>

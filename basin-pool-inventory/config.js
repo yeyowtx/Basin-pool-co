@@ -65,10 +65,10 @@ const CONFIG = {
     // Default item structure
     DEFAULT_ITEM: {
         name: '',
-        estimatedPrice: 0,
         actualPrice: 0,
         quantity: 0,
         usage: 'pending',
+        location: 'both',
         link: '',
         status: 'pending',
         notes: ''
@@ -87,6 +87,13 @@ const CONFIG = {
         'pending': { label: 'Pending', color: '#e74c3c' },
         'partial': { label: 'Partial', color: '#f39c12' },
         'verified': { label: 'Verified', color: '#27ae60' }
+    },
+    
+    // Location types and their colors
+    LOCATION_TYPES: {
+        'online': { label: 'Online', color: '#3498db', description: 'Order online (Amazon, eBay, etc.)' },
+        'local': { label: 'Local Midland TX', color: '#e67e22', description: 'Available locally within 60-mile radius of Midland, TX' },
+        'both': { label: 'Both Options', color: '#9b59b6', description: 'Available both online and locally' }
     },
     
     // Section configurations

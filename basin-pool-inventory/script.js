@@ -9,7 +9,12 @@ let inventoryData = {
     salt: [],
     heating: [],
     hardware: [],
-    projectNotes: ''
+    projectNotes: '',
+    roiTracking: {
+        totalRevenue: 0,
+        jobsCompleted: 0,
+        revenueHistory: []
+    }
 };
 
 // Firebase and collaboration variables
@@ -174,76 +179,76 @@ function updatePresenceDisplay(presenceData) {
 
 // Initialize default inventory data
 function initializeData() {
-    // Cliff's Installation - Lean Startup Materials
+    // Cliff's Installation - Lean Startup Materials (template with $0 prices)
     inventoryData.cliff = [
-        { name: '8ft CountyLine Tank (700 gal)', estimatedPrice: 600, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Cliff\'s installation' },
-        { name: 'Intex SX2800 Sand Filter Pump', estimatedPrice: 225, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: '2-day shipping' },
-        { name: 'Filter Balls 4.6lbs', estimatedPrice: 40, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'REVICOAR brand' },
-        { name: 'Intex QS200 Salt System', estimatedPrice: 110.99, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Spa experience' },
-        { name: 'Pool Salt (50 lb bag)', estimatedPrice: 30, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Local supplier' },
-        { name: 'FOGATTI Heater (120k BTU)', estimatedPrice: 500, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'B0CS9M5BFM model' },
-        { name: 'Pool Skimmer', estimatedPrice: 15, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Surface cleaning' },
-        { name: 'Return Jet Fitting', estimatedPrice: 12, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: '1.5 inch' },
-        { name: 'Suction Fitting', estimatedPrice: 18, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Main drain' },
-        { name: 'PVC Fittings & Pipe', estimatedPrice: 25, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Elbows, unions' },
-        { name: 'Pool Hoses (25ft x2)', estimatedPrice: 60, actualPrice: 0, quantity: 2, usage: 'per-job', link: '', status: 'pending', notes: '1.5 inch diameter' },
-        { name: 'GFCI Outlet & Box', estimatedPrice: 40, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Outdoor rated' },
-        { name: 'Gas Line Kit', estimatedPrice: 25, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Propane connection' },
-        { name: 'Heater Mounting Kit', estimatedPrice: 20, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Brackets, bolts' },
-        { name: 'Temp Controller', estimatedPrice: 35, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Digital display' },
-        { name: 'Test Strips', estimatedPrice: 15, actualPrice: 0, quantity: 1, usage: 'consumable', link: '', status: 'pending', notes: '50 count' },
-        { name: 'Chlorine Tablets (starter)', estimatedPrice: 20, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: '2-week supply' },
-        { name: 'Chlorine Dispenser', estimatedPrice: 12, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Floating tablet' },
-        { name: 'Pool Thermometer', estimatedPrice: 8, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Floating digital' },
-        { name: 'Vacuum Head & Hose', estimatedPrice: 35, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Manual cleaning' },
-        { name: 'Pool Ladder', estimatedPrice: 60, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Tank specific' }
+        { name: '8ft CountyLine Tank (700 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Cliff\'s installation' },
+        { name: 'Intex SX2800 Sand Filter Pump', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: '2-day shipping' },
+        { name: 'Filter Balls 4.6lbs', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'REVICOAR brand' },
+        { name: 'Intex QS200 Salt System', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Spa experience' },
+        { name: 'Pool Salt (50 lb bag)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Local supplier' },
+        { name: 'FOGATTI Heater (120k BTU)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'B0CS9M5BFM model' },
+        { name: 'Pool Skimmer', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Surface cleaning' },
+        { name: 'Return Jet Fitting', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1.5 inch' },
+        { name: 'Suction Fitting', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Main drain' },
+        { name: 'PVC Fittings & Pipe', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Elbows, unions' },
+        { name: 'Pool Hoses (25ft x2)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: '1.5 inch diameter' },
+        { name: 'GFCI Outlet & Box', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Outdoor rated' },
+        { name: 'Gas Line Kit', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Propane connection' },
+        { name: 'Heater Mounting Kit', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Brackets, bolts' },
+        { name: 'Temp Controller', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Digital display' },
+        { name: 'Test Strips', actualPrice: 0, quantity: 0, usage: 'consumable', location: 'both', link: '', status: 'pending', notes: '50 count' },
+        { name: 'Chlorine Tablets (starter)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2-week supply' },
+        { name: 'Chlorine Dispenser', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Floating tablet' },
+        { name: 'Pool Thermometer', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Floating digital' },
+        { name: 'Vacuum Head & Hose', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Manual cleaning' },
+        { name: 'Pool Ladder', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Tank specific' }
     ];
 
-    // One-Time Tools
+    // One-Time Tools (template with $0 prices)
     inventoryData.tools = [
-        { name: 'Hole Saw Set (1.5", 2", 3")', estimatedPrice: 45, actualPrice: 0, quantity: 1, usage: 'one-time', link: '', status: 'pending', notes: 'Tank fittings' },
-        { name: 'Cordless Drill (if needed)', estimatedPrice: 120, actualPrice: 0, quantity: 0, usage: 'one-time', link: '', status: 'pending', notes: 'May already have' },
-        { name: 'Step Bit Set', estimatedPrice: 25, actualPrice: 0, quantity: 1, usage: 'one-time', link: '', status: 'pending', notes: 'Clean holes' },
-        { name: 'Level (4ft)', estimatedPrice: 35, actualPrice: 0, quantity: 1, usage: 'one-time', link: '', status: 'pending', notes: 'Tank leveling' },
-        { name: 'Socket Set & Wrenches', estimatedPrice: 45, actualPrice: 0, quantity: 1, usage: 'one-time', link: '', status: 'pending', notes: 'Pump assembly' },
-        { name: 'Shop Vacuum (wet/dry)', estimatedPrice: 80, actualPrice: 0, quantity: 1, usage: 'one-time', link: '', status: 'pending', notes: 'Cleanup' }
+        { name: 'Hole Saw Set (1.5", 2", 3")', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Tank fittings' },
+        { name: 'Cordless Drill (if needed)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'May already have' },
+        { name: 'Step Bit Set', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Clean holes' },
+        { name: 'Level (4ft)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Tank leveling' },
+        { name: 'Socket Set & Wrenches', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'Pump assembly' },
+        { name: 'Shop Vacuum (wet/dry)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Cleanup' }
     ];
 
-    // Additional Tanks
+    // Additional Tanks (template with $0 prices)
     inventoryData.tanks = [
-        { name: '6ft CountyLine (390 gal)', estimatedPrice: 450, actualPrice: 0, quantity: 2, usage: 'per-job', link: '', status: 'pending', notes: 'Singles/couples' },
-        { name: '8ft CountyLine (700 gal)', estimatedPrice: 600, actualPrice: 0, quantity: 2, usage: 'per-job', link: '', status: 'pending', notes: 'Most popular' },
-        { name: '10ft Behlen (1,117 gal)', estimatedPrice: 875, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'Premium families' }
+        { name: '6ft CountyLine (390 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Singles/couples' },
+        { name: '8ft CountyLine (700 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Most popular' },
+        { name: '10ft Behlen (1,117 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Premium families' }
     ];
 
-    // Additional Pump Systems
+    // Additional Pump Systems (template with $0 prices)
     inventoryData.pumps = [
-        { name: 'Intex SX2800 (additional)', estimatedPrice: 225, actualPrice: 0, quantity: 4, usage: 'per-job', link: '', status: 'pending', notes: '6ft & 8ft tanks' },
-        { name: 'Intex SX3000 (for 10ft)', estimatedPrice: 250, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: '10ft tanks only' },
-        { name: 'Filter Balls 4.6lbs (bulk)', estimatedPrice: 40, actualPrice: 0, quantity: 4, usage: 'per-job', link: '', status: 'pending', notes: 'SX2800 pumps' },
-        { name: 'Filter Balls 6lbs (10ft)', estimatedPrice: 50, actualPrice: 0, quantity: 1, usage: 'per-job', link: '', status: 'pending', notes: 'SX3000 pumps' }
+        { name: 'Intex SX2800 (additional)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: '6ft & 8ft tanks' },
+        { name: 'Intex SX3000 (for 10ft)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: '10ft tanks only' },
+        { name: 'Filter Balls 4.6lbs (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'SX2800 pumps' },
+        { name: 'Filter Balls 6lbs (10ft)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'SX3000 pumps' }
     ];
 
-    // Salt Water Systems
+    // Salt Water Systems (template with $0 prices)
     inventoryData.salt = [
-        { name: 'Intex QS200 (additional)', estimatedPrice: 110.99, actualPrice: 0, quantity: 3, usage: 'per-job', link: '', status: 'pending', notes: '$697 upsell' },
-        { name: 'Pool Salt (50 lb bags)', estimatedPrice: 30, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: 'Local bulk pricing' }
+        { name: 'Intex QS200 (additional)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: '$697 upsell' },
+        { name: 'Pool Salt (50 lb bags)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Local bulk pricing' }
     ];
 
-    // Heating Systems
+    // Heating Systems (template with $0 prices)
     inventoryData.heating = [
-        { name: 'FOGATTI Heaters (extra)', estimatedPrice: 500, actualPrice: 0, quantity: 2, usage: 'per-job', link: '', status: 'pending', notes: '$1,497 upsell' },
-        { name: 'Gas Line Kits (bulk)', estimatedPrice: 25, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: 'Propane connections' },
-        { name: 'Mounting Kits (bulk)', estimatedPrice: 20, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: 'Brackets, bolts' },
-        { name: 'Temp Controllers (bulk)', estimatedPrice: 35, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: 'Digital displays' }
+        { name: 'FOGATTI Heaters (extra)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: '$1,497 upsell' },
+        { name: 'Gas Line Kits (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Propane connections' },
+        { name: 'Mounting Kits (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Brackets, bolts' },
+        { name: 'Temp Controllers (bulk)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Digital displays' }
     ];
 
-    // Standard Hardware
+    // Standard Hardware (template with $0 prices)
     inventoryData.hardware = [
-        { name: 'Pool Skimmers', estimatedPrice: 15, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: 'Surface cleaning' },
-        { name: 'Return Jet Fittings', estimatedPrice: 12, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: '1.5 inch' },
-        { name: 'Suction Fittings', estimatedPrice: 18, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: 'Main drains' },
-        { name: 'Pool Hoses (25ft pairs)', estimatedPrice: 60, actualPrice: 0, quantity: 5, usage: 'per-job', link: '', status: 'pending', notes: '1.5 inch diameter' }
+        { name: 'Pool Skimmers', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Surface cleaning' },
+        { name: 'Return Jet Fittings', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1.5 inch' },
+        { name: 'Suction Fittings', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Main drains' },
+        { name: 'Pool Hoses (25ft pairs)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: '1.5 inch diameter' }
     ];
 }
 
@@ -258,6 +263,22 @@ function setupEventListeners() {
         });
     }
 
+    // Revenue tracking
+    const revenueInput = document.getElementById('revenueInput');
+    if (revenueInput) {
+        revenueInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addRevenue();
+            }
+        });
+        
+        revenueInput.addEventListener('blur', function() {
+            if (this.value) {
+                addRevenue();
+            }
+        });
+    }
+
     // Status click handlers
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('status')) {
@@ -267,7 +288,7 @@ function setupEventListeners() {
 
     // Input change handlers
     document.addEventListener('input', function(e) {
-        if (e.target.matches('.price-input, .qty-input, .link-input, .notes-input')) {
+        if (e.target.matches('.price-input, .qty-input, .link-input, .notes-input, .location-select, .item-name-input, .usage-select')) {
             scheduleAutoSave();
             updateSummary();
         }
@@ -293,11 +314,18 @@ function renderSection(section, items, tableId) {
     tbody.innerHTML = '';
     
     items.forEach((item, index) => {
+        // Ensure location field exists with default value
+        if (!item.location) {
+            item.location = 'both';
+        }
+        
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td data-label="Item"><strong>${item.name}</strong></td>
-            <td data-label="Est. Price">$${item.estimatedPrice}</td>
-            <td data-label="Actual">
+            <td data-label="Item">
+                <input type="text" class="item-name-input" data-section="${section}" data-index="${index}" data-field="name" 
+                       value="${item.name}" placeholder="Item name..." style="font-weight: bold; border: 1px solid #e1e8ed; padding: 6px; border-radius: 4px; width: 100%; background: #fafbfc;">
+            </td>
+            <td data-label="Price">
                 <input type="number" class="price-input" data-section="${section}" data-index="${index}" data-field="actualPrice" 
                        value="${item.actualPrice || ''}" placeholder="$" step="0.01">
             </td>
@@ -306,9 +334,24 @@ function renderSection(section, items, tableId) {
                        value="${item.quantity}" min="0">
             </td>
             <td data-label="Usage">
-                <span class="usage-type ${item.usage}">${CONFIG.USAGE_TYPES[item.usage]?.label || item.usage}</span>
+                <select class="usage-select" data-section="${section}" data-index="${index}" data-field="usage" style="padding: 6px; border: 1px solid #e1e8ed; border-radius: 4px; font-size: 0.85em;">
+                    <option value="one-time" ${item.usage === 'one-time' ? 'selected' : ''}>One-Time</option>
+                    <option value="per-job" ${item.usage === 'per-job' ? 'selected' : ''}>Per Job</option>
+                    <option value="reusable" ${item.usage === 'reusable' ? 'selected' : ''}>Reusable</option>
+                    <option value="consumable" ${item.usage === 'consumable' ? 'selected' : ''}>Consumable</option>
+                </select>
             </td>
-            <td data-label="Link">
+            <td data-label="Location">
+                <select class="location-select" data-section="${section}" data-index="${index}" data-field="location">
+                    <option value="online" ${item.location === 'online' ? 'selected' : ''}>Online</option>
+                    <option value="local" ${item.location === 'local' ? 'selected' : ''}>Local Midland TX</option>
+                    <option value="both" ${item.location === 'both' ? 'selected' : ''}>Both</option>
+                </select>
+                <span class="location-badge ${item.location}">
+                    ${item.location === 'online' ? 'Online' : item.location === 'local' ? 'Local TX' : 'Both'}
+                </span>
+            </td>
+            <td data-label="Supplier Link">
                 <input type="url" class="link-input" data-section="${section}" data-index="${index}" data-field="link" 
                        value="${item.link}" placeholder="Supplier link...">
             </td>
@@ -318,13 +361,14 @@ function renderSection(section, items, tableId) {
             <td data-label="Notes">
                 <input type="text" class="notes-input" data-section="${section}" data-index="${index}" data-field="notes" 
                        value="${item.notes}" placeholder="Notes...">
+                <button class="delete-item-btn" onclick="deleteItem('${section}', ${index})" title="Delete item">🗑️</button>
             </td>
         `;
         tbody.appendChild(row);
     });
 
-    // Add event listeners for the new inputs
-    tbody.querySelectorAll('input').forEach(input => {
+    // Add event listeners for inputs and selects
+    tbody.querySelectorAll('input, select').forEach(input => {
         input.addEventListener('input', function() {
             const section = this.dataset.section;
             const index = parseInt(this.dataset.index);
@@ -332,8 +376,25 @@ function renderSection(section, items, tableId) {
             const value = this.type === 'number' ? parseFloat(this.value) || 0 : this.value;
             
             inventoryData[section][index][field] = value;
+            
+            // Update location badge when location changes
+            if (field === 'location') {
+                const badge = this.parentNode.querySelector('.location-badge');
+                if (badge) {
+                    badge.className = `location-badge ${value}`;
+                    badge.textContent = value === 'online' ? 'Online' : value === 'local' ? 'Local TX' : 'Both';
+                }
+            }
+            
             scheduleAutoSave();
             updateSummary();
+        });
+        
+        input.addEventListener('change', function() {
+            // Trigger change for selects as well
+            if (this.tagName === 'SELECT') {
+                this.dispatchEvent(new Event('input'));
+            }
         });
     });
 }
@@ -381,7 +442,7 @@ function updateSummary() {
                 else pendingItems++;
                 
                 // Calculate costs
-                const actualPrice = item.actualPrice || item.estimatedPrice;
+                const actualPrice = item.actualPrice || 0;
                 const totalPrice = actualPrice * (item.quantity || 0);
                 
                 if (section === 'cliff') {
@@ -395,14 +456,33 @@ function updateSummary() {
         }
     });
 
+    // ROI Calculations
+    const initialInvestment = cliffTotal + oneTimeTotal; // First install + tools
     const totalDeposit = oneTimeTotal + perJobTotal + cliffTotal;
+    const totalRevenue = inventoryData.roiTracking?.totalRevenue || 0;
+    const netProfit = totalRevenue - initialInvestment;
+    const roiPercentage = initialInvestment > 0 ? ((netProfit / initialInvestment) * 100) : 0;
+    
+    // ROI Status Messages
+    let roiStatus = 'Break-even pending';
+    if (roiPercentage > 0) {
+        roiStatus = `Profit: ${formatCurrency(netProfit)}`;
+    } else if (roiPercentage === 0 && totalRevenue > 0) {
+        roiStatus = 'Break-even achieved!';
+    } else if (totalRevenue > 0) {
+        const remaining = initialInvestment - totalRevenue;
+        roiStatus = `Need ${formatCurrency(remaining)} more`;
+    }
 
     // Update summary cards
     updateElement('totalItems', totalItems);
     updateElement('verifiedItems', verifiedItems);
+    updateElement('initialInvestment', formatCurrency(initialInvestment));
     updateElement('oneTimeTotal', formatCurrency(oneTimeTotal));
     updateElement('perJobTotal', formatCurrency(perJobTotal));
-    updateElement('cliffMaterials', formatCurrency(cliffTotal));
+    updateElement('totalRevenue', formatCurrency(totalRevenue));
+    updateElement('roiPercentage', roiPercentage.toFixed(1) + '%');
+    updateElement('roiStatus', roiStatus);
     updateElement('totalDeposit', formatCurrency(totalDeposit));
 
     // Update detailed summaries
@@ -411,6 +491,28 @@ function updateSummary() {
     updateElement('depositPerJob', formatCurrency(perJobTotal));
     updateElement('depositCliff', formatCurrency(cliffTotal));
     updateElement('depositTotal', formatCurrency(totalDeposit));
+    
+    // Update ROI summary section
+    updateElement('roiCliffTotal', formatCurrency(cliffTotal));
+    updateElement('roiToolsTotal', formatCurrency(oneTimeTotal));
+    updateElement('roiInitialTotal', formatCurrency(initialInvestment));
+    updateElement('roiRevenueTotal', formatCurrency(totalRevenue));
+    updateElement('roiJobsCount', inventoryData.roiTracking?.jobsCompleted || 0);
+    updateElement('roiCurrentPercent', roiPercentage.toFixed(1) + '%');
+    
+    // Update ROI status text with more detailed info
+    let detailedStatus = 'Enter job revenue to track your return on investment';
+    if (totalRevenue > 0) {
+        if (roiPercentage > 0) {
+            detailedStatus = `🎉 Profitable! You've earned ${formatCurrency(netProfit)} profit on your ${formatCurrency(initialInvestment)} investment.`;
+        } else if (roiPercentage === 0) {
+            detailedStatus = `🎯 Break-even achieved! You've recovered your initial investment of ${formatCurrency(initialInvestment)}.`;
+        } else {
+            const remaining = initialInvestment - totalRevenue;
+            detailedStatus = `📈 ${formatCurrency(remaining)} more revenue needed to break even on your ${formatCurrency(initialInvestment)} investment.`;
+        }
+    }
+    updateElement('roiStatusText', detailedStatus);
     
     // Update inventory status
     updateElement('verifiedCount', verifiedItems);
@@ -562,21 +664,21 @@ async function syncToCloud() {
 }
 
 function prepareDataForSheets() {
-    const rows = [['Section', 'Item', 'Estimated Price', 'Actual Price', 'Quantity', 'Usage', 'Status', 'Link', 'Notes', 'Total Cost']];
+    const rows = [['Section', 'Item', 'Price', 'Quantity', 'Usage', 'Location', 'Status', 'Link', 'Notes', 'Total Cost']];
     
     Object.keys(inventoryData).forEach(section => {
         if (Array.isArray(inventoryData[section])) {
             inventoryData[section].forEach(item => {
-                const actualPrice = item.actualPrice || item.estimatedPrice;
+                const actualPrice = item.actualPrice || 0;
                 const totalCost = actualPrice * (item.quantity || 0);
                 
                 rows.push([
                     section,
                     item.name,
-                    item.estimatedPrice,
                     item.actualPrice || '',
                     item.quantity,
                     item.usage,
+                    item.location || 'both',
                     item.status,
                     item.link || '',
                     item.notes || '',
@@ -664,22 +766,22 @@ function importData(event) {
 }
 
 function exportToCSV() {
-    const headers = ['Section', 'Item', 'Estimated Price', 'Actual Price', 'Quantity', 'Usage', 'Status', 'Link', 'Notes', 'Total Cost'];
+    const headers = ['Section', 'Item', 'Price', 'Quantity', 'Usage', 'Location', 'Status', 'Link', 'Notes', 'Total Cost'];
     const rows = [headers];
     
     Object.keys(inventoryData).forEach(section => {
         if (Array.isArray(inventoryData[section])) {
             inventoryData[section].forEach(item => {
-                const actualPrice = item.actualPrice || item.estimatedPrice;
+                const actualPrice = item.actualPrice || 0;
                 const totalCost = actualPrice * (item.quantity || 0);
                 
                 rows.push([
                     section,
                     item.name,
-                    item.estimatedPrice,
                     item.actualPrice || '',
                     item.quantity,
                     item.usage,
+                    item.location || 'both',
                     item.status,
                     item.link || '',
                     item.notes || '',
@@ -716,7 +818,24 @@ function printReport() {
 function clearAllData() {
     if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
         localStorage.removeItem(CONFIG.AUTO_SAVE.LOCAL_STORAGE_KEY);
-        initializeData();
+        
+        // Clear all inventory data completely
+        inventoryData.cliff = [];
+        inventoryData.tools = [];
+        inventoryData.tanks = [];
+        inventoryData.pumps = [];
+        inventoryData.salt = [];
+        inventoryData.heating = [];
+        inventoryData.hardware = [];
+        inventoryData.projectNotes = '';
+        
+        // Clear ROI tracking
+        inventoryData.roiTracking = {
+            totalRevenue: 0,
+            jobsCompleted: 0,
+            revenueHistory: []
+        };
+        
         renderAllSections();
         updateSummary();
         
@@ -726,7 +845,14 @@ function clearAllData() {
             notesElement.value = '';
         }
         
-        showNotification('All data cleared', 'success');
+        // Clear revenue input
+        const revenueInput = document.getElementById('revenueInput');
+        if (revenueInput) {
+            revenueInput.value = '';
+        }
+        
+        scheduleAutoSave();
+        showNotification('All data cleared - starting fresh!', 'success');
     }
 }
 
@@ -769,6 +895,142 @@ function loadProjectNotes() {
     const notesElement = document.getElementById('projectNotes');
     if (notesElement && inventoryData.projectNotes) {
         notesElement.value = inventoryData.projectNotes;
+    }
+}
+
+// Revenue tracking functions
+function addRevenue() {
+    const revenueInput = document.getElementById('revenueInput');
+    const amount = parseFloat(revenueInput.value);
+    
+    if (!amount || amount <= 0) {
+        showNotification('Please enter a valid revenue amount', 'error');
+        return;
+    }
+    
+    // Initialize ROI tracking if it doesn't exist
+    if (!inventoryData.roiTracking) {
+        inventoryData.roiTracking = {
+            totalRevenue: 0,
+            jobsCompleted: 0,
+            revenueHistory: []
+        };
+    }
+    
+    // Add to tracking
+    inventoryData.roiTracking.totalRevenue += amount;
+    inventoryData.roiTracking.jobsCompleted++;
+    inventoryData.roiTracking.revenueHistory.push({
+        amount: amount,
+        date: new Date().toISOString(),
+        jobNumber: inventoryData.roiTracking.jobsCompleted
+    });
+    
+    // Clear input and update
+    revenueInput.value = '';
+    updateSummary();
+    scheduleAutoSave();
+    
+    showNotification(`Revenue added: ${formatCurrency(amount)} (Job #${inventoryData.roiTracking.jobsCompleted})`, 'success');
+}
+
+function resetROI() {
+    if (confirm('Reset all revenue tracking? This will clear your ROI progress but keep inventory data.')) {
+        inventoryData.roiTracking = {
+            totalRevenue: 0,
+            jobsCompleted: 0,
+            revenueHistory: []
+        };
+        updateSummary();
+        scheduleAutoSave();
+        showNotification('ROI tracking reset', 'success');
+    }
+}
+
+// Dynamic item management functions
+function addNewItem(section) {
+    if (!inventoryData[section]) {
+        console.error(`Section ${section} does not exist`);
+        return;
+    }
+    
+    // Create new item from template
+    const newItem = { ...CONFIG.DEFAULT_ITEM };
+    
+    // Set default usage based on section
+    if (section === 'tools') {
+        newItem.usage = 'one-time';
+    } else if (section === 'cliff') {
+        newItem.usage = 'per-job';
+    } else {
+        newItem.usage = 'per-job';
+    }
+    
+    // Add to inventory data
+    inventoryData[section].push(newItem);
+    
+    // Re-render the section
+    const tableMap = {
+        'cliff': 'cliffTable',
+        'tools': 'toolsTable', 
+        'tanks': 'tanksTable',
+        'pumps': 'pumpsTable',
+        'salt': 'saltTable',
+        'heating': 'heatingTable',
+        'hardware': 'hardwareTable'
+    };
+    
+    renderSection(section, inventoryData[section], tableMap[section]);
+    
+    // Update summary and save
+    updateSummary();
+    scheduleAutoSave();
+    
+    // Focus on the name field of the new item
+    setTimeout(() => {
+        const newIndex = inventoryData[section].length - 1;
+        const nameField = document.querySelector(`input[data-section="${section}"][data-index="${newIndex}"][data-field="name"]`);
+        if (nameField) {
+            nameField.focus();
+            nameField.select();
+        }
+    }, 100);
+    
+    showNotification(`New item added to ${section}`, 'success');
+}
+
+function deleteItem(section, index) {
+    if (!inventoryData[section] || !inventoryData[section][index]) {
+        console.error(`Item at ${section}[${index}] does not exist`);
+        return;
+    }
+    
+    const item = inventoryData[section][index];
+    const itemName = item.name || 'Unnamed item';
+    
+    // Confirmation dialog
+    if (confirm(`Delete "${itemName}"?\n\nThis action cannot be undone.`)) {
+        // Remove item from array
+        inventoryData[section].splice(index, 1);
+        
+        // Re-render the section
+        const tableMap = {
+            'cliff': 'cliffTable',
+            'tools': 'toolsTable', 
+            'tanks': 'tanksTable',
+            'pumps': 'pumpsTable',
+            'salt': 'saltTable',
+            'heating': 'heatingTable',
+            'hardware': 'hardwareTable'
+        };
+        
+        renderSection(section, inventoryData[section], tableMap[section]);
+        
+        // Update summary and save
+        updateSummary();
+        scheduleAutoSave();
+        
+        showNotification(`"${itemName}" deleted`, 'success');
     }
 }
 
