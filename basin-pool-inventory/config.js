@@ -3,13 +3,13 @@
 const CONFIG = {
     // Firebase Configuration for Real-time Collaboration
     FIREBASE: {
-        apiKey: "AIzaSyBqRjKs8ux4V3fU-Zi6L_EXAMPLE_KEY",
+        apiKey: "AIzaSyAxnc2XeHS8DrumOMGKfiD9uP12CYMEogU",
         authDomain: "basin-pool-inventory.firebaseapp.com",
-        databaseURL: "https://basin-pool-inventory-default-rtdb.firebaseio.com/",
+        databaseURL: "https://basin-pool-inventory-default-rtdb.firebaseio.com",
         projectId: "basin-pool-inventory",
-        storageBucket: "basin-pool-inventory.appspot.com",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:abcdef1234567890example"
+        storageBucket: "basin-pool-inventory.firebasestorage.app",
+        messagingSenderId: "50367073628",
+        appId: "1:50367073628:web:84eb3e794a39073ced37d1"
     },
     
     // Google Sheets API Configuration (Optional backup)
