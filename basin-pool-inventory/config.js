@@ -8,8 +8,8 @@ const CONFIG = {
         databaseURL: "https://basin-pool-inventory-default-rtdb.firebaseio.com",
         projectId: "basin-pool-inventory",
         storageBucket: "basin-pool-inventory.firebasestorage.app",
-        messagingSenderId: "50367073628",
-        appId: "1:50367073628:web:84eb3e794a39073ced37d1"
+        messagingSenderId: "503670730628",
+        appId: "1:503670730628:web:84eb3e794a39073ced37d1"
     },
     
     // Google Sheets API Configuration (Optional backup)
