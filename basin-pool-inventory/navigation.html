@@ -1,0 +1,563 @@
+<!-- iOS-Style Tab Navigation Component -->
+<div class="ios-nav-container">
+    <!-- Top Navigation Bar -->
+    <div class="ios-nav-header">
+        <div class="nav-title" id="navTitle">Basin Pool Co.</div>
+        <div class="nav-subtitle" id="navSubtitle">Business Management System</div>
+    </div>
+
+    <!-- Tab Bar Navigation (iOS Style) -->
+    <div class="ios-tab-bar">
+        <div class="tab-item" data-page="inventory">
+            <div class="tab-icon">📊</div>
+            <div class="tab-label">Inventory</div>
+        </div>
+        
+        <div class="tab-item" data-page="estimate">
+            <div class="tab-icon">📱</div>
+            <div class="tab-label">Sales</div>
+        </div>
+        
+        <div class="tab-item" data-page="admin">
+            <div class="tab-icon">⚙️</div>
+            <div class="tab-label">Admin</div>
+        </div>
+        
+        <div class="tab-item" data-page="analytics">
+            <div class="tab-icon">📈</div>
+            <div class="tab-label">Analytics</div>
+        </div>
+    </div>
+
+    <!-- Page Content Container -->
+    <div class="ios-page-content" id="pageContent">
+        <!-- Content will be loaded here -->
+    </div>
+
+    <!-- Floating Action Button (for quick actions) -->
+    <div class="ios-fab" id="floatingActionBtn">
+        <span class="fab-icon">+</span>
+    </div>
+
+    <!-- Quick Action Menu -->
+    <div class="quick-action-menu" id="quickActionMenu">
+        <div class="quick-action" data-action="new-quote">
+            <div class="action-icon">📝</div>
+            <div class="action-label">New Quote</div>
+        </div>
+        <div class="quick-action" data-action="add-inventory">
+            <div class="action-icon">📦</div>
+            <div class="action-label">Add Item</div>
+        </div>
+        <div class="quick-action" data-action="sync-data">
+            <div class="action-icon">☁️</div>
+            <div class="action-label">Sync Data</div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* iOS-Style Navigation Styles */
+.ios-nav-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #f8f9fa;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top Navigation Header */
+.ios-nav-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    padding-top: env(safe-area-inset-top, 20px);
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.nav-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Tab Bar */
+.ios-tab-bar {
+    display: flex;
+    background: white;
+    border-top: 1px solid #e1e8ed;
+    padding: 8px 0;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    margin: 0 4px;
+}
+
+.tab-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.tab-item.active {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+}
+
+.tab-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.tab-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Page Content */
+.ios-page-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 20px 100px;
+    background: #f8f9fa;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Floating Action Button */
+.ios-fab {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 200;
+}
+
+.ios-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.fab-icon {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Quick Action Menu */
+.quick-action-menu {
+    position: fixed;
+    bottom: 160px;
+    right: 20px;
+    background: white;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 150;
+}
+
+.quick-action-menu.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+.quick-action {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    min-width: 150px;
+}
+
+.quick-action:hover {
+    background: #f0f2f5;
+}
+
+.action-icon {
+    font-size: 1.2rem;
+    margin-right: 12px;
+}
+
+.action-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+/* Smooth Page Transitions */
+.page-transition-enter {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.page-transition-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all 0.3s ease-out;
+}
+
+.page-transition-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.page-transition-exit-active {
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: all 0.3s ease-in;
+}
+
+/* Mobile-First Responsive Design */
+@media (max-width: 768px) {
+    .ios-nav-header {
+        padding: 15px;
+    }
+    
+    .nav-title {
+        font-size: 1.2rem;
+    }
+    
+    .nav-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .ios-page-content {
+        padding: 15px 15px 100px;
+    }
+    
+    .tab-icon {
+        font-size: 1.3rem;
+    }
+    
+    .tab-label {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ios-page-content {
+        padding: 10px 10px 100px;
+    }
+    
+    .tab-item {
+        padding: 6px 2px;
+        margin: 0 2px;
+    }
+    
+    .quick-action-menu {
+        right: 10px;
+    }
+    
+    .ios-fab {
+        right: 15px;
+        bottom: 85px;
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .ios-nav-container {
+        background: #1a1a1a;
+    }
+    
+    .ios-tab-bar {
+        background: #2d2d2d;
+        border-top-color: #404040;
+    }
+    
+    .tab-item {
+        color: #e0e0e0;
+    }
+    
+    .tab-item.active {
+        background: rgba(102, 126, 234, 0.2);
+        color: #8bb9fe;
+    }
+    
+    .ios-page-content {
+        background: #1a1a1a;
+    }
+    
+    .quick-action-menu {
+        background: #2d2d2d;
+    }
+    
+    .action-label {
+        color: #e0e0e0;
+    }
+}
+</style>
+
+<script>
+// iOS-Style Navigation Controller
+class iOSNavigation {
+    constructor() {
+        this.currentPage = 'inventory';
+        this.pages = {
+            inventory: { title: 'Inventory Management', subtitle: 'Track materials and costs', url: 'index.html' },
+            estimate: { title: 'Sales Calculator', subtitle: 'Generate customer quotes', url: 'estimate.html' },
+            admin: { title: 'Admin Panel', subtitle: 'Configure pricing and margins', url: 'admin.html' },
+            analytics: { title: 'Business Analytics', subtitle: 'Performance insights', url: '#' }
+        };
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupTabNavigation();
+        this.setupFloatingActionButton();
+        this.detectCurrentPage();
+        this.addSwipeGestures();
+    }
+    
+    setupTabNavigation() {
+        const tabItems = document.querySelectorAll('.tab-item');
+        tabItems.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const page = tab.dataset.page;
+                this.navigateToPage(page);
+            });
+        });
+    }
+    
+    setupFloatingActionButton() {
+        const fab = document.getElementById('floatingActionBtn');
+        const quickMenu = document.getElementById('quickActionMenu');
+        
+        if (fab && quickMenu) {
+            fab.addEventListener('click', () => {
+                quickMenu.classList.toggle('show');
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!fab.contains(e.target) && !quickMenu.contains(e.target)) {
+                    quickMenu.classList.remove('show');
+                }
+            });
+            
+            // Quick action handlers
+            const quickActions = document.querySelectorAll('.quick-action');
+            quickActions.forEach(action => {
+                action.addEventListener('click', (e) => {
+                    const actionType = action.dataset.action;
+                    this.handleQuickAction(actionType);
+                    quickMenu.classList.remove('show');
+                });
+            });
+        }
+    }
+    
+    detectCurrentPage() {
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('estimate.html')) {
+            this.currentPage = 'estimate';
+        } else if (currentPath.includes('admin.html')) {
+            this.currentPage = 'admin';
+        } else {
+            this.currentPage = 'inventory';
+        }
+        
+        this.updateActiveTab();
+        this.updatePageTitle();
+    }
+    
+    navigateToPage(page) {
+        if (page === this.currentPage) return;
+        
+        const pageConfig = this.pages[page];
+        if (pageConfig && pageConfig.url !== '#') {
+            // Add transition class
+            document.body.classList.add('page-transition');
+            
+            setTimeout(() => {
+                window.location.href = pageConfig.url;
+            }, 150);
+        }
+    }
+    
+    updateActiveTab() {
+        const tabItems = document.querySelectorAll('.tab-item');
+        tabItems.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.dataset.page === this.currentPage) {
+                tab.classList.add('active');
+            }
+        });
+    }
+    
+    updatePageTitle() {
+        const pageConfig = this.pages[this.currentPage];
+        const titleElement = document.getElementById('navTitle');
+        const subtitleElement = document.getElementById('navSubtitle');
+        
+        if (titleElement && pageConfig) {
+            titleElement.textContent = pageConfig.title;
+        }
+        
+        if (subtitleElement && pageConfig) {
+            subtitleElement.textContent = pageConfig.subtitle;
+        }
+    }
+    
+    handleQuickAction(actionType) {
+        switch (actionType) {
+            case 'new-quote':
+                if (this.currentPage !== 'estimate') {
+                    this.navigateToPage('estimate');
+                } else {
+                    // Clear current quote and start fresh
+                    if (typeof clearCurrentQuote === 'function') {
+                        clearCurrentQuote();
+                    }
+                }
+                break;
+                
+            case 'add-inventory':
+                if (this.currentPage !== 'inventory') {
+                    this.navigateToPage('inventory');
+                } else {
+                    // Trigger add item function
+                    if (typeof addNewItem === 'function') {
+                        addNewItem('cliff'); // Default to cliff section
+                    }
+                }
+                break;
+                
+            case 'sync-data':
+                // Trigger data sync
+                if (typeof syncToCloud === 'function') {
+                    syncToCloud();
+                } else if (typeof saveAllSettings === 'function') {
+                    saveAllSettings();
+                }
+                this.showNotification('Data synced successfully', 'success');
+                break;
+        }
+    }
+    
+    addSwipeGestures() {
+        let startX = 0;
+        let startY = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            if (!startX || !startY) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            
+            // Only process horizontal swipes
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    // Swipe left - next page
+                    this.navigateNext();
+                } else {
+                    // Swipe right - previous page
+                    this.navigatePrevious();
+                }
+            }
+            
+            startX = 0;
+            startY = 0;
+        });
+    }
+    
+    navigateNext() {
+        const pages = Object.keys(this.pages);
+        const currentIndex = pages.indexOf(this.currentPage);
+        const nextIndex = (currentIndex + 1) % pages.length;
+        this.navigateToPage(pages[nextIndex]);
+    }
+    
+    navigatePrevious() {
+        const pages = Object.keys(this.pages);
+        const currentIndex = pages.indexOf(this.currentPage);
+        const prevIndex = currentIndex === 0 ? pages.length - 1 : currentIndex - 1;
+        this.navigateToPage(pages[prevIndex]);
+    }
+    
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `ios-notification ${type}`;
+        notification.textContent = message;
+        
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: type === 'success' ? '#27ae60' : '#3498db',
+            color: 'white',
+            padding: '12px 20px',
+            borderRadius: '20px',
+            fontSize: '0.9rem',
+            fontWeight: '500',
+            zIndex: '2000',
+            opacity: '0',
+            transition: 'all 0.3s ease'
+        });
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.opacity = '1', 100);
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+}
+
+// Initialize iOS Navigation when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new iOSNavigation();
+});
+</script>

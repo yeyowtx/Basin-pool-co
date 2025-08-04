@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basin Pool Co. - Admin Control Panel</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>🏊 Basin Pool Co. - Admin Control Panel</h1>
+            <div class="nav-links">
+                <a href="index.html" class="nav-btn">📊 Inventory</a>
+                <a href="estimate.html" class="nav-btn">📱 Sales Calculator</a>
+                <a href="#" class="nav-btn active">⚙️ Admin</a>
+            </div>
+        </div>
+
+        <!-- PRICING CONTROL PANEL -->
+        <div class="control-section">
+            <h2>💰 Pricing & Margin Control</h2>
+            
+            <div class="margin-control">
+                <div class="margin-slider-container">
+                    <label for="globalMargin">Global Margin Percentage:</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="globalMargin" min="35" max="80" value="50" class="margin-slider">
+                        <div class="slider-values">
+                            <span>35%</span>
+                            <span id="currentMargin">50%</span>
+                            <span>80%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="margin-categories">
+                    <div class="margin-category">
+                        <h3>Materials Markup</h3>
+                        <input type="range" id="materialsMargin" min="35" max="80" value="45" class="category-slider">
+                        <span class="margin-display" id="materialsDisplay">45%</span>
+                    </div>
+                    
+                    <div class="margin-category">
+                        <h3>Add-ons Markup</h3>
+                        <input type="range" id="addonsMargin" min="35" max="80" value="55" class="category-slider">
+                        <span class="margin-display" id="addonsDisplay">55%</span>
+                    </div>
+                    
+                    <div class="margin-category">
+                        <h3>Site Prep Markup</h3>
+                        <input type="range" id="siteprepMargin" min="35" max="80" value="60" class="category-slider">
+                        <span class="margin-display" id="siteprepDisplay">60%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JORGE'S CONTRACTOR STRUCTURE -->
+        <div class="control-section">
+            <h2>👷 Jorge's Contractor Structure</h2>
+            
+            <div class="jorge-structure">
+                <div class="base-rates">
+                    <h3>Base Installation Rates</h3>
+                    <div class="rate-item">
+                        <label>Base Installation (All Sizes):</label>
+                        <input type="number" id="jorgeBase" value="600" step="25">
+                        <span class="currency">$</span>
+                    </div>
+                </div>
+
+                <div class="addon-rates">
+                    <h3>Add-on Service Rates</h3>
+                    <div class="addon-grid">
+                        <div class="rate-item">
+                            <label>Site Prep Add-On:</label>
+                            <input type="number" id="jorgeSitePrep" value="150" step="25">
+                            <span class="currency">$</span>
+                        </div>
+                        
+                        <div class="rate-item">
+                            <label>Salt System Setup:</label>
+                            <input type="number" id="jorgeSalt" value="75" step="25">
+                            <span class="currency">$</span>
+                        </div>
+                        
+                        <div class="rate-item">
+                            <label>Heating System Install:</label>
+                            <input type="number" id="jorgeHeating" value="200" step="25">
+                            <span class="currency">$</span>
+                        </div>
+                        
+                        <div class="rate-item">
+                            <label>Shade System Install:</label>
+                            <input type="number" id="jorgeShade" value="125" step="25">
+                            <span class="currency">$</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bonus-rates">
+                    <h3>Performance Bonuses</h3>
+                    <div class="bonus-grid">
+                        <div class="rate-item">
+                            <label>5-Star Review Bonus:</label>
+                            <input type="number" id="jorgeReviewBonus" value="100" step="25">
+                            <span class="currency">$</span>
+                        </div>
+                        
+                        <div class="rate-item">
+                            <label>Speed Completion (<6hrs):</label>
+                            <input type="number" id="jorgeSpeedBonus" value="75" step="25">
+                            <span class="currency">$</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="jorge-summary">
+                    <h3>Jorge's Earnings Calculator</h3>
+                    <div class="earnings-preview">
+                        <div class="job-example">
+                            <h4>8ft Basic (Site Ready)</h4>
+                            <div class="breakdown">
+                                <span>Base Installation: $<span id="previewBase">600</span></span>
+                                <span>Total Jorge Earnings: $<span id="previewTotal">600</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY & LEAD TIME MANAGEMENT -->
+        <div class="control-section">
+            <h2>📦 Inventory & Lead Time Management</h2>
+            
+            <div class="inventory-control">
+                <div class="quick-inventory">
+                    <h3>Current Stock Levels</h3>
+                    <div class="stock-grid">
+                        <div class="stock-item">
+                            <label>6ft Tanks:</label>
+                            <input type="number" id="stock6ft" value="0" min="0">
+                            <span class="stock-status" id="status6ft">Out of Stock</span>
+                        </div>
+                        
+                        <div class="stock-item">
+                            <label>8ft Tanks:</label>
+                            <input type="number" id="stock8ft" value="0" min="0">
+                            <span class="stock-status" id="status8ft">Out of Stock</span>
+                        </div>
+                        
+                        <div class="stock-item">
+                            <label>10ft Tanks:</label>
+                            <input type="number" id="stock10ft" value="0" min="0">
+                            <span class="stock-status" id="status10ft">Out of Stock</span>
+                        </div>
+
+                        <div class="stock-item">
+                            <label>SX2800 Pumps:</label>
+                            <input type="number" id="stockSX2800" value="0" min="0">
+                            <span class="stock-status" id="statusSX2800">Out of Stock</span>
+                        </div>
+
+                        <div class="stock-item">
+                            <label>Salt Systems:</label>
+                            <input type="number" id="stockSalt" value="0" min="0">
+                            <span class="stock-status" id="statusSalt">Out of Stock</span>
+                        </div>
+
+                        <div class="stock-item">
+                            <label>Heating Systems:</label>
+                            <input type="number" id="stockHeating" value="0" min="0">
+                            <span class="stock-status" id="statusHeating">Out of Stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lead-times">
+                    <h3>Supplier Lead Times</h3>
+                    <div class="leadtime-grid">
+                        <div class="leadtime-item">
+                            <label>Local Tank Supplier:</label>
+                            <input type="number" id="leadLocal" value="3" min="1" max="30">
+                            <span>days</span>
+                        </div>
+                        
+                        <div class="leadtime-item">
+                            <label>Online Equipment:</label>
+                            <input type="number" id="leadOnline" value="5" min="1" max="30">
+                            <span>days</span>
+                        </div>
+                        
+                        <div class="leadtime-item">
+                            <label>Specialty Items:</label>
+                            <input type="number" id="leadSpecialty" value="10" min="1" max="30">
+                            <span>days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUSINESS INTELLIGENCE DASHBOARD -->
+        <div class="control-section">
+            <h2>📊 Business Intelligence</h2>
+            
+            <div class="dashboard-grid">
+                <div class="metric-card">
+                    <h3>Jorge's Monthly Earnings</h3>
+                    <div class="metric-value" id="jorgeMonthly">$0</div>
+                    <div class="metric-detail">This month</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Average Job Profit</h3>
+                    <div class="metric-value" id="avgProfit">$0</div>
+                    <div class="metric-detail">After all costs</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Speed Advantage</h3>
+                    <div class="metric-value" id="speedJobs">0</div>
+                    <div class="metric-detail">Jobs ready this week</div>
+                </div>
+
+                <div class="metric-card">
+                    <h3>Margin Performance</h3>
+                    <div class="metric-value" id="marginPerf">0%</div>
+                    <div class="metric-detail">Average margin achieved</div>
+                </div>
+            </div>
+
+            <div class="profit-calculator">
+                <h3>Live Profit Calculator</h3>
+                <div class="calc-inputs">
+                    <select id="packageType">
+                        <option value="6ft">6ft Basic Package</option>
+                        <option value="8ft" selected>8ft Standard Package</option>
+                        <option value="10ft">10ft Premium Package</option>
+                    </select>
+                    
+                    <label>
+                        <input type="checkbox" id="addSaltwater"> Salt Water System
+                    </label>
+                    
+                    <label>
+                        <input type="checkbox" id="addHeating"> Heating System
+                    </label>
+                    
+                    <label>
+                        <input type="checkbox" id="addSitePrep"> Site Preparation
+                    </label>
+                    
+                    <label>
+                        <input type="checkbox" id="siteReady"> Customer Site Ready
+                    </label>
+                </div>
+
+                <div class="profit-breakdown" id="profitBreakdown">
+                    <!-- Profit calculation will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="control-section">
+            <h2>⚡ Quick Actions</h2>
+            
+            <div class="action-buttons">
+                <button id="saveSettings" class="action-btn primary">💾 Save All Settings</button>
+                <button id="resetToDefaults" class="action-btn secondary">🔄 Reset to Defaults</button>
+                <button id="syncInventory" class="action-btn">☁️ Sync with Main Inventory</button>
+                <button id="generateReport" class="action-btn">📋 Generate Business Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>

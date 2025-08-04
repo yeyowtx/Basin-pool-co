@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basin Pool Co. - Quick Estimate Calculator</title>
+    <link rel="stylesheet" href="estimate-styles.css">
+</head>
+<body>
+    <div class="estimate-container">
+        <div class="header">
+            <div class="company-logo">
+                <h1>🏊 Basin Pool Co.</h1>
+                <p>Professional Pool & Deck Installation</p>
+            </div>
+            <div class="customer-info">
+                <input type="text" id="customerName" placeholder="Customer Name" class="customer-input">
+                <input type="tel" id="customerPhone" placeholder="Phone Number" class="customer-input">
+                <input type="email" id="customerEmail" placeholder="Email Address" class="customer-input">
+            </div>
+        </div>
+
+        <div class="service-selection">
+            <!-- POOL PACKAGES -->
+            <div class="service-category">
+                <h2>🏊 Pool Installation Packages</h2>
+                <div class="package-grid">
+                    <div class="package-card" data-service="pool" data-size="6ft">
+                        <h3>6ft "The Splash"</h3>
+                        <div class="package-price">$2,495</div>
+                        <div class="package-details">
+                            <p>• 390 gallon CountyLine tank</p>
+                            <p>• SX2800 sand filter system</p>
+                            <p>• Filter balls & hardware kit</p>
+                            <p>• Same-day professional setup</p>
+                            <p>• Water treatment & customer training</p>
+                        </div>
+                        <button class="select-package">Select Package</button>
+                    </div>
+
+                    <div class="package-card recommended" data-service="pool" data-size="8ft">
+                        <h3>8ft "The Oasis" ⭐</h3>
+                        <div class="package-price">$2,795</div>
+                        <div class="package-details">
+                            <p>• 700 gallon CountyLine tank</p>
+                            <p>• SX2800 sand filter system</p>
+                            <p>• Enhanced hardware & filter balls</p>
+                            <p>• Same-day professional setup</p>
+                            <p>• Water treatment & customer training</p>
+                        </div>
+                        <button class="select-package">Select Package</button>
+                        <div class="recommended-badge">Most Popular</div>
+                    </div>
+
+                    <div class="package-card premium" data-service="pool" data-size="10ft">
+                        <h3>10ft "The Resort"</h3>
+                        <div class="package-price">$3,495</div>
+                        <div class="package-details">
+                            <p>• 1,117 gallon Behlen tank</p>
+                            <p>• SX3000 sand filter system (upgraded)</p>
+                            <p>• Heavy-duty hardware & 6lbs filter balls</p>
+                            <p>• Same-day professional setup</p>
+                            <p>• Water treatment & customer training</p>
+                        </div>
+                        <button class="select-package">Select Package</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DECK PACKAGES -->
+            <div class="service-category">
+                <h2>🏗️ Custom Deck Packages</h2>
+                <div class="deck-calculator">
+                    <div class="deck-inputs">
+                        <label>Deck Size:</label>
+                        <select id="deckSize">
+                            <option value="144">12x12 (144 sq ft)</option>
+                            <option value="192" selected>12x16 (192 sq ft)</option>
+                            <option value="256">16x16 (256 sq ft)</option>
+                            <option value="320">16x20 (320 sq ft)</option>
+                            <option value="custom">Custom Size</option>
+                        </select>
+                        
+                        <div id="customSizeInputs" style="display: none;">
+                            <input type="number" id="deckWidth" placeholder="Width (ft)" min="8" max="30">
+                            <input type="number" id="deckLength" placeholder="Length (ft)" min="8" max="40">
+                        </div>
+                    </div>
+
+                    <div class="deck-packages">
+                        <div class="deck-package" data-type="basic">
+                            <h4>Basic Deck</h4>
+                            <div class="deck-price">$25/sq ft</div>
+                            <div class="deck-total" id="basicDeckTotal">$4,800</div>
+                            <button class="select-deck" data-price="25">Select Basic</button>
+                        </div>
+
+                        <div class="deck-package" data-type="premium">
+                            <h4>Premium Deck</h4>
+                            <div class="deck-price">$35/sq ft</div>
+                            <div class="deck-total" id="premiumDeckTotal">$6,720</div>
+                            <button class="select-deck" data-price="35">Select Premium</button>
+                        </div>
+
+                        <div class="deck-package" data-type="luxury">
+                            <h4>Luxury Deck</h4>
+                            <div class="deck-price">$45/sq ft</div>
+                            <div class="deck-total" id="luxuryDeckTotal">$8,640</div>
+                            <button class="select-deck" data-price="45">Select Luxury</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADD-ONS -->
+            <div class="service-category">
+                <h2>✨ Premium Upgrades</h2>
+                <div class="addons-grid">
+                    <div class="addon-item premium-addon">
+                        <input type="checkbox" id="saltwater" data-price="697">
+                        <label for="saltwater">
+                            <span class="addon-name">🌊 Spa Experience (Salt Water)</span>
+                            <span class="addon-description">Luxury resort-feel saltwater • Softer on skin • Reduced maintenance</span>
+                            <span class="addon-price">+$697</span>
+                        </label>
+                    </div>
+
+                    <div class="addon-item premium-addon">
+                        <input type="checkbox" id="heating" data-price="1497">
+                        <label for="heating">
+                            <span class="addon-name">🔥 Heating System</span>
+                            <span class="addon-description">FOGATTI 120k BTU • Extend your season • Professional installation</span>
+                            <span class="addon-price">+$1,497</span>
+                        </label>
+                    </div>
+
+                    <div class="addon-item">
+                        <input type="checkbox" id="premiumSite" data-price="400">
+                        <label for="premiumSite">
+                            <span class="addon-name">🏗️ Turnkey Site Preparation</span>
+                            <span class="addon-description">Complete ground prep • Recom Materials • Professional grading</span>
+                            <span class="addon-price">+$400</span>
+                        </label>
+                    </div>
+
+                    <div class="addon-item premium-addon">
+                        <input type="checkbox" id="shade" data-price="1797">
+                        <label for="shade">
+                            <span class="addon-name">☂️ Shade System</span>
+                            <span class="addon-description">10x10 cantilever umbrella • Professional installation • Weather-resistant</span>
+                            <span class="addon-price">+$1,797</span>
+                        </label>
+                    </div>
+
+                    <div class="addon-item site-ready">
+                        <input type="checkbox" id="siteReady" data-discount="400">
+                        <label for="siteReady">
+                            <span class="addon-name">✅ My Site is Ready</span>
+                            <span class="addon-description">Level area prepared • Save on site prep costs</span>
+                            <span class="addon-price savings">Save $400</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICING SUMMARY -->
+        <div class="pricing-summary">
+            <div class="quote-breakdown">
+                <h3>Project Quote</h3>
+                <div id="selectedServices"></div>
+                
+                <div class="pricing-row subtotal">
+                    <span>Subtotal:</span>
+                    <span id="subtotalAmount">$0</span>
+                </div>
+
+                <div class="discount-section">
+                    <label>Bundle Discount:</label>
+                    <select id="discountPercent">
+                        <option value="0">No Discount</option>
+                        <option value="5">5% - Referral</option>
+                        <option value="10">10% - Repeat Customer</option>
+                        <option value="15">15% - Pool + Deck Combo</option>
+                        <option value="20">20% - Special Promotion</option>
+                    </select>
+                    <div class="discount-amount">-<span id="discountAmount">$0</span></div>
+                </div>
+
+                <div class="pricing-row total">
+                    <span>Total Project Cost:</span>
+                    <span id="totalAmount">$0</span>
+                </div>
+
+                <div class="payment-structure">
+                    <h3>Payment Schedule</h3>
+                    <div class="payment-row">
+                        <span>Today (50% Deposit):</span>
+                        <span id="depositAmount">$0</span>
+                    </div>
+                    <div class="payment-row">
+                        <span>Mobilization (25%):</span>
+                        <span id="mobilizationAmount">$0</span>
+                    </div>
+                    <div class="payment-row">
+                        <span>Completion (25%):</span>
+                        <span id="completionAmount">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="generateQuote" class="primary-btn">Generate Quote</button>
+                <button id="collectDeposit" class="deposit-btn">Collect Deposit</button>
+                <button id="emailQuote" class="secondary-btn">Email Quote</button>
+            </div>
+        </div>
+
+        <!-- QUOTE MODAL -->
+        <div id="quoteModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="quoteContent">
+                    <!-- Quote will be generated here -->
+                </div>
+                <div class="modal-actions">
+                    <button id="printQuote">Print Quote</button>
+                    <button id="downloadPDF">Download PDF</button>
+                    <button id="sendEmail">Send Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="estimate-script.js"></script>
+</body>
+</html>
