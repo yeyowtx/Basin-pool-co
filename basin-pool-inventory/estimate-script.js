@@ -146,9 +146,13 @@ function setupEventListeners() {
 
 // Pool Package Selection
 function selectPoolPackage(size) {
-    console.log('Selecting pool package:', size);
-    console.log('PRICING.pools:', PRICING.pools);
-    console.log('Price for', size, ':', PRICING.pools[size]);
+    // FORCE CORRECT PRICING - NO VARIABLES
+    let price = 0;
+    if (size === '6ft') price = 2495;
+    else if (size === '8ft') price = 2795; 
+    else if (size === '10ft') price = 3495;
+    
+    console.log('FORCED PRICE for', size, ':', price);
     
     // Clear previous selection
     document.querySelectorAll('.package-card').forEach(card => {
@@ -157,16 +161,16 @@ function selectPoolPackage(size) {
 
     // Select new package
     const selectedCard = document.querySelector(`[data-size="${size}"]`);
-    selectedCard.classList.add('selected');
+    if (selectedCard) selectedCard.classList.add('selected');
 
-    // Update quote
+    // Update quote with FORCED PRICE
     currentQuote.pool = {
         size: size,
-        price: PRICING.pools[size],
+        price: price,
         name: `${size} Pool Package`
     };
 
-    console.log('Updated currentQuote.pool:', currentQuote.pool);
+    console.log('FORCED currentQuote.pool:', currentQuote.pool);
     updateQuoteSummary();
 }
 
