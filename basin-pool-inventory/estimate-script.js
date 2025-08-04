@@ -146,13 +146,12 @@ function setupEventListeners() {
 
 // Pool Package Selection
 function selectPoolPackage(size) {
-    // FORCE CORRECT PRICING - NO VARIABLES
-    let price = 0;
-    if (size === '6ft') price = 2495;
-    else if (size === '8ft') price = 2795; 
-    else if (size === '10ft') price = 3495;
-    
-    console.log('FORCED PRICE for', size, ':', price);
+    console.log('=== selectPoolPackage DEBUG ===');
+    console.log('Input size:', size);
+    console.log('PRICING object:', PRICING);
+    console.log('PRICING.pools:', PRICING.pools);
+    console.log('PRICING.pools[size]:', PRICING.pools[size]);
+    console.log('typeof PRICING.pools[size]:', typeof PRICING.pools[size]);
     
     // Clear previous selection
     document.querySelectorAll('.package-card').forEach(card => {
@@ -163,14 +162,15 @@ function selectPoolPackage(size) {
     const selectedCard = document.querySelector(`[data-size="${size}"]`);
     if (selectedCard) selectedCard.classList.add('selected');
 
-    // Update quote with FORCED PRICE
+    // Update quote using the PRICING variable properly
     currentQuote.pool = {
         size: size,
-        price: price,
+        price: PRICING.pools[size],
         name: `${size} Pool Package`
     };
 
-    console.log('FORCED currentQuote.pool:', currentQuote.pool);
+    console.log('Set currentQuote.pool to:', currentQuote.pool);
+    console.log('=== END selectPoolPackage DEBUG ===');
     updateQuoteSummary();
 }
 
@@ -237,12 +237,15 @@ function updateQuoteSummary() {
     const servicesDiv = document.getElementById('selectedServices');
     servicesDiv.innerHTML = '';
 
-    console.log('updateQuoteSummary called, currentQuote.pool:', currentQuote.pool);
+    console.log('=== updateQuoteSummary DEBUG ===');
+    console.log('currentQuote.pool:', currentQuote.pool);
 
     // Add pool to quote
     if (currentQuote.pool) {
-        console.log('Adding pool to quote - price:', currentQuote.pool.price);
+        console.log('Pool price before adding to subtotal:', currentQuote.pool.price);
+        console.log('Current subtotal before adding pool:', subtotal);
         subtotal += currentQuote.pool.price;
+        console.log('Subtotal after adding pool:', subtotal);
         servicesDiv.innerHTML += `
             <div class="service-line">
                 <span>${currentQuote.pool.name}</span>
