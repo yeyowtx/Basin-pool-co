@@ -180,85 +180,77 @@ function updateCustomerInfo() {
     };
 }
 
-// Update quote summary
+// Update quote summary - SIMPLE ADD UP PRICES
 function updateQuoteSummary() {
-    let subtotal = 0;
+    let total = 0;
     const servicesDiv = document.getElementById('selectedServices');
     if (servicesDiv) {
         servicesDiv.innerHTML = '';
     }
 
-    // Add pool to quote
+    // Pool price
     if (currentQuote.pool) {
-        subtotal += currentQuote.pool.price;
+        total += currentQuote.pool.price;
         if (servicesDiv) {
             servicesDiv.innerHTML += `
                 <div class="service-line">
                     <span>${currentQuote.pool.name}</span>
-                    <span>${formatCurrency(currentQuote.pool.price)}</span>
+                    <span>$${currentQuote.pool.price}</span>
                 </div>
             `;
         }
     }
 
-    // Add addons to quote
+    // Addon prices
     currentQuote.addons.forEach(addon => {
-        subtotal += addon.price;
+        total += addon.price;
         if (servicesDiv) {
             servicesDiv.innerHTML += `
                 <div class="service-line addon">
                     <span>${addon.name}</span>
-                    <span>${formatCurrency(addon.price)}</span>
+                    <span>$${addon.price}</span>
                 </div>
             `;
         }
     });
 
-    // Calculate discount
-    const discountPercent = parseInt(document.getElementById('discountPercent')?.value || '0');
-    let discountAmount = subtotal * (discountPercent / 100);
-    
-    // Add site-ready discount
+    // Site ready discount
+    let discount = 0;
     const siteReadyChecked = document.getElementById('siteReady')?.checked || false;
     if (siteReadyChecked) {
-        discountAmount += 400; // Site-ready saves $400
+        discount = 400;
+        total -= 400;
     }
-    
-    const total = subtotal - discountAmount;
-    
-    // 50/25/25 payment structure
+
+    // Manual discount
+    const discountPercent = parseInt(document.getElementById('discountPercent')?.value || '0');
+    if (discountPercent > 0) {
+        const manualDiscount = (total + discount) * (discountPercent / 100);
+        discount += manualDiscount;
+        total -= manualDiscount;
+    }
+
+    // Payments
     const deposit = total * 0.5;
     const mobilization = total * 0.25;
     const completion = total * 0.25;
 
-    // Update quote object
-    currentQuote.subtotal = subtotal;
-    currentQuote.discount = discountAmount;
-    currentQuote.total = total;
-    currentQuote.deposit = deposit;
-
     // Update display
-    updateElement('subtotalAmount', formatCurrency(subtotal));
-    updateElement('discountAmount', formatCurrency(discountAmount));
-    updateElement('totalAmount', formatCurrency(total));
-    updateElement('depositAmount', formatCurrency(deposit));
-    updateElement('mobilizationAmount', formatCurrency(mobilization));
-    updateElement('completionAmount', formatCurrency(completion));
+    updateElement('subtotalAmount', `$${(total + discount).toFixed(0)}`);
+    updateElement('discountAmount', `$${discount.toFixed(0)}`);
+    updateElement('totalAmount', `$${total.toFixed(0)}`);
+    updateElement('depositAmount', `$${deposit.toFixed(0)}`);
+    updateElement('mobilizationAmount', `$${mobilization.toFixed(0)}`);
+    updateElement('completionAmount', `$${completion.toFixed(0)}`);
 
-    // Enable/disable buttons
-    const hasServices = currentQuote.pool !== null;
+    // Enable buttons
     const generateBtn = document.getElementById('generateQuote');
     const collectBtn = document.getElementById('collectDeposit');
     
-    if (generateBtn) generateBtn.disabled = !hasServices;
-    if (collectBtn) collectBtn.disabled = !hasServices || total === 0;
+    if (generateBtn) generateBtn.disabled = !currentQuote.pool;
+    if (collectBtn) collectBtn.disabled = !currentQuote.pool;
 
-    console.log('Quote updated:', {
-        subtotal: subtotal,
-        discount: discountAmount,
-        total: total,
-        deposit: deposit
-    });
+    console.log('SIMPLE TOTAL:', total);
 }
 
 // Helper function to safely update element text
