@@ -1,20 +1,21 @@
 // Basin Pool Co. Quick Estimate Calculator
-// FRESH DEPLOY - Cache Bust: 2025-08-04-00:53:00
-// Simple calculator that adds up retail prices
+// FRESH DEPLOY - Cache Bust: 2025-08-04-01:45:00
+// Clean sales tool with Master Plan pricing and comprehensive specs
 
-// MASTER PLAN FIXED PRICING - EXACTLY AS SPECIFIED
+// MASTER PLAN PRICING - CORRECT BASE PRICES
 const PRICING = {
     pools: {
-        '6ft': 2495,   // "The Splash"
-        '8ft': 2795,   // "The Oasis" 
-        '10ft': 3495   // "The Resort"
+        '6ft': 2495,   // "The Splash" - Master Plan base price
+        '8ft': 2795,   // "The Oasis" - Master Plan base price
+        '10ft': 3495   // "The Resort" - Master Plan base price
     },
     addons: {
         saltwater: 697,      // Spa Experience
         heating: 1497,       // Heating System  
-        premiumSite: 400,    // Turnkey Site Prep
+        premiumSite: 400,    // Turnkey Site Prep (as addon)
         shade: 1797          // Shade System
-    }
+    },
+    sitePrepCost: 400        // Site preparation value
 };
 
 // Current selection
@@ -106,7 +107,7 @@ function selectPool(size) {
         selectedCard.classList.add('selected');
     }
 
-    // Store selection
+    // Store selection (Master Plan base price)
     selectedPool = {
         size: size,
         price: PRICING.pools[size],
@@ -119,23 +120,9 @@ function selectPool(size) {
 // Update addons
 function updateAddons() {
     selectedAddons = [];
-    siteReady = false;
     
-    // Check site ready first
-    const siteReadyBox = document.getElementById('siteReady');
-    if (siteReadyBox && siteReadyBox.checked) {
-        siteReady = true;
-    }
-
     // Get checked addons
     document.querySelectorAll('.addon-item input[type="checkbox"]:checked').forEach(checkbox => {
-        if (checkbox.id === 'siteReady') return; // Skip site ready
-
-        // Skip site prep if site is ready
-        if (siteReady && checkbox.id === 'premiumSite') {
-            checkbox.checked = false;
-            return;
-        }
 
         let price = 0;
         let name = checkbox.nextElementSibling?.querySelector('.addon-name')?.textContent || 'Unknown';
@@ -168,7 +155,7 @@ function updateCustomer() {
     };
 }
 
-// Update total - SIMPLE MATH ONLY
+// Update total - HANDLES SITE PREP DISCOUNT
 function updateTotal() {
     let total = 0;
     
@@ -178,9 +165,10 @@ function updateTotal() {
         servicesDiv.innerHTML = '';
     }
 
-    // Add pool price
+    // Add pool price (Master Plan base price)
     if (selectedPool) {
         total += selectedPool.price;
+        
         if (servicesDiv) {
             servicesDiv.innerHTML += `
                 <div class="service-line">
@@ -207,11 +195,6 @@ function updateTotal() {
     // Calculate discounts
     let discount = 0;
     
-    // Site ready discount
-    if (siteReady) {
-        discount += 400;
-    }
-
     // Manual discount
     const discountPercent = parseInt(document.getElementById('discountPercent')?.value || '0');
     if (discountPercent > 0) {
