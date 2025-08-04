@@ -100,22 +100,22 @@ function setupEventListeners() {
     });
 
     // Discount selection
-    document.getElementById('discountPercent').addEventListener('change', updateQuoteSummary);
+    document.getElementById('discountPercent')?.addEventListener('change', updateQuoteSummary);
 
     // Customer info
     document.querySelectorAll('.customer-input').forEach(input => {
-        input.addEventListener('input', updateCustomerInfo);
+        input?.addEventListener('input', updateCustomerInfo);
     });
 
     // Action buttons
-    document.getElementById('generateQuote').addEventListener('click', generateQuote);
-    document.getElementById('collectDeposit').addEventListener('click', collectDeposit);
-    document.getElementById('emailQuote').addEventListener('click', emailQuote);
+    document.getElementById('generateQuote')?.addEventListener('click', generateQuote);
+    document.getElementById('collectDeposit')?.addEventListener('click', collectDeposit);
+    document.getElementById('emailQuote')?.addEventListener('click', emailQuote);
 
     // Modal controls
-    document.querySelector('.close').addEventListener('click', closeModal);
-    document.getElementById('printQuote').addEventListener('click', printQuote);
-    document.getElementById('downloadPDF').addEventListener('click', downloadPDF);
+    document.querySelector('.close')?.addEventListener('click', closeModal);
+    document.getElementById('printQuote')?.addEventListener('click', printQuote);
+    document.getElementById('downloadPDF')?.addEventListener('click', downloadPDF);
 }
 
 // Pool Package Selection
@@ -203,8 +203,11 @@ function updateQuoteSummary() {
     const servicesDiv = document.getElementById('selectedServices');
     servicesDiv.innerHTML = '';
 
+    console.log('updateQuoteSummary called, currentQuote.pool:', currentQuote.pool);
+
     // Add pool to quote
     if (currentQuote.pool) {
+        console.log('Adding pool to quote - price:', currentQuote.pool.price);
         subtotal += currentQuote.pool.price;
         servicesDiv.innerHTML += `
             <div class="service-line">
