@@ -8,11 +8,11 @@ let PRICING = {
         '8ft': 0,
         '10ft': 0
     },
-    decks: {
-        basic: 25,    // per sq ft
-        premium: 35,  // per sq ft
-        luxury: 45    // per sq ft
-    },
+    // decks: { // Temporarily removed - save for later
+    //     basic: 25,    // per sq ft
+    //     premium: 35,  // per sq ft
+    //     luxury: 45    // per sq ft
+    // },
     addons: {
         saltwater: 0,
         heating: 0,
@@ -72,7 +72,7 @@ function loadAdminPricing() {
 let currentQuote = {
     customer: {},
     pool: null,
-    deck: null,
+    // deck: null, // Temporarily removed - save for later
     addons: [],
     subtotal: 0,
     discount: 0,
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAdminPricing();
     updatePackagePricing();
     setupEventListeners();
-    updateDeckPricing();
+    // updateDeckPricing(); // Temporarily removed - save for later
     updateQuoteSummary();
 });
 
@@ -100,28 +100,14 @@ function setupEventListeners() {
         });
     });
 
-    // Deck package selection
-    document.querySelectorAll('.select-deck').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const price = parseInt(this.dataset.price);
-            const type = this.closest('.deck-package').dataset.type;
-            selectDeckPackage(type, price);
-        });
-    });
-
-    // Deck size change
-    document.getElementById('deckSize').addEventListener('change', function() {
-        if (this.value === 'custom') {
-            document.getElementById('customSizeInputs').style.display = 'block';
-        } else {
-            document.getElementById('customSizeInputs').style.display = 'none';
-            updateDeckPricing();
-        }
-    });
-
-    // Custom deck size inputs
-    document.getElementById('deckWidth')?.addEventListener('input', updateCustomDeckSize);
-    document.getElementById('deckLength')?.addEventListener('input', updateCustomDeckSize);
+    // Deck functionality temporarily removed - save for later
+    // document.querySelectorAll('.select-deck').forEach(btn => {
+    //     btn.addEventListener('click', function() {
+    //         const price = parseInt(this.dataset.price);
+    //         const type = this.closest('.deck-package').dataset.type;
+    //         selectDeckPackage(type, price);
+    //     });
+    // });
 
     // Add-ons
     document.querySelectorAll('.addon-item input[type="checkbox"]').forEach(checkbox => {
@@ -168,65 +154,11 @@ function selectPoolPackage(size) {
     updateQuoteSummary();
 }
 
-// Deck Package Selection
-function selectDeckPackage(type, pricePerSqFt) {
-    // Clear previous selection
-    document.querySelectorAll('.deck-package').forEach(pkg => {
-        pkg.classList.remove('selected');
-    });
-
-    // Select new package
-    const selectedPackage = document.querySelector(`[data-type="${type}"]`);
-    selectedPackage.classList.add('selected');
-
-    // Calculate total based on size
-    const sqFt = getCurrentDeckSize();
-    const totalPrice = pricePerSqFt * sqFt;
-
-    // Update quote
-    currentQuote.deck = {
-        type: type,
-        pricePerSqFt: pricePerSqFt,
-        sqFt: sqFt,
-        price: totalPrice,
-        name: `${type.charAt(0).toUpperCase() + type.slice(1)} Deck (${sqFt} sq ft)`
-    };
-
-    updateQuoteSummary();
-}
-
-// Get current deck size
-function getCurrentDeckSize() {
-    const deckSizeSelect = document.getElementById('deckSize');
-    if (deckSizeSelect.value === 'custom') {
-        const width = parseInt(document.getElementById('deckWidth').value) || 0;
-        const length = parseInt(document.getElementById('deckLength').value) || 0;
-        return width * length;
-    }
-    return parseInt(deckSizeSelect.value);
-}
-
-// Update deck pricing display
-function updateDeckPricing() {
-    const sqFt = getCurrentDeckSize();
-    
-    document.getElementById('basicDeckTotal').textContent = formatCurrency(25 * sqFt);
-    document.getElementById('premiumDeckTotal').textContent = formatCurrency(35 * sqFt);
-    document.getElementById('luxuryDeckTotal').textContent = formatCurrency(45 * sqFt);
-
-    // Update current selection if deck is selected
-    if (currentQuote.deck) {
-        currentQuote.deck.sqFt = sqFt;
-        currentQuote.deck.price = currentQuote.deck.pricePerSqFt * sqFt;
-        currentQuote.deck.name = `${currentQuote.deck.type.charAt(0).toUpperCase() + currentQuote.deck.type.slice(1)} Deck (${sqFt} sq ft)`;
-        updateQuoteSummary();
-    }
-}
-
-// Update custom deck size
-function updateCustomDeckSize() {
-    updateDeckPricing();
-}
+// DECK FUNCTIONALITY TEMPORARILY REMOVED - SAVE FOR LATER
+// function selectDeckPackage(type, pricePerSqFt) { ... }
+// function getCurrentDeckSize() { ... }
+// function updateDeckPricing() { ... }
+// function updateCustomDeckSize() { ... }
 
 // Update add-ons
 function updateAddons() {
@@ -292,16 +224,11 @@ function updateQuoteSummary() {
         `;
     }
 
-    // Add deck to quote
-    if (currentQuote.deck) {
-        subtotal += currentQuote.deck.price;
-        servicesDiv.innerHTML += `
-            <div class="service-line">
-                <span>${currentQuote.deck.name}</span>
-                <span>${formatCurrency(currentQuote.deck.price)}</span>
-            </div>
-        `;
-    }
+    // Deck functionality temporarily removed - save for later
+    // if (currentQuote.deck) {
+    //     subtotal += currentQuote.deck.price;
+    //     servicesDiv.innerHTML += `...`;
+    // }
 
     // Add add-ons to quote
     currentQuote.addons.forEach(addon => {
@@ -346,7 +273,7 @@ function updateQuoteSummary() {
     document.getElementById('completionAmount').textContent = formatCurrency(completion);
 
     // Enable/disable buttons based on selection
-    const hasServices = currentQuote.pool || currentQuote.deck;
+    const hasServices = currentQuote.pool; // Removed deck reference
     document.getElementById('generateQuote').disabled = !hasServices;
     document.getElementById('collectDeposit').disabled = !hasServices || total === 0;
 }
