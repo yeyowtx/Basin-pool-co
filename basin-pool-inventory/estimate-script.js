@@ -35,23 +35,7 @@ let PRICING = {
 
 // Load admin configuration if available
 function loadAdminPricing() {
-    try {
-        const adminConfig = localStorage.getItem('basinPoolAdminConfig');
-        if (adminConfig) {
-            const config = JSON.parse(adminConfig);
-            
-            // Update Jorge's structure from admin config
-            if (config.jorgeRates) {
-                PRICING.jorgeStructure = { ...PRICING.jorgeStructure, ...config.jorgeRates };
-            }
-            
-            console.log('Loaded admin configuration');
-        }
-    } catch (error) {
-        console.error('Failed to load admin pricing:', error);
-    }
-    
-    // ALWAYS use Master Plan fixed pricing (not calculated)
+    // FORCE MASTER PLAN FIXED PRICING - NO ADMIN OVERRIDE
     PRICING.pools = { 
         '6ft': 2495,   // "The Splash" - FIXED customer price
         '8ft': 2795,   // "The Oasis" - FIXED customer price
@@ -65,7 +49,8 @@ function loadAdminPricing() {
         shade: 1797          // Shade System - FIXED customer price
     };
     
-    console.log('Loaded Master Plan fixed pricing');
+    console.log('FORCED Master Plan fixed pricing - pools:', PRICING.pools);
+    console.log('FORCED Master Plan fixed pricing - addons:', PRICING.addons);
 }
 
 // Current quote state
@@ -135,6 +120,10 @@ function setupEventListeners() {
 
 // Pool Package Selection
 function selectPoolPackage(size) {
+    console.log('Selecting pool package:', size);
+    console.log('PRICING.pools:', PRICING.pools);
+    console.log('Price for', size, ':', PRICING.pools[size]);
+    
     // Clear previous selection
     document.querySelectorAll('.package-card').forEach(card => {
         card.classList.remove('selected');
@@ -151,6 +140,7 @@ function selectPoolPackage(size) {
         name: `${size} Pool Package`
     };
 
+    console.log('Updated currentQuote.pool:', currentQuote.pool);
     updateQuoteSummary();
 }
 
