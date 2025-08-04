@@ -75,73 +75,104 @@ document.addEventListener('DOMContentLoaded', function() {
     updateQuoteSummary();
 });
 
-// Event Listeners Setup
+// Event Listeners Setup - SAFE VERSION
 function setupEventListeners() {
-    console.log('Setting up event listeners...');
+    console.log('Setting up event listeners SAFELY...');
     
-    // Pool package selection
-    const packageBtns = document.querySelectorAll('.select-package');
-    console.log('Package buttons found:', packageBtns.length);
-    packageBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const card = this.closest('.package-card');
-            const size = card.dataset.size;
-            selectPoolPackage(size);
+    try {
+        // Pool package selection
+        const packageBtns = document.querySelectorAll('.select-package');
+        console.log('Package buttons found:', packageBtns.length);
+        if (packageBtns.length > 0) {
+            packageBtns.forEach(btn => {
+                if (btn && typeof btn.addEventListener === 'function') {
+                    btn.addEventListener('click', function() {
+                        const card = this.closest('.package-card');
+                        const size = card ? card.dataset.size : null;
+                        if (size) selectPoolPackage(size);
+                    });
+                }
+            });
+        }
+
+        // Add-ons
+        const addonCheckboxes = document.querySelectorAll('.addon-item input[type="checkbox"]');
+        console.log('Addon checkboxes found:', addonCheckboxes.length);
+        if (addonCheckboxes.length > 0) {
+            addonCheckboxes.forEach(checkbox => {
+                if (checkbox && typeof checkbox.addEventListener === 'function') {
+                    checkbox.addEventListener('change', updateAddons);
+                }
+            });
+        }
+
+        // Simple element checks with try-catch
+        ['discountPercent', 'generateQuote', 'collectDeposit', 'emailQuote', 'printQuote', 'downloadPDF'].forEach(id => {
+            try {
+                const element = document.getElementById(id);
+                if (element && typeof element.addEventListener === 'function') {
+                    switch(id) {
+                        case 'discountPercent':
+                            element.addEventListener('change', updateQuoteSummary);
+                            break;
+                        case 'generateQuote':
+                            element.addEventListener('click', generateQuote);
+                            break;
+                        case 'collectDeposit':
+                            element.addEventListener('click', collectDeposit);
+                            break;
+                        case 'emailQuote':
+                            element.addEventListener('click', emailQuote);
+                            break;
+                        case 'printQuote':
+                            element.addEventListener('click', printQuote);
+                            break;
+                        case 'downloadPDF':
+                            element.addEventListener('click', downloadPDF);
+                            break;
+                    }
+                    console.log(`✓ ${id} listener added`);
+                } else {
+                    console.warn(`⚠ ${id} element not found or invalid`);
+                }
+            } catch (e) {
+                console.error(`✗ Error setting up ${id}:`, e);
+            }
         });
-    });
 
-    // Add-ons
-    const addonCheckboxes = document.querySelectorAll('.addon-item input[type="checkbox"]');
-    console.log('Addon checkboxes found:', addonCheckboxes.length);
-    addonCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateAddons);
-    });
+        // Customer inputs
+        try {
+            const customerInputs = document.querySelectorAll('.customer-input');
+            console.log('Customer inputs found:', customerInputs.length);
+            if (customerInputs.length > 0) {
+                customerInputs.forEach(input => {
+                    if (input && typeof input.addEventListener === 'function') {
+                        input.addEventListener('input', updateCustomerInfo);
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Error setting up customer inputs:', e);
+        }
 
-    // Discount selection
-    const discountSelect = document.getElementById('discountPercent');
-    if (discountSelect) {
-        discountSelect.addEventListener('change', updateQuoteSummary);
-        console.log('Discount select listener added');
-    } else {
-        console.error('discountPercent element not found');
+        // Modal close button
+        try {
+            const closeBtn = document.querySelector('.close');
+            if (closeBtn && typeof closeBtn.addEventListener === 'function') {
+                closeBtn.addEventListener('click', closeModal);
+                console.log('✓ close button listener added');
+            } else {
+                console.warn('⚠ close button not found');
+            }
+        } catch (e) {
+            console.error('✗ Error setting up close button:', e);
+        }
+        
+        console.log('✓ Event listeners setup complete');
+        
+    } catch (error) {
+        console.error('CRITICAL ERROR in setupEventListeners:', error);
     }
-
-    // Customer info
-    const customerInputs = document.querySelectorAll('.customer-input');
-    console.log('Customer inputs found:', customerInputs.length);
-    customerInputs.forEach(input => {
-        input.addEventListener('input', updateCustomerInfo);
-    });
-
-    // Action buttons
-    const generateBtn = document.getElementById('generateQuote');
-    const collectBtn = document.getElementById('collectDeposit');
-    const emailBtn = document.getElementById('emailQuote');
-    
-    if (generateBtn) generateBtn.addEventListener('click', generateQuote);
-    else console.error('generateQuote button not found');
-    
-    if (collectBtn) collectBtn.addEventListener('click', collectDeposit);
-    else console.error('collectDeposit button not found');
-    
-    if (emailBtn) emailBtn.addEventListener('click', emailQuote);
-    else console.error('emailQuote button not found');
-
-    // Modal controls
-    const closeBtn = document.querySelector('.close');
-    const printBtn = document.getElementById('printQuote');
-    const downloadBtn = document.getElementById('downloadPDF');
-    
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    else console.error('close button not found');
-    
-    if (printBtn) printBtn.addEventListener('click', printQuote);
-    else console.error('printQuote button not found');
-    
-    if (downloadBtn) downloadBtn.addEventListener('click', downloadPDF);
-    else console.error('downloadPDF button not found');
-    
-    console.log('Event listeners setup complete');
 }
 
 // Pool Package Selection
