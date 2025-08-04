@@ -1,5 +1,6 @@
 // Basin Pool Co. Quick Estimate Calculator
 // Real-time pricing engine for customer appointments
+// Updated: 2025-08-04 - Fixed all null reference errors
 
 // Dynamic Pricing Configuration - Pulls from Admin System
 let PRICING = {
@@ -181,7 +182,7 @@ function updateAddons() {
     
     // Check site-ready status first
     const siteReadyCheckbox = document.getElementById('siteReady');
-    const siteReadySelected = siteReadyCheckbox && siteReadyCheckbox.checked;
+    const siteReadySelected = siteReadyCheckbox ? siteReadyCheckbox.checked : false;
     
     document.querySelectorAll('.addon-item input[type="checkbox"]:checked').forEach(checkbox => {
         // Skip site-ready as it's handled separately
@@ -215,10 +216,14 @@ function updateAddons() {
 
 // Update customer information
 function updateCustomerInfo() {
+    const nameEl = document.getElementById('customerName');
+    const phoneEl = document.getElementById('customerPhone');
+    const emailEl = document.getElementById('customerEmail');
+    
     currentQuote.customer = {
-        name: document.getElementById('customerName').value,
-        phone: document.getElementById('customerPhone').value,
-        email: document.getElementById('customerEmail').value
+        name: nameEl ? nameEl.value : '',
+        phone: phoneEl ? phoneEl.value : '',
+        email: emailEl ? emailEl.value : ''
     };
 }
 
@@ -282,18 +287,28 @@ function updateQuoteSummary() {
     currentQuote.total = total;
     currentQuote.deposit = deposit;
 
-    // Update display
-    document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal);
-    document.getElementById('discountAmount').textContent = formatCurrency(discountAmount);
-    document.getElementById('totalAmount').textContent = formatCurrency(total);
-    document.getElementById('depositAmount').textContent = formatCurrency(deposit);
-    document.getElementById('mobilizationAmount').textContent = formatCurrency(mobilization);
-    document.getElementById('completionAmount').textContent = formatCurrency(completion);
+    // Update display with null checks
+    const subtotalEl = document.getElementById('subtotalAmount');
+    const discountEl = document.getElementById('discountAmount');
+    const totalEl = document.getElementById('totalAmount');
+    const depositEl = document.getElementById('depositAmount');
+    const mobilizationEl = document.getElementById('mobilizationAmount');
+    const completionEl = document.getElementById('completionAmount');
+    
+    if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+    if (discountEl) discountEl.textContent = formatCurrency(discountAmount);
+    if (totalEl) totalEl.textContent = formatCurrency(total);
+    if (depositEl) depositEl.textContent = formatCurrency(deposit);
+    if (mobilizationEl) mobilizationEl.textContent = formatCurrency(mobilization);
+    if (completionEl) completionEl.textContent = formatCurrency(completion);
 
     // Enable/disable buttons based on selection
     const hasServices = currentQuote.pool; // Removed deck reference
-    document.getElementById('generateQuote').disabled = !hasServices;
-    document.getElementById('collectDeposit').disabled = !hasServices || total === 0;
+    const generateBtn = document.getElementById('generateQuote');
+    const collectBtn = document.getElementById('collectDeposit');
+    
+    if (generateBtn) generateBtn.disabled = !hasServices;
+    if (collectBtn) collectBtn.disabled = !hasServices || total === 0;
 }
 
 // Generate Professional Quote
