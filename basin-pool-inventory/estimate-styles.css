@@ -88,35 +88,22 @@ body {
     padding-bottom: 80px;
 }
 
-.estimate-container {
+.main-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* Header */
-.header {
+/* Page Header */
+.page-header {
     background: white;
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.company-logo h1 {
-    color: #2c3e50;
-    font-size: 2rem;
-    margin-bottom: 5px;
-}
-
-.company-logo p {
-    color: #7f8c8d;
-    font-size: 1rem;
 }
 
 .customer-info {

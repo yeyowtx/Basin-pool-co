@@ -32,25 +32,16 @@
     </div>
     <div class="save-indicator" id="saveIndicator">✓ Auto-saved</div>
     
-    <div class="container">
-        <div class="header">
-            <div class="backup-controls">
-                <button class="backup-btn" onclick="exportData()">💾 Backup</button>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="action-controls">
+                <button class="action-btn" onclick="exportData()">💾 Backup</button>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
-                <button class="backup-btn" onclick="document.getElementById('importFile').click()">📂 Restore</button>
-                <button class="backup-btn" onclick="clearAllData()">🗑️ Clear All</button>
-                <button class="backup-btn" onclick="syncToCloud()">☁️ Sync</button>
-                <a href="estimate.html" class="backup-btn" style="text-decoration: none; display: inline-block; text-align: center;">📱 Quick Estimate</a>
-                <a href="admin.html" class="backup-btn" style="text-decoration: none; display: inline-block; text-align: center;">⚙️ Admin Panel</a>
+                <button class="action-btn" onclick="document.getElementById('importFile').click()">📂 Restore</button>
+                <button class="action-btn" onclick="clearAllData()">🗑️ Clear All</button>
+                <button class="action-btn" onclick="syncToCloud()">☁️ Sync</button>
             </div>
-            
-            <h1>🏊 Basin Pool Co.</h1>
-            <!-- Deployment: 2025-08-04 -->
-            <p>Individual Item Inventory & Deposit Calculator</p>
-            
-            <div class="version-info">
-                v4.0 - Working + Site Prep Ready
-            </div>
+        </div>
             
             <div class="user-presence" id="userPresence" style="display: none;">
                 <span class="presence-label">👥 Online:</span>

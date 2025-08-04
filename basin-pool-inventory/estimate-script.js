@@ -1,6 +1,6 @@
 // Basin Pool Co. Quick Estimate Calculator
-// FRESH DEPLOY - Cache Bust: 2025-08-04-02:00:00
-// Clean sales tool with Master Plan pricing and mobile navigation
+// FRESH DEPLOY - Cache Bust: 2025-08-04-02:15:00
+// Uniform branding with consistent mobile navigation across all pages
 
 // MASTER PLAN PRICING - CORRECT BASE PRICES
 const PRICING = {
