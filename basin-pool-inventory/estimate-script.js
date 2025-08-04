@@ -76,8 +76,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Event Listeners Setup
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
     // Pool package selection
-    document.querySelectorAll('.select-package').forEach(btn => {
+    const packageBtns = document.querySelectorAll('.select-package');
+    console.log('Package buttons found:', packageBtns.length);
+    packageBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const card = this.closest('.package-card');
             const size = card.dataset.size;
@@ -85,37 +89,58 @@ function setupEventListeners() {
         });
     });
 
-    // Deck functionality temporarily removed - save for later
-    // document.querySelectorAll('.select-deck').forEach(btn => {
-    //     btn.addEventListener('click', function() {
-    //         const price = parseInt(this.dataset.price);
-    //         const type = this.closest('.deck-package').dataset.type;
-    //         selectDeckPackage(type, price);
-    //     });
-    // });
-
     // Add-ons
-    document.querySelectorAll('.addon-item input[type="checkbox"]').forEach(checkbox => {
+    const addonCheckboxes = document.querySelectorAll('.addon-item input[type="checkbox"]');
+    console.log('Addon checkboxes found:', addonCheckboxes.length);
+    addonCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateAddons);
     });
 
     // Discount selection
-    document.getElementById('discountPercent')?.addEventListener('change', updateQuoteSummary);
+    const discountSelect = document.getElementById('discountPercent');
+    if (discountSelect) {
+        discountSelect.addEventListener('change', updateQuoteSummary);
+        console.log('Discount select listener added');
+    } else {
+        console.error('discountPercent element not found');
+    }
 
     // Customer info
-    document.querySelectorAll('.customer-input').forEach(input => {
-        input?.addEventListener('input', updateCustomerInfo);
+    const customerInputs = document.querySelectorAll('.customer-input');
+    console.log('Customer inputs found:', customerInputs.length);
+    customerInputs.forEach(input => {
+        input.addEventListener('input', updateCustomerInfo);
     });
 
     // Action buttons
-    document.getElementById('generateQuote')?.addEventListener('click', generateQuote);
-    document.getElementById('collectDeposit')?.addEventListener('click', collectDeposit);
-    document.getElementById('emailQuote')?.addEventListener('click', emailQuote);
+    const generateBtn = document.getElementById('generateQuote');
+    const collectBtn = document.getElementById('collectDeposit');
+    const emailBtn = document.getElementById('emailQuote');
+    
+    if (generateBtn) generateBtn.addEventListener('click', generateQuote);
+    else console.error('generateQuote button not found');
+    
+    if (collectBtn) collectBtn.addEventListener('click', collectDeposit);
+    else console.error('collectDeposit button not found');
+    
+    if (emailBtn) emailBtn.addEventListener('click', emailQuote);
+    else console.error('emailQuote button not found');
 
     // Modal controls
-    document.querySelector('.close')?.addEventListener('click', closeModal);
-    document.getElementById('printQuote')?.addEventListener('click', printQuote);
-    document.getElementById('downloadPDF')?.addEventListener('click', downloadPDF);
+    const closeBtn = document.querySelector('.close');
+    const printBtn = document.getElementById('printQuote');
+    const downloadBtn = document.getElementById('downloadPDF');
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    else console.error('close button not found');
+    
+    if (printBtn) printBtn.addEventListener('click', printQuote);
+    else console.error('printQuote button not found');
+    
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadPDF);
+    else console.error('downloadPDF button not found');
+    
+    console.log('Event listeners setup complete');
 }
 
 // Pool Package Selection
