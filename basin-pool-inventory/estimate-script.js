@@ -1,7 +1,8 @@
 // Basin Pool Co. Quick Estimate Calculator
-// Clean rebuild - no more broken code
+// FRESH DEPLOY - Cache Bust: 2025-08-04-00:53:00
+// Simple calculator that adds up retail prices
 
-// Master Plan Fixed Pricing
+// MASTER PLAN FIXED PRICING - EXACTLY AS SPECIFIED
 const PRICING = {
     pools: {
         '6ft': 2495,   // "The Splash"
@@ -10,41 +11,32 @@ const PRICING = {
     },
     addons: {
         saltwater: 697,      // Spa Experience
-        heating: 1497,       // Heating System
+        heating: 1497,       // Heating System  
         premiumSite: 400,    // Turnkey Site Prep
         shade: 1797          // Shade System
     }
 };
 
-// Current quote state
-let currentQuote = {
-    customer: {},
-    pool: null,
-    addons: [],
-    subtotal: 0,
-    discount: 0,
-    total: 0,
-    deposit: 0
-};
+// Current selection
+let selectedPool = null;
+let selectedAddons = [];
+let siteReady = false;
 
-// Initialize when DOM loads
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Calculator initializing...');
+    console.log('Calculator starting with correct prices:', PRICING);
     setupEventListeners();
-    updateQuoteSummary();
-    console.log('Calculator ready!');
+    updateTotal();
 });
 
-// Setup all event listeners
+// Setup event listeners
 function setupEventListeners() {
-    console.log('Setting up event listeners...');
-    
-    // Pool package buttons
+    // Pool selection buttons
     document.querySelectorAll('.select-package').forEach(btn => {
         btn.addEventListener('click', function() {
             const card = this.closest('.package-card');
             const size = card.dataset.size;
-            selectPoolPackage(size);
+            selectPool(size);
         });
     });
 
@@ -53,18 +45,18 @@ function setupEventListeners() {
         checkbox.addEventListener('change', updateAddons);
     });
 
-    // Customer info inputs
+    // Customer inputs
     document.querySelectorAll('.customer-input').forEach(input => {
-        input.addEventListener('input', updateCustomerInfo);
+        input.addEventListener('input', updateCustomer);
     });
 
-    // Discount selection
+    // Discount
     const discountSelect = document.getElementById('discountPercent');
     if (discountSelect) {
-        discountSelect.addEventListener('change', updateQuoteSummary);
+        discountSelect.addEventListener('change', updateTotal);
     }
 
-    // Action buttons
+    // Buttons
     const generateBtn = document.getElementById('generateQuote');
     if (generateBtn) {
         generateBtn.addEventListener('click', generateQuote);
@@ -80,7 +72,7 @@ function setupEventListeners() {
         emailBtn.addEventListener('click', emailQuote);
     }
 
-    // Modal controls
+    // Modal
     const closeBtn = document.querySelector('.close');
     if (closeBtn) {
         closeBtn.addEventListener('click', closeModal);
@@ -96,11 +88,11 @@ function setupEventListeners() {
         downloadBtn.addEventListener('click', downloadPDF);
     }
 
-    console.log('Event listeners ready!');
+    console.log('Event listeners ready');
 }
 
 // Select pool package
-function selectPoolPackage(size) {
+function selectPool(size) {
     console.log('Selecting pool:', size, 'Price:', PRICING.pools[size]);
     
     // Clear previous selection
@@ -114,53 +106,48 @@ function selectPoolPackage(size) {
         selectedCard.classList.add('selected');
     }
 
-    // Update quote
-    currentQuote.pool = {
+    // Store selection
+    selectedPool = {
         size: size,
         price: PRICING.pools[size],
         name: `${size} Pool Package`
     };
 
-    console.log('Pool selected:', currentQuote.pool);
-    updateQuoteSummary();
+    updateTotal();
 }
 
 // Update addons
 function updateAddons() {
-    currentQuote.addons = [];
+    selectedAddons = [];
+    siteReady = false;
     
-    // Check site-ready status
-    const siteReadyChecked = document.getElementById('siteReady')?.checked || false;
-    
+    // Check site ready first
+    const siteReadyBox = document.getElementById('siteReady');
+    if (siteReadyBox && siteReadyBox.checked) {
+        siteReady = true;
+    }
+
+    // Get checked addons
     document.querySelectorAll('.addon-item input[type="checkbox"]:checked').forEach(checkbox => {
-        if (checkbox.id === 'siteReady') return; // Handle separately
-        
+        if (checkbox.id === 'siteReady') return; // Skip site ready
+
         // Skip site prep if site is ready
-        if (siteReadyChecked && checkbox.id === 'premiumSite') {
+        if (siteReady && checkbox.id === 'premiumSite') {
             checkbox.checked = false;
             return;
         }
-        
+
         let price = 0;
-        let name = '';
-        
-        // Get addon details
-        const label = checkbox.nextElementSibling;
-        if (label) {
-            const nameElement = label.querySelector('.addon-name');
-            if (nameElement) {
-                name = nameElement.textContent;
-            }
-        }
-        
-        // Get price from PRICING
+        let name = checkbox.nextElementSibling?.querySelector('.addon-name')?.textContent || 'Unknown';
+
+        // Get price from PRICING object
         if (checkbox.id === 'saltwater') price = PRICING.addons.saltwater;
         else if (checkbox.id === 'heating') price = PRICING.addons.heating;
         else if (checkbox.id === 'premiumSite') price = PRICING.addons.premiumSite;
         else if (checkbox.id === 'shade') price = PRICING.addons.shade;
-        
+
         if (price > 0) {
-            currentQuote.addons.push({
+            selectedAddons.push({
                 id: checkbox.id,
                 name: name,
                 price: price
@@ -168,137 +155,136 @@ function updateAddons() {
         }
     });
 
-    updateQuoteSummary();
+    updateTotal();
 }
 
 // Update customer info
-function updateCustomerInfo() {
-    currentQuote.customer = {
+let customerInfo = {};
+function updateCustomer() {
+    customerInfo = {
         name: document.getElementById('customerName')?.value || '',
         phone: document.getElementById('customerPhone')?.value || '',
         email: document.getElementById('customerEmail')?.value || ''
     };
 }
 
-// Update quote summary - SIMPLE ADD UP PRICES
-function updateQuoteSummary() {
+// Update total - SIMPLE MATH ONLY
+function updateTotal() {
     let total = 0;
+    
+    // Show selected services
     const servicesDiv = document.getElementById('selectedServices');
     if (servicesDiv) {
         servicesDiv.innerHTML = '';
     }
 
-    // Pool price
-    if (currentQuote.pool) {
-        total += currentQuote.pool.price;
+    // Add pool price
+    if (selectedPool) {
+        total += selectedPool.price;
         if (servicesDiv) {
             servicesDiv.innerHTML += `
                 <div class="service-line">
-                    <span>${currentQuote.pool.name}</span>
-                    <span>$${currentQuote.pool.price}</span>
+                    <span>${selectedPool.name}</span>
+                    <span>$${selectedPool.price.toLocaleString()}</span>
                 </div>
             `;
         }
     }
 
-    // Addon prices
-    currentQuote.addons.forEach(addon => {
+    // Add addon prices
+    selectedAddons.forEach(addon => {
         total += addon.price;
         if (servicesDiv) {
             servicesDiv.innerHTML += `
                 <div class="service-line addon">
                     <span>${addon.name}</span>
-                    <span>$${addon.price}</span>
+                    <span>$${addon.price.toLocaleString()}</span>
                 </div>
             `;
         }
     });
 
-    // Site ready discount
+    // Calculate discounts
     let discount = 0;
-    const siteReadyChecked = document.getElementById('siteReady')?.checked || false;
-    if (siteReadyChecked) {
-        discount = 400;
-        total -= 400;
+    
+    // Site ready discount
+    if (siteReady) {
+        discount += 400;
     }
 
     // Manual discount
     const discountPercent = parseInt(document.getElementById('discountPercent')?.value || '0');
     if (discountPercent > 0) {
-        const manualDiscount = (total + discount) * (discountPercent / 100);
-        discount += manualDiscount;
-        total -= manualDiscount;
+        discount += Math.round(total * (discountPercent / 100));
     }
 
-    // Payments
-    const deposit = total * 0.5;
-    const mobilization = total * 0.25;
-    const completion = total * 0.25;
+    // Final total
+    const finalTotal = total - discount;
+
+    // 50/25/25 payment structure
+    const deposit = Math.round(finalTotal * 0.5);
+    const mobilization = Math.round(finalTotal * 0.25);
+    const completion = Math.round(finalTotal * 0.25);
 
     // Update display
-    updateElement('subtotalAmount', `$${(total + discount).toFixed(0)}`);
-    updateElement('discountAmount', `$${discount.toFixed(0)}`);
-    updateElement('totalAmount', `$${total.toFixed(0)}`);
-    updateElement('depositAmount', `$${deposit.toFixed(0)}`);
-    updateElement('mobilizationAmount', `$${mobilization.toFixed(0)}`);
-    updateElement('completionAmount', `$${completion.toFixed(0)}`);
+    updateElement('subtotalAmount', `$${total.toLocaleString()}`);
+    updateElement('discountAmount', `$${discount.toLocaleString()}`);
+    updateElement('totalAmount', `$${finalTotal.toLocaleString()}`);
+    updateElement('depositAmount', `$${deposit.toLocaleString()}`);
+    updateElement('mobilizationAmount', `$${mobilization.toLocaleString()}`);
+    updateElement('completionAmount', `$${completion.toLocaleString()}`);
 
-    // Enable buttons
-    const generateBtn = document.getElementById('generateQuote');
-    const collectBtn = document.getElementById('collectDeposit');
-    
-    if (generateBtn) generateBtn.disabled = !currentQuote.pool;
-    if (collectBtn) collectBtn.disabled = !currentQuote.pool;
+    // Enable/disable buttons
+    const hasPool = selectedPool !== null;
+    updateElement('generateQuote', hasPool ? '' : 'disabled', 'disabled');
+    updateElement('collectDeposit', hasPool ? '' : 'disabled', 'disabled');
 
-    console.log('SIMPLE TOTAL:', total);
+    console.log('Total updated:', {
+        subtotal: total,
+        discount: discount,
+        final: finalTotal,
+        deposit: deposit
+    });
 }
 
-// Helper function to safely update element text
-function updateElement(id, text) {
+// Helper to safely update elements
+function updateElement(id, text, attribute = 'textContent') {
     const element = document.getElementById(id);
     if (element) {
-        element.textContent = text;
+        if (attribute === 'disabled') {
+            if (text === 'disabled') {
+                element.disabled = true;
+            } else {
+                element.disabled = false;
+            }
+        } else {
+            element[attribute] = text;
+        }
     }
-}
-
-// Format currency
-function formatCurrency(amount) {
-    return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
 
 // Generate quote
 function generateQuote() {
-    if (!currentQuote.customer.name) {
-        alert('Please enter customer name before generating quote.');
-        const nameInput = document.getElementById('customerName');
-        if (nameInput) nameInput.focus();
+    if (!customerInfo.name) {
+        alert('Please enter customer name');
+        document.getElementById('customerName')?.focus();
         return;
     }
 
-    const quoteHTML = generateQuoteHTML();
-    const quoteContent = document.getElementById('quoteContent');
-    const quoteModal = document.getElementById('quoteModal');
-    
-    if (quoteContent) quoteContent.innerHTML = quoteHTML;
-    if (quoteModal) quoteModal.style.display = 'block';
-}
-
-// Generate quote HTML
-function generateQuoteHTML() {
-    return `
+    const quoteHTML = `
         <div class="quote-document">
             <div class="quote-header">
                 <h2>🏊 Basin Pool Co.</h2>
-                <p>Professional Pool & Deck Installation</p>
+                <p>Professional Pool Installation</p>
                 <div class="quote-date">Date: ${new Date().toLocaleDateString()}</div>
                 <div class="quote-number">Quote #: BPC-${Date.now().toString().slice(-6)}</div>
             </div>
 
             <div class="customer-details">
                 <h3>Customer Information</h3>
-                <p><strong>Name:</strong> ${currentQuote.customer.name}</p>
-                <p><strong>Phone:</strong> ${currentQuote.customer.phone}</p>
-                <p><strong>Email:</strong> ${currentQuote.customer.email}</p>
+                <p><strong>Name:</strong> ${customerInfo.name}</p>
+                <p><strong>Phone:</strong> ${customerInfo.phone}</p>
+                <p><strong>Email:</strong> ${customerInfo.email}</p>
             </div>
 
             <div class="quote-services">
@@ -309,17 +295,15 @@ function generateQuoteHTML() {
             <div class="quote-totals">
                 <div class="total-line">
                     <span>Subtotal:</span>
-                    <span>${formatCurrency(currentQuote.subtotal)}</span>
+                    <span>${document.getElementById('subtotalAmount')?.textContent || '$0'}</span>
                 </div>
-                ${currentQuote.discount > 0 ? `
-                <div class="total-line discount">
+                <div class="total-line">
                     <span>Discount:</span>
-                    <span>-${formatCurrency(currentQuote.discount)}</span>
+                    <span>-${document.getElementById('discountAmount')?.textContent || '$0'}</span>
                 </div>
-                ` : ''}
                 <div class="total-line final">
                     <span><strong>Total Project Cost:</strong></span>
-                    <span><strong>${formatCurrency(currentQuote.total)}</strong></span>
+                    <span><strong>${document.getElementById('totalAmount')?.textContent || '$0'}</strong></span>
                 </div>
             </div>
 
@@ -328,15 +312,15 @@ function generateQuoteHTML() {
                 <div class="payment-breakdown">
                     <div class="payment-item">
                         <span>Today (50% Deposit):</span>
-                        <span><strong>${formatCurrency(currentQuote.total * 0.5)}</strong></span>
+                        <span><strong>${document.getElementById('depositAmount')?.textContent || '$0'}</strong></span>
                     </div>
                     <div class="payment-item">
                         <span>Mobilization (25%):</span>
-                        <span><strong>${formatCurrency(currentQuote.total * 0.25)}</strong></span>
+                        <span><strong>${document.getElementById('mobilizationAmount')?.textContent || '$0'}</strong></span>
                     </div>
                     <div class="payment-item">
                         <span>Completion (25%):</span>
-                        <span><strong>${formatCurrency(currentQuote.total * 0.25)}</strong></span>
+                        <span><strong>${document.getElementById('completionAmount')?.textContent || '$0'}</strong></span>
                     </div>
                 </div>
             </div>
@@ -354,20 +338,21 @@ function generateQuoteHTML() {
             </div>
         </div>
     `;
+
+    const quoteModal = document.getElementById('quoteModal');
+    const quoteContent = document.getElementById('quoteContent');
+    
+    if (quoteContent) quoteContent.innerHTML = quoteHTML;
+    if (quoteModal) quoteModal.style.display = 'block';
 }
 
 // Collect deposit
 function collectDeposit() {
-    if (currentQuote.total === 0) {
-        alert('Please select services before collecting deposit.');
-        return;
-    }
-
-    const depositAmount = formatCurrency(currentQuote.deposit);
-    const confirmed = confirm(`Collect deposit of ${depositAmount}?\n\nThis would normally open your payment processor.`);
+    const depositAmount = document.getElementById('depositAmount')?.textContent || '$0';
+    const confirmed = confirm(`Collect deposit of ${depositAmount}?\n\nThis would open your payment processor.`);
     
     if (confirmed) {
-        alert(`Payment processing simulation:\n\nAmount: ${depositAmount}\nCustomer: ${currentQuote.customer.name}\n\nIn production, this would integrate with your payment processor.`);
+        alert(`Processing payment: ${depositAmount}\nCustomer: ${customerInfo.name}\n\nWould integrate with payment processor.`);
         
         const collectBtn = document.getElementById('collectDeposit');
         if (collectBtn) {
@@ -379,14 +364,12 @@ function collectDeposit() {
 
 // Email quote
 function emailQuote() {
-    if (!currentQuote.customer.email) {
-        alert('Please enter customer email address.');
-        const emailInput = document.getElementById('customerEmail');
-        if (emailInput) emailInput.focus();
+    if (!customerInfo.email) {
+        alert('Please enter customer email');
+        document.getElementById('customerEmail')?.focus();
         return;
     }
-
-    alert(`Quote would be emailed to: ${currentQuote.customer.email}\n\nIn production, this would integrate with your email service.`);
+    alert(`Quote would be emailed to: ${customerInfo.email}`);
 }
 
 // Print quote
@@ -396,15 +379,13 @@ function printQuote() {
 
 // Download PDF
 function downloadPDF() {
-    alert('PDF generation would be implemented here using a library like jsPDF or server-side generation.');
+    alert('PDF generation would be implemented with jsPDF library');
 }
 
 // Close modal
 function closeModal() {
     const quoteModal = document.getElementById('quoteModal');
-    if (quoteModal) {
-        quoteModal.style.display = 'none';
-    }
+    if (quoteModal) quoteModal.style.display = 'none';
 }
 
 // Close modal when clicking outside
