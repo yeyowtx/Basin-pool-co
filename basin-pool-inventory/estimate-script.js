@@ -1,64 +1,25 @@
 // Basin Pool Co. Quick Estimate Calculator
-// Real-time pricing engine for customer appointments
-// Updated: 2025-08-04 - Fixed all null reference errors
+// Clean rebuild - no more broken code
 
-// Dynamic Pricing Configuration - Pulls from Admin System
-let PRICING = {
+// Master Plan Fixed Pricing
+const PRICING = {
     pools: {
-        '6ft': 0,
-        '8ft': 0,
-        '10ft': 0
+        '6ft': 2495,   // "The Splash"
+        '8ft': 2795,   // "The Oasis" 
+        '10ft': 3495   // "The Resort"
     },
-    // decks: { // Temporarily removed - save for later
-    //     basic: 25,    // per sq ft
-    //     premium: 35,  // per sq ft
-    //     luxury: 45    // per sq ft
-    // },
     addons: {
-        saltwater: 0,
-        heating: 0,
-        premiumSite: 0,
-        deckSeating: 800,
-        pergola: 2500,
-        lighting: 1200
-    },
-    jorgeStructure: {
-        baseInstallation: 300,  // Jorge's base payment per master plan
-        sitePrep: 75,          // Jorge's site prep bonus
-        saltSystem: 50,        // Jorge's salt system bonus
-        heatingSystem: 100,    // Jorge's heating bonus
-        shadeSystem: 75,       // Jorge's shade system bonus
-        speedBonus: 75,        // Speed completion bonus
-        reviewBonus: 100,      // 5-star review bonus
-        helper: 90             // Helper cost per job
+        saltwater: 697,      // Spa Experience
+        heating: 1497,       // Heating System
+        premiumSite: 400,    // Turnkey Site Prep
+        shade: 1797          // Shade System
     }
 };
-
-// Load admin configuration if available
-function loadAdminPricing() {
-    // FORCE MASTER PLAN FIXED PRICING - NO ADMIN OVERRIDE
-    PRICING.pools = { 
-        '6ft': 2495,   // "The Splash" - FIXED customer price
-        '8ft': 2795,   // "The Oasis" - FIXED customer price
-        '10ft': 3495   // "The Resort" - FIXED customer price
-    };
-    
-    PRICING.addons = { 
-        saltwater: 697,      // Spa Experience - FIXED customer price
-        heating: 1497,       // Heating System - FIXED customer price
-        premiumSite: 400,    // Turnkey Site Prep - FIXED customer price
-        shade: 1797          // Shade System - FIXED customer price
-    };
-    
-    console.log('FORCED Master Plan fixed pricing - pools:', PRICING.pools);
-    console.log('FORCED Master Plan fixed pricing - addons:', PRICING.addons);
-}
 
 // Current quote state
 let currentQuote = {
     customer: {},
     pool: null,
-    // deck: null, // Temporarily removed - save for later
     addons: [],
     subtotal: 0,
     discount: 0,
@@ -66,123 +27,81 @@ let currentQuote = {
     deposit: 0
 };
 
-// Initialize calculator
+// Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
-    loadAdminPricing();
-    updatePackagePricing();
+    console.log('Calculator initializing...');
     setupEventListeners();
-    // updateDeckPricing(); // Temporarily removed - save for later
     updateQuoteSummary();
+    console.log('Calculator ready!');
 });
 
-// Event Listeners Setup - SAFE VERSION
+// Setup all event listeners
 function setupEventListeners() {
-    console.log('Setting up event listeners SAFELY...');
+    console.log('Setting up event listeners...');
     
-    try {
-        // Pool package selection
-        const packageBtns = document.querySelectorAll('.select-package');
-        console.log('Package buttons found:', packageBtns.length);
-        if (packageBtns.length > 0) {
-            packageBtns.forEach(btn => {
-                if (btn && typeof btn.addEventListener === 'function') {
-                    btn.addEventListener('click', function() {
-                        const card = this.closest('.package-card');
-                        const size = card ? card.dataset.size : null;
-                        if (size) selectPoolPackage(size);
-                    });
-                }
-            });
-        }
-
-        // Add-ons
-        const addonCheckboxes = document.querySelectorAll('.addon-item input[type="checkbox"]');
-        console.log('Addon checkboxes found:', addonCheckboxes.length);
-        if (addonCheckboxes.length > 0) {
-            addonCheckboxes.forEach(checkbox => {
-                if (checkbox && typeof checkbox.addEventListener === 'function') {
-                    checkbox.addEventListener('change', updateAddons);
-                }
-            });
-        }
-
-        // Simple element checks with try-catch
-        ['discountPercent', 'generateQuote', 'collectDeposit', 'emailQuote', 'printQuote', 'downloadPDF'].forEach(id => {
-            try {
-                const element = document.getElementById(id);
-                if (element && typeof element.addEventListener === 'function') {
-                    switch(id) {
-                        case 'discountPercent':
-                            element.addEventListener('change', updateQuoteSummary);
-                            break;
-                        case 'generateQuote':
-                            element.addEventListener('click', generateQuote);
-                            break;
-                        case 'collectDeposit':
-                            element.addEventListener('click', collectDeposit);
-                            break;
-                        case 'emailQuote':
-                            element.addEventListener('click', emailQuote);
-                            break;
-                        case 'printQuote':
-                            element.addEventListener('click', printQuote);
-                            break;
-                        case 'downloadPDF':
-                            element.addEventListener('click', downloadPDF);
-                            break;
-                    }
-                    console.log(`✓ ${id} listener added`);
-                } else {
-                    console.warn(`⚠ ${id} element not found or invalid`);
-                }
-            } catch (e) {
-                console.error(`✗ Error setting up ${id}:`, e);
-            }
+    // Pool package buttons
+    document.querySelectorAll('.select-package').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const card = this.closest('.package-card');
+            const size = card.dataset.size;
+            selectPoolPackage(size);
         });
+    });
 
-        // Customer inputs
-        try {
-            const customerInputs = document.querySelectorAll('.customer-input');
-            console.log('Customer inputs found:', customerInputs.length);
-            if (customerInputs.length > 0) {
-                customerInputs.forEach(input => {
-                    if (input && typeof input.addEventListener === 'function') {
-                        input.addEventListener('input', updateCustomerInfo);
-                    }
-                });
-            }
-        } catch (e) {
-            console.error('Error setting up customer inputs:', e);
-        }
+    // Addon checkboxes
+    document.querySelectorAll('.addon-item input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateAddons);
+    });
 
-        // Modal close button
-        try {
-            const closeBtn = document.querySelector('.close');
-            if (closeBtn && typeof closeBtn.addEventListener === 'function') {
-                closeBtn.addEventListener('click', closeModal);
-                console.log('✓ close button listener added');
-            } else {
-                console.warn('⚠ close button not found');
-            }
-        } catch (e) {
-            console.error('✗ Error setting up close button:', e);
-        }
-        
-        console.log('✓ Event listeners setup complete');
-        
-    } catch (error) {
-        console.error('CRITICAL ERROR in setupEventListeners:', error);
+    // Customer info inputs
+    document.querySelectorAll('.customer-input').forEach(input => {
+        input.addEventListener('input', updateCustomerInfo);
+    });
+
+    // Discount selection
+    const discountSelect = document.getElementById('discountPercent');
+    if (discountSelect) {
+        discountSelect.addEventListener('change', updateQuoteSummary);
     }
+
+    // Action buttons
+    const generateBtn = document.getElementById('generateQuote');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', generateQuote);
+    }
+
+    const collectBtn = document.getElementById('collectDeposit');
+    if (collectBtn) {
+        collectBtn.addEventListener('click', collectDeposit);
+    }
+
+    const emailBtn = document.getElementById('emailQuote');
+    if (emailBtn) {
+        emailBtn.addEventListener('click', emailQuote);
+    }
+
+    // Modal controls
+    const closeBtn = document.querySelector('.close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+
+    const printBtn = document.getElementById('printQuote');
+    if (printBtn) {
+        printBtn.addEventListener('click', printQuote);
+    }
+
+    const downloadBtn = document.getElementById('downloadPDF');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', downloadPDF);
+    }
+
+    console.log('Event listeners ready!');
 }
 
-// Pool Package Selection
+// Select pool package
 function selectPoolPackage(size) {
-    console.log('=== selectPoolPackage DEBUG ===');
-    console.log('Input size:', size);
-    console.log('PRICING object:', PRICING);
-    console.log('PRICING.pools:', PRICING.pools);
-    console.log('PRICING.pools[size]:', PRICING.pools[size]);
-    console.log('typeof PRICING.pools[size]:', typeof PRICING.pools[size]);
+    console.log('Selecting pool:', size, 'Price:', PRICING.pools[size]);
     
     // Clear previous selection
     document.querySelectorAll('.package-card').forEach(card => {
@@ -191,74 +110,73 @@ function selectPoolPackage(size) {
 
     // Select new package
     const selectedCard = document.querySelector(`[data-size="${size}"]`);
-    if (selectedCard) selectedCard.classList.add('selected');
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
 
-    // Update quote using the PRICING variable properly
+    // Update quote
     currentQuote.pool = {
         size: size,
         price: PRICING.pools[size],
         name: `${size} Pool Package`
     };
 
-    console.log('Set currentQuote.pool to:', currentQuote.pool);
-    console.log('=== END selectPoolPackage DEBUG ===');
+    console.log('Pool selected:', currentQuote.pool);
     updateQuoteSummary();
 }
 
-// DECK FUNCTIONALITY TEMPORARILY REMOVED - SAVE FOR LATER
-// function selectDeckPackage(type, pricePerSqFt) { ... }
-// function getCurrentDeckSize() { ... }
-// function updateDeckPricing() { ... }
-// function updateCustomDeckSize() { ... }
-
-// Update add-ons
+// Update addons
 function updateAddons() {
     currentQuote.addons = [];
     
-    // Check site-ready status first
-    const siteReadyCheckbox = document.getElementById('siteReady');
-    const siteReadySelected = siteReadyCheckbox ? siteReadyCheckbox.checked : false;
+    // Check site-ready status
+    const siteReadyChecked = document.getElementById('siteReady')?.checked || false;
     
     document.querySelectorAll('.addon-item input[type="checkbox"]:checked').forEach(checkbox => {
-        // Skip site-ready as it's handled separately
-        if (checkbox.id === 'siteReady') return;
+        if (checkbox.id === 'siteReady') return; // Handle separately
         
-        // If site is ready and this is site prep, skip it (conflict)
-        if (siteReadySelected && checkbox.id === 'premiumSite') {
-            checkbox.checked = false; // Uncheck conflicting option
+        // Skip site prep if site is ready
+        if (siteReadyChecked && checkbox.id === 'premiumSite') {
+            checkbox.checked = false;
             return;
         }
         
-        const price = parseInt(checkbox.dataset.price) || parseInt(checkbox.dataset.discount) || 0;
-        const name = checkbox.nextElementSibling.querySelector('.addon-name').textContent;
+        let price = 0;
+        let name = '';
         
-        // Get correct pricing for addons
-        let addonPrice = price;
-        if (checkbox.id === 'saltwater') addonPrice = PRICING.addons.saltwater;
-        else if (checkbox.id === 'heating') addonPrice = PRICING.addons.heating;
-        else if (checkbox.id === 'premiumSite') addonPrice = PRICING.addons.premiumSite;
-        else if (checkbox.id === 'shade') addonPrice = PRICING.addons.shade;
+        // Get addon details
+        const label = checkbox.nextElementSibling;
+        if (label) {
+            const nameElement = label.querySelector('.addon-name');
+            if (nameElement) {
+                name = nameElement.textContent;
+            }
+        }
         
-        currentQuote.addons.push({
-            id: checkbox.id,
-            name: name,
-            price: addonPrice
-        });
+        // Get price from PRICING
+        if (checkbox.id === 'saltwater') price = PRICING.addons.saltwater;
+        else if (checkbox.id === 'heating') price = PRICING.addons.heating;
+        else if (checkbox.id === 'premiumSite') price = PRICING.addons.premiumSite;
+        else if (checkbox.id === 'shade') price = PRICING.addons.shade;
+        
+        if (price > 0) {
+            currentQuote.addons.push({
+                id: checkbox.id,
+                name: name,
+                price: price
+            });
+        }
     });
 
     updateQuoteSummary();
 }
 
-// Update customer information
+// Update customer info
 function updateCustomerInfo() {
-    const nameEl = document.getElementById('customerName');
-    const phoneEl = document.getElementById('customerPhone');
-    const emailEl = document.getElementById('customerEmail');
-    
     currentQuote.customer = {
-        name: nameEl ? nameEl.value : '',
-        phone: phoneEl ? phoneEl.value : '',
-        email: emailEl ? emailEl.value : ''
+        name: document.getElementById('customerName')?.value || '',
+        phone: document.getElementById('customerPhone')?.value || '',
+        email: document.getElementById('customerEmail')?.value || ''
     };
 }
 
@@ -266,98 +184,116 @@ function updateCustomerInfo() {
 function updateQuoteSummary() {
     let subtotal = 0;
     const servicesDiv = document.getElementById('selectedServices');
-    servicesDiv.innerHTML = '';
-
-    console.log('=== updateQuoteSummary DEBUG ===');
-    console.log('currentQuote.pool:', currentQuote.pool);
+    if (servicesDiv) {
+        servicesDiv.innerHTML = '';
+    }
 
     // Add pool to quote
     if (currentQuote.pool) {
-        console.log('Pool price before adding to subtotal:', currentQuote.pool.price);
-        console.log('Current subtotal before adding pool:', subtotal);
         subtotal += currentQuote.pool.price;
-        console.log('Subtotal after adding pool:', subtotal);
-        servicesDiv.innerHTML += `
-            <div class="service-line">
-                <span>${currentQuote.pool.name}</span>
-                <span>${formatCurrency(currentQuote.pool.price)}</span>
-            </div>
-        `;
+        if (servicesDiv) {
+            servicesDiv.innerHTML += `
+                <div class="service-line">
+                    <span>${currentQuote.pool.name}</span>
+                    <span>${formatCurrency(currentQuote.pool.price)}</span>
+                </div>
+            `;
+        }
     }
 
-    // Deck functionality temporarily removed - save for later
-    // if (currentQuote.deck) {
-    //     subtotal += currentQuote.deck.price;
-    //     servicesDiv.innerHTML += `...`;
-    // }
-
-    // Add add-ons to quote
+    // Add addons to quote
     currentQuote.addons.forEach(addon => {
         subtotal += addon.price;
-        servicesDiv.innerHTML += `
-            <div class="service-line addon">
-                <span>${addon.name}</span>
-                <span>${formatCurrency(addon.price)}</span>
-            </div>
-        `;
+        if (servicesDiv) {
+            servicesDiv.innerHTML += `
+                <div class="service-line addon">
+                    <span>${addon.name}</span>
+                    <span>${formatCurrency(addon.price)}</span>
+                </div>
+            `;
+        }
     });
 
     // Calculate discount
-    const discountPercent = parseInt(document.getElementById('discountPercent').value) || 0;
+    const discountPercent = parseInt(document.getElementById('discountPercent')?.value || '0');
     let discountAmount = subtotal * (discountPercent / 100);
     
-    // Add site-ready discount if selected
-    const siteReadyCheckbox = document.getElementById('siteReady');
-    if (siteReadyCheckbox && siteReadyCheckbox.checked) {
+    // Add site-ready discount
+    const siteReadyChecked = document.getElementById('siteReady')?.checked || false;
+    if (siteReadyChecked) {
         discountAmount += 400; // Site-ready saves $400
     }
     
     const total = subtotal - discountAmount;
     
     // 50/25/25 payment structure
-    const deposit = total * 0.5;      // 50% deposit
-    const mobilization = total * 0.25; // 25% mobilization  
-    const completion = total * 0.25;   // 25% completion
+    const deposit = total * 0.5;
+    const mobilization = total * 0.25;
+    const completion = total * 0.25;
 
-    // Update totals
+    // Update quote object
     currentQuote.subtotal = subtotal;
     currentQuote.discount = discountAmount;
     currentQuote.total = total;
     currentQuote.deposit = deposit;
 
-    // Update display with null checks
-    const subtotalEl = document.getElementById('subtotalAmount');
-    const discountEl = document.getElementById('discountAmount');
-    const totalEl = document.getElementById('totalAmount');
-    const depositEl = document.getElementById('depositAmount');
-    const mobilizationEl = document.getElementById('mobilizationAmount');
-    const completionEl = document.getElementById('completionAmount');
-    
-    if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
-    if (discountEl) discountEl.textContent = formatCurrency(discountAmount);
-    if (totalEl) totalEl.textContent = formatCurrency(total);
-    if (depositEl) depositEl.textContent = formatCurrency(deposit);
-    if (mobilizationEl) mobilizationEl.textContent = formatCurrency(mobilization);
-    if (completionEl) completionEl.textContent = formatCurrency(completion);
+    // Update display
+    updateElement('subtotalAmount', formatCurrency(subtotal));
+    updateElement('discountAmount', formatCurrency(discountAmount));
+    updateElement('totalAmount', formatCurrency(total));
+    updateElement('depositAmount', formatCurrency(deposit));
+    updateElement('mobilizationAmount', formatCurrency(mobilization));
+    updateElement('completionAmount', formatCurrency(completion));
 
-    // Enable/disable buttons based on selection
-    const hasServices = currentQuote.pool; // Removed deck reference
+    // Enable/disable buttons
+    const hasServices = currentQuote.pool !== null;
     const generateBtn = document.getElementById('generateQuote');
     const collectBtn = document.getElementById('collectDeposit');
     
     if (generateBtn) generateBtn.disabled = !hasServices;
     if (collectBtn) collectBtn.disabled = !hasServices || total === 0;
+
+    console.log('Quote updated:', {
+        subtotal: subtotal,
+        discount: discountAmount,
+        total: total,
+        deposit: deposit
+    });
 }
 
-// Generate Professional Quote
+// Helper function to safely update element text
+function updateElement(id, text) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = text;
+    }
+}
+
+// Format currency
+function formatCurrency(amount) {
+    return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}
+
+// Generate quote
 function generateQuote() {
     if (!currentQuote.customer.name) {
         alert('Please enter customer name before generating quote.');
-        document.getElementById('customerName').focus();
+        const nameInput = document.getElementById('customerName');
+        if (nameInput) nameInput.focus();
         return;
     }
 
-    const quoteHTML = `
+    const quoteHTML = generateQuoteHTML();
+    const quoteContent = document.getElementById('quoteContent');
+    const quoteModal = document.getElementById('quoteModal');
+    
+    if (quoteContent) quoteContent.innerHTML = quoteHTML;
+    if (quoteModal) quoteModal.style.display = 'block';
+}
+
+// Generate quote HTML
+function generateQuoteHTML() {
+    return `
         <div class="quote-document">
             <div class="quote-header">
                 <h2>🏊 Basin Pool Co.</h2>
@@ -375,7 +311,7 @@ function generateQuote() {
 
             <div class="quote-services">
                 <h3>Services & Materials</h3>
-                ${document.getElementById('selectedServices').innerHTML}
+                ${document.getElementById('selectedServices')?.innerHTML || ''}
             </div>
 
             <div class="quote-totals">
@@ -385,7 +321,7 @@ function generateQuote() {
                 </div>
                 ${currentQuote.discount > 0 ? `
                 <div class="total-line discount">
-                    <span>Discount (${document.getElementById('discountPercent').value}%):</span>
+                    <span>Discount:</span>
                     <span>-${formatCurrency(currentQuote.discount)}</span>
                 </div>
                 ` : ''}
@@ -393,14 +329,10 @@ function generateQuote() {
                     <span><strong>Total Project Cost:</strong></span>
                     <span><strong>${formatCurrency(currentQuote.total)}</strong></span>
                 </div>
-                <div class="total-line deposit">
-                    <span><strong>Deposit Required:</strong></span>
-                    <span><strong>${formatCurrency(currentQuote.deposit)}</strong></span>
-                </div>
             </div>
 
             <div class="payment-schedule">
-                <h3>Payment Schedule</h3>
+                <h3>Payment Schedule (50/25/25)</h3>
                 <div class="payment-breakdown">
                     <div class="payment-item">
                         <span>Today (50% Deposit):</span>
@@ -428,136 +360,59 @@ function generateQuote() {
                     <li>Quote valid for 30 days</li>
                 </ul>
             </div>
-
-            <div class="quote-signature">
-                <div class="signature-line">
-                    <p>Customer Signature: ___________________________ Date: ___________</p>
-                </div>
-                <div class="company-signature">
-                    <p>Basin Pool Co. Representative</p>
-                    <p>Phone: (432) 555-POOL | Email: info@basinpoolco.com</p>
-                </div>
-            </div>
         </div>
     `;
-
-    document.getElementById('quoteContent').innerHTML = quoteHTML;
-    document.getElementById('quoteModal').style.display = 'block';
 }
 
-// Collect Deposit
+// Collect deposit
 function collectDeposit() {
     if (currentQuote.total === 0) {
         alert('Please select services before collecting deposit.');
         return;
     }
 
-    // In a real implementation, this would integrate with Square/Stripe
     const depositAmount = formatCurrency(currentQuote.deposit);
     const confirmed = confirm(`Collect deposit of ${depositAmount}?\n\nThis would normally open your payment processor.`);
     
     if (confirmed) {
-        // Simulate payment processing
         alert(`Payment processing simulation:\n\nAmount: ${depositAmount}\nCustomer: ${currentQuote.customer.name}\n\nIn production, this would integrate with your payment processor.`);
         
-        // Mark as deposit collected
-        document.getElementById('collectDeposit').textContent = 'Deposit Collected ✓';
-        document.getElementById('collectDeposit').style.backgroundColor = '#27ae60';
+        const collectBtn = document.getElementById('collectDeposit');
+        if (collectBtn) {
+            collectBtn.textContent = 'Deposit Collected ✓';
+            collectBtn.style.backgroundColor = '#27ae60';
+        }
     }
 }
 
-// Email Quote
+// Email quote
 function emailQuote() {
     if (!currentQuote.customer.email) {
         alert('Please enter customer email address.');
-        document.getElementById('customerEmail').focus();
+        const emailInput = document.getElementById('customerEmail');
+        if (emailInput) emailInput.focus();
         return;
     }
 
-    // In a real implementation, this would send via email service
     alert(`Quote would be emailed to: ${currentQuote.customer.email}\n\nIn production, this would integrate with your email service.`);
 }
 
-// Print Quote
+// Print quote
 function printQuote() {
     window.print();
 }
 
 // Download PDF
 function downloadPDF() {
-    // In a real implementation, this would generate a PDF
     alert('PDF generation would be implemented here using a library like jsPDF or server-side generation.');
 }
 
-// Close Modal
+// Close modal
 function closeModal() {
-    document.getElementById('quoteModal').style.display = 'none';
-}
-
-// Update package pricing display
-function updatePackagePricing() {
-    // Update pool package prices in HTML
-    const priceElements = document.querySelectorAll('.package-price');
-    if (priceElements.length >= 3) {
-        priceElements[0].textContent = formatCurrency(PRICING.pools['6ft']);
-        priceElements[1].textContent = formatCurrency(PRICING.pools['8ft']);
-        priceElements[2].textContent = formatCurrency(PRICING.pools['10ft']);
+    const quoteModal = document.getElementById('quoteModal');
+    if (quoteModal) {
+        quoteModal.style.display = 'none';
     }
-    
-    // Update addon prices
-    const addonPrices = document.querySelectorAll('.addon-price');
-    addonPrices.forEach(element => {
-        const addonId = element.closest('.addon-item')?.querySelector('input')?.id;
-        if (addonId === 'saltwater') {
-            element.textContent = '+' + formatCurrency(PRICING.addons.saltwater);
-        } else if (addonId === 'heating') {
-            element.textContent = '+' + formatCurrency(PRICING.addons.heating);
-        } else if (addonId === 'premiumSite') {
-            element.textContent = '+' + formatCurrency(PRICING.addons.premiumSite);
-        }
-    });
-}
-
-// Check inventory availability and show lead times
-function checkAvailability(packageSize) {
-    try {
-        const adminConfig = localStorage.getItem('basinPoolAdminConfig');
-        if (adminConfig) {
-            const config = JSON.parse(adminConfig);
-            const inventory = config.inventory || {};
-            const leadTimes = config.leadTimes || { local: 3, online: 5 };
-            
-            let available = false;
-            let leadTime = 0;
-            
-            if (packageSize === '6ft' && inventory.tanks6ft > 0 && inventory.pumpsSX2800 > 0) {
-                available = true;
-            } else if (packageSize === '8ft' && inventory.tanks8ft > 0 && inventory.pumpsSX2800 > 0) {
-                available = true;
-            } else if (packageSize === '10ft' && inventory.tanks10ft > 0 && inventory.pumpsSX2800 > 0) {
-                available = true;
-            } else {
-                leadTime = leadTimes.local || 3;
-            }
-            
-            return { available, leadTime };
-        }
-    } catch (error) {
-        console.error('Failed to check availability:', error);
-    }
-    
-    return { available: false, leadTime: 5 };
-}
-
-// Add site-ready discount logic
-function calculateSiteReadyDiscount(subtotal) {
-    // Customer saves $400 when site is ready (Jorge's structure)
-    return 400;
-}
-
-// Utility Functions
-function formatCurrency(amount) {
-    return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
 
 // Close modal when clicking outside
