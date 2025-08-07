@@ -434,7 +434,10 @@ function renderAllSections() {
 // Toggle accordion sections
 function toggleAccordion(sectionId) {
     const content = document.getElementById(sectionId);
-    const arrow = document.getElementById(sectionId.replace('-section', '').replace('arrow-', 'arrow-'));
+    const arrowId = 'arrow-' + sectionId.replace('-section', '');
+    const arrow = document.getElementById(arrowId);
+    
+    console.log('Toggling:', sectionId, 'Arrow ID:', arrowId); // Debug
     
     if (content && arrow) {
         if (content.classList.contains('collapsed')) {
@@ -446,6 +449,8 @@ function toggleAccordion(sectionId) {
             content.classList.add('collapsed');
             arrow.classList.remove('expanded');
         }
+    } else {
+        console.error('Could not find elements:', { content, arrow, sectionId, arrowId });
     }
 }
 
@@ -561,6 +566,24 @@ function addCategoryItem(category) {
     renderAccordionSections();
     updateSummary();
     scheduleAutoSave();
+}
+
+// Update individual item field
+function updateItemField(section, index, field, value) {
+    console.log('Updating field:', section, index, field, value); // Debug
+    
+    if (inventoryData[section] && inventoryData[section][index]) {
+        inventoryData[section][index][field] = value;
+        
+        // Re-render accordion sections to update categories and totals
+        renderAccordionSections();
+        updateSummary();
+        scheduleAutoSave();
+        
+        console.log('Updated item:', inventoryData[section][index]); // Debug
+    } else {
+        console.error('Could not update field - invalid section or index:', section, index);
+    }
 }
 
 
@@ -771,7 +794,8 @@ function updateSummary() {
                 
                 // Calculate costs
                 const actualPrice = item.actualPrice || 0;
-                const totalPrice = actualPrice * (item.quantity || 0);
+                const quantity = item.quantity || 1; // Default to 1, not 0
+                const totalPrice = actualPrice * quantity;
                 
                 if (section === 'cliff') {
                     cliffTotal += totalPrice;
@@ -814,6 +838,7 @@ function updateSummary() {
     updateElement('totalDeposit', formatCurrency(totalDeposit));
 
     // Update detailed summaries
+    console.log('Cliff total calculation:', cliffTotal, 'from', inventoryData.cliff?.length, 'items'); // Debug
     updateElement('cliff-total', formatCurrency(cliffTotal));
     updateElement('depositOneTime', formatCurrency(oneTimeTotal));
     updateElement('depositPerJob', formatCurrency(perJobTotal));
