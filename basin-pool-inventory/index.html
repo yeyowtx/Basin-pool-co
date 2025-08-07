@@ -95,137 +95,76 @@
                 </div>
             </div>
 
-            <!-- MOBILE SHOPPING SECTIONS -->
-            <div class="shopping-sections">
-                <!-- ✅ ALREADY PURCHASED -->
-                <div class="shopping-section completed">
-                    <div class="section-header" onclick="toggleSection('purchased-section')">
-                        <div class="section-info">
-                            <h3>✅ Already Purchased</h3>
-                            <span class="section-total" id="purchased-total">$599.43</span>
-                        </div>
-                        <div class="toggle-icon" id="purchased-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="purchased-section">
-                        <table class="shopping-table">
-                            <tbody id="purchasedTable">
-                                <!-- eBay purchased items will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- VERTICAL TABS FOR MATERIAL CATEGORIES -->
+            <div class="tabs-container">
+                <div class="vertical-tabs">
+                    <button class="tab-btn active" onclick="switchTab('all')" id="tab-all">
+                        <span class="tab-icon">📋</span>
+                        <span class="tab-text">All Items</span>
+                        <span class="tab-count" id="count-all">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('pool')" id="tab-pool">
+                        <span class="tab-icon">🏊</span>
+                        <span class="tab-text">Pool System</span>
+                        <span class="tab-count" id="count-pool">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('electrical')" id="tab-electrical">
+                        <span class="tab-icon">⚡</span>
+                        <span class="tab-text">Electrical</span>
+                        <span class="tab-count" id="count-electrical">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('plumbing')" id="tab-plumbing">
+                        <span class="tab-icon">🔧</span>
+                        <span class="tab-text">Plumbing</span>
+                        <span class="tab-count" id="count-plumbing">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('deck')" id="tab-deck">
+                        <span class="tab-icon">🪵</span>
+                        <span class="tab-text">Deck/Structure</span>
+                        <span class="tab-count" id="count-deck">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('siteprep')" id="tab-siteprep">
+                        <span class="tab-icon">🏗️</span>
+                        <span class="tab-text">Site Prep</span>
+                        <span class="tab-count" id="count-siteprep">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('labor')" id="tab-labor">
+                        <span class="tab-icon">👷</span>
+                        <span class="tab-text">Labor</span>
+                        <span class="tab-count" id="count-labor">0</span>
+                    </button>
                 </div>
-
-                <!-- 🛒 TSC MIDLAND -->
-                <div class="shopping-section priority">
-                    <div class="section-header" onclick="toggleSection('tsc-section')">
-                        <div class="section-info">
-                            <h3>🛒 TSC Midland - PRIORITY</h3>
-                            <span class="section-total" id="tsc-total">$599.00</span>
+                
+                <div class="tab-content">
+                    <!-- EDITABLE INVENTORY TABLE -->
+                    <div class="section cliff-inventory">
+                        <div class="section-header-bar">
+                            <h2>Cliff's Installation Materials</h2>
+                            <div class="header-actions">
+                                <span class="total-display" id="filtered-total">$0.00</span>
+                                <button class="add-item-btn" onclick="addNewItem('cliff')">➕ Add Item</button>
+                            </div>
                         </div>
-                        <div class="toggle-icon" id="tsc-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="tsc-section">
-                        <div class="store-info">📍 TSC Store - Call ahead for tank availability</div>
-                        <table class="shopping-table">
-                            <tbody id="tscTable">
-                                <!-- TSC items will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- 🛒 HOME DEPOT - ELECTRICAL -->
-                <div class="shopping-section">
-                    <div class="section-header" onclick="toggleSection('electrical-section')">
-                        <div class="section-info">
-                            <h3>🛒 Home Depot - Electrical</h3>
-                            <span class="section-total" id="electrical-total">$98.98</span>
+                        
+                        <div class="table-container">
+                            <table class="item-table" id="mainInventoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th>Usage</th>
+                                        <th>Location</th>
+                                        <th>Supplier Link</th>
+                                        <th>Status</th>
+                                        <th>Notes & Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cliffTable">
+                                    <!-- Content will be loaded by JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="toggle-icon" id="electrical-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="electrical-section">
-                        <div class="store-info">🏪 Home Depot - Electrical Department</div>
-                        <table class="shopping-table">
-                            <tbody id="electricalTable">
-                                <!-- Electrical items will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- 🛒 HOME DEPOT - PLUMBING -->
-                <div class="shopping-section">
-                    <div class="section-header" onclick="toggleSection('plumbing-section')">
-                        <div class="section-info">
-                            <h3>🛒 Home Depot - Plumbing</h3>
-                            <span class="section-total" id="plumbing-total">$214.00</span>
-                        </div>
-                        <div class="toggle-icon" id="plumbing-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="plumbing-section">
-                        <div class="store-info">🔧 Home Depot - Plumbing Department</div>
-                        <table class="shopping-table">
-                            <tbody id="plumbingTable">
-                                <!-- Plumbing items will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- 🛒 HOME DEPOT - DECK MATERIALS -->
-                <div class="shopping-section">
-                    <div class="section-header" onclick="toggleSection('deck-section')">
-                        <div class="section-info">
-                            <h3>🛒 Home Depot - Deck Materials</h3>
-                            <span class="section-total" id="deck-total">$675.00</span>
-                        </div>
-                        <div class="toggle-icon" id="deck-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="deck-section">
-                        <div class="store-info">🪵 Home Depot - Lumber & Building Materials</div>
-                        <table class="shopping-table">
-                            <tbody id="deckTable">
-                                <!-- Deck materials will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- 🛒 RECOM MATERIALS -->
-                <div class="shopping-section">
-                    <div class="section-header" onclick="toggleSection('recom-section')">
-                        <div class="section-info">
-                            <h3>🛒 Recom Materials - Pickup</h3>
-                            <span class="section-total" id="recom-total">$150.00</span>
-                        </div>
-                        <div class="toggle-icon" id="recom-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="recom-section">
-                        <div class="store-info">🚛 Recom Materials - Call for pickup scheduling</div>
-                        <table class="shopping-table">
-                            <tbody id="recomTable">
-                                <!-- Recom materials will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- 🛒 MISCELLANEOUS -->
-                <div class="shopping-section">
-                    <div class="section-header" onclick="toggleSection('misc-section')">
-                        <div class="section-info">
-                            <h3>🛒 Miscellaneous & Labor</h3>
-                            <span class="section-total" id="misc-total">$850.00</span>
-                        </div>
-                        <div class="toggle-icon" id="misc-toggle">▼</div>
-                    </div>
-                    <div class="section-content collapsed" id="misc-section">
-                        <div class="store-info">🔧 Local supplies + Installation labor</div>
-                        <table class="shopping-table">
-                            <tbody id="miscTable">
-                                <!-- Misc items and labor will be loaded here -->
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>

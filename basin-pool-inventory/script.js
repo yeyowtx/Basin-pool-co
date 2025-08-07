@@ -415,10 +415,15 @@ function setupEventListeners() {
     });
 }
 
+// Global variable for current tab filter
+let currentTabFilter = 'all';
+
 // Render all inventory sections
 function renderAllSections() {
-    // Render legacy sections (hidden)
+    // Render main editable table
     renderSection('cliff', inventoryData.cliff, 'cliffTable');
+    
+    // Render legacy sections (hidden)
     renderSection('tools', inventoryData.tools, 'toolsTable');
     renderSection('tanks', inventoryData.tanks, 'tanksTable');
     renderSection('pumps', inventoryData.pumps, 'pumpsTable');
@@ -427,96 +432,11 @@ function renderAllSections() {
     renderSection('siteprep', inventoryData.siteprep, 'siteprepTable');
     renderSection('hardware', inventoryData.hardware, 'hardwareTable');
     
-    // Render new mobile shopping sections
-    renderShoppingSections();
+    // Update tab counts and apply current filter
+    updateTabCounts();
+    applyTabFilter(currentTabFilter);
 }
 
-// Toggle section visibility
-function toggleSection(sectionId) {
-    const content = document.getElementById(sectionId);
-    const toggle = document.getElementById(sectionId.replace('-section', '-toggle'));
-    
-    if (content && toggle) {
-        if (content.classList.contains('collapsed')) {
-            content.classList.remove('collapsed');
-            content.classList.add('expanded');
-            toggle.classList.add('expanded');
-        } else {
-            content.classList.remove('expanded');
-            content.classList.add('collapsed');
-            toggle.classList.remove('expanded');
-        }
-    }
-}
-
-// Render mobile shopping sections
-function renderShoppingSections() {
-    if (!inventoryData.cliff) return;
-    
-    // Group items by shopping category
-    const shoppingGroups = {
-        purchased: [],
-        tsc: [],
-        electrical: [],
-        plumbing: [],
-        deck: [],
-        recom: [],
-        misc: []
-    };
-    
-    inventoryData.cliff.forEach((item, index) => {
-        const itemWithIndex = { ...item, originalIndex: index };
-        
-        if (item.status === 'purchased') {
-            shoppingGroups.purchased.push(itemWithIndex);
-        } else if (item.notes && item.notes.includes('CountyLine Stock Tank')) {
-            shoppingGroups.tsc.push(itemWithIndex);
-        } else if (item.notes && (item.notes.includes('Gang') || item.notes.includes('Conduit') || item.notes.includes('Clamp') || item.notes.includes('Anchor'))) {
-            shoppingGroups.electrical.push(itemWithIndex);
-        } else if (item.notes && (item.notes.includes('Bulkhead') || item.notes.includes('PVC') || item.notes.includes('Valve') || item.notes.includes('Teflon'))) {
-            shoppingGroups.plumbing.push(itemWithIndex);
-        } else if (item.notes && (item.notes.includes('PT ') || item.notes.includes('Deck') || item.notes.includes('Joist') || item.notes.includes('Stair') || item.notes.includes('Pier') || item.notes.includes('Screw'))) {
-            shoppingGroups.deck.push(itemWithIndex);
-        } else if (item.notes && (item.notes.includes('Caliche') || item.notes.includes('Gravel') || item.notes.includes('Landscape'))) {
-            shoppingGroups.recom.push(itemWithIndex);
-        } else {
-            shoppingGroups.misc.push(itemWithIndex);
-        }
-    });
-    
-    // Render each group
-    renderShoppingGroup('purchasedTable', shoppingGroups.purchased);
-    renderShoppingGroup('tscTable', shoppingGroups.tsc);
-    renderShoppingGroup('electricalTable', shoppingGroups.electrical);
-    renderShoppingGroup('plumbingTable', shoppingGroups.plumbing);
-    renderShoppingGroup('deckTable', shoppingGroups.deck);
-    renderShoppingGroup('recomTable', shoppingGroups.recom);
-    renderShoppingGroup('miscTable', shoppingGroups.misc);
-}
-
-// Render a shopping group
-function renderShoppingGroup(tableId, items) {
-    const tbody = document.getElementById(tableId);
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    items.forEach((item) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                <div class="item-name">${item.name}</div>
-                <div class="item-price">$${item.actualPrice.toFixed(2)}</div>
-                <div class="item-notes">${item.notes}</div>
-                <button class="item-status ${item.status}" onclick="cycleStatus(this)" data-section="cliff" data-index="${item.originalIndex}">
-                    ${CONFIG.STATUS_TYPES[item.status]?.label || item.status}
-                </button>
-                ${item.status !== 'purchased' ? `<button class="quick-purchase-btn" onclick="openQuickPurchase('cliff', ${item.originalIndex})">🛒 Quick Buy</button>` : ''}
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
 
 // Render a specific inventory section
 function renderSection(section, items, tableId) {
@@ -646,11 +566,130 @@ function cycleStatus(statusElement) {
     const index = parseInt(statusElement.dataset.index);
     inventoryData[section][index].status = nextStatus;
     
-    // Re-render shopping sections to move items to correct groups
-    renderShoppingSections();
+    // Re-render and apply current filter
+    updateTabCounts();
+    applyTabFilter(currentTabFilter);
     
     scheduleAutoSave();
     updateSummary();
+}
+
+// Switch between tabs
+function switchTab(tabType) {
+    // Update active tab
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${tabType}`).classList.add('active');
+    
+    // Update current filter and apply
+    currentTabFilter = tabType;
+    applyTabFilter(tabType);
+}
+
+// Categorize items by type
+function categorizeItem(item) {
+    const notes = item.notes.toLowerCase();
+    const name = item.name.toLowerCase();
+    
+    // Pool System (tanks, pumps, filters, heaters)
+    if (notes.includes('stock tank') || notes.includes('filter') || notes.includes('pump') || 
+        notes.includes('heater') || notes.includes('water transfer') || name.includes('tank') ||
+        name.includes('filter') || name.includes('pump') || name.includes('heater')) {
+        return 'pool';
+    }
+    
+    // Electrical
+    if (notes.includes('gang') || notes.includes('box') || notes.includes('conduit') || 
+        notes.includes('clamp') || notes.includes('anchor') || notes.includes('electrical') ||
+        name.includes('electrical') || name.includes('conduit') || name.includes('box')) {
+        return 'electrical';
+    }
+    
+    // Plumbing
+    if (notes.includes('bulkhead') || notes.includes('pvc') || notes.includes('valve') || 
+        notes.includes('teflon') || notes.includes('hose') || notes.includes('fitting') ||
+        name.includes('valve') || name.includes('pvc') || name.includes('fitting')) {
+        return 'plumbing';
+    }
+    
+    // Deck/Structure
+    if (notes.includes('pt ') || notes.includes('deck') || notes.includes('joist') || 
+        notes.includes('stair') || notes.includes('pier') || notes.includes('screw') ||
+        notes.includes('lumber') || notes.includes('board') || name.includes('deck') ||
+        name.includes('pt ') || name.includes('stair') || name.includes('pier')) {
+        return 'deck';
+    }
+    
+    // Site Prep
+    if (notes.includes('caliche') || notes.includes('gravel') || notes.includes('landscape') ||
+        notes.includes('fabric') || name.includes('caliche') || name.includes('gravel')) {
+        return 'siteprep';
+    }
+    
+    // Labor
+    if (notes.includes('labor') || notes.includes('installation') || name.includes('labor')) {
+        return 'labor';
+    }
+    
+    // Default to pool system for uncategorized items
+    return 'pool';
+}
+
+// Update tab counts
+function updateTabCounts() {
+    const counts = {
+        all: 0,
+        pool: 0,
+        electrical: 0,
+        plumbing: 0,
+        deck: 0,
+        siteprep: 0,
+        labor: 0
+    };
+    
+    inventoryData.cliff.forEach(item => {
+        counts.all++;
+        const category = categorizeItem(item);
+        counts[category]++;
+    });
+    
+    // Update count displays
+    Object.keys(counts).forEach(category => {
+        const countElement = document.getElementById(`count-${category}`);
+        if (countElement) {
+            countElement.textContent = counts[category];
+        }
+    });
+}
+
+// Apply tab filter to show/hide table rows
+function applyTabFilter(tabType) {
+    const table = document.getElementById('cliffTable');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tr');
+    let filteredTotal = 0;
+    let visibleCount = 0;
+    
+    rows.forEach((row, index) => {
+        if (index >= inventoryData.cliff.length) return;
+        
+        const item = inventoryData.cliff[index];
+        const category = categorizeItem(item);
+        
+        if (tabType === 'all' || category === tabType) {
+            row.classList.remove('filtered-out');
+            filteredTotal += item.actualPrice || 0;
+            visibleCount++;
+        } else {
+            row.classList.add('filtered-out');
+        }
+    });
+    
+    // Update filtered total display
+    const filteredTotalElement = document.getElementById('filtered-total');
+    if (filteredTotalElement) {
+        filteredTotalElement.textContent = `$${filteredTotal.toFixed(2)}`;
+    }
 }
 
 // Update summary calculations
