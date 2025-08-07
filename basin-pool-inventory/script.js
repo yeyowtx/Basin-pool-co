@@ -417,6 +417,7 @@ function setupEventListeners() {
 
 // Render all inventory sections
 function renderAllSections() {
+    // Render legacy sections (hidden)
     renderSection('cliff', inventoryData.cliff, 'cliffTable');
     renderSection('tools', inventoryData.tools, 'toolsTable');
     renderSection('tanks', inventoryData.tanks, 'tanksTable');
@@ -425,6 +426,96 @@ function renderAllSections() {
     renderSection('heating', inventoryData.heating, 'heatingTable');
     renderSection('siteprep', inventoryData.siteprep, 'siteprepTable');
     renderSection('hardware', inventoryData.hardware, 'hardwareTable');
+    
+    // Render new mobile shopping sections
+    renderShoppingSections();
+}
+
+// Toggle section visibility
+function toggleSection(sectionId) {
+    const content = document.getElementById(sectionId);
+    const toggle = document.getElementById(sectionId.replace('-section', '-toggle'));
+    
+    if (content && toggle) {
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            content.classList.add('expanded');
+            toggle.classList.add('expanded');
+        } else {
+            content.classList.remove('expanded');
+            content.classList.add('collapsed');
+            toggle.classList.remove('expanded');
+        }
+    }
+}
+
+// Render mobile shopping sections
+function renderShoppingSections() {
+    if (!inventoryData.cliff) return;
+    
+    // Group items by shopping category
+    const shoppingGroups = {
+        purchased: [],
+        tsc: [],
+        electrical: [],
+        plumbing: [],
+        deck: [],
+        recom: [],
+        misc: []
+    };
+    
+    inventoryData.cliff.forEach((item, index) => {
+        const itemWithIndex = { ...item, originalIndex: index };
+        
+        if (item.status === 'purchased') {
+            shoppingGroups.purchased.push(itemWithIndex);
+        } else if (item.notes && item.notes.includes('CountyLine Stock Tank')) {
+            shoppingGroups.tsc.push(itemWithIndex);
+        } else if (item.notes && (item.notes.includes('Gang') || item.notes.includes('Conduit') || item.notes.includes('Clamp') || item.notes.includes('Anchor'))) {
+            shoppingGroups.electrical.push(itemWithIndex);
+        } else if (item.notes && (item.notes.includes('Bulkhead') || item.notes.includes('PVC') || item.notes.includes('Valve') || item.notes.includes('Teflon'))) {
+            shoppingGroups.plumbing.push(itemWithIndex);
+        } else if (item.notes && (item.notes.includes('PT ') || item.notes.includes('Deck') || item.notes.includes('Joist') || item.notes.includes('Stair') || item.notes.includes('Pier') || item.notes.includes('Screw'))) {
+            shoppingGroups.deck.push(itemWithIndex);
+        } else if (item.notes && (item.notes.includes('Caliche') || item.notes.includes('Gravel') || item.notes.includes('Landscape'))) {
+            shoppingGroups.recom.push(itemWithIndex);
+        } else {
+            shoppingGroups.misc.push(itemWithIndex);
+        }
+    });
+    
+    // Render each group
+    renderShoppingGroup('purchasedTable', shoppingGroups.purchased);
+    renderShoppingGroup('tscTable', shoppingGroups.tsc);
+    renderShoppingGroup('electricalTable', shoppingGroups.electrical);
+    renderShoppingGroup('plumbingTable', shoppingGroups.plumbing);
+    renderShoppingGroup('deckTable', shoppingGroups.deck);
+    renderShoppingGroup('recomTable', shoppingGroups.recom);
+    renderShoppingGroup('miscTable', shoppingGroups.misc);
+}
+
+// Render a shopping group
+function renderShoppingGroup(tableId, items) {
+    const tbody = document.getElementById(tableId);
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    items.forEach((item) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">$${item.actualPrice.toFixed(2)}</div>
+                <div class="item-notes">${item.notes}</div>
+                <button class="item-status ${item.status}" onclick="cycleStatus(this)" data-section="cliff" data-index="${item.originalIndex}">
+                    ${CONFIG.STATUS_TYPES[item.status]?.label || item.status}
+                </button>
+                ${item.status !== 'purchased' ? `<button class="quick-purchase-btn" onclick="openQuickPurchase('cliff', ${item.originalIndex})">🛒 Quick Buy</button>` : ''}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
 // Render a specific inventory section
@@ -542,14 +633,21 @@ function cycleStatus(statusElement) {
     const currentIndex = statuses.indexOf(currentStatus);
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
     
-    // Update visual
-    statusElement.className = `status ${nextStatus}`;
+    // Update visual - handle both old 'status' class and new 'item-status' class
+    if (statusElement.classList.contains('status')) {
+        statusElement.className = `status ${nextStatus}`;
+    } else {
+        statusElement.className = `item-status ${nextStatus}`;
+    }
     statusElement.textContent = CONFIG.STATUS_TYPES[nextStatus].label;
     
     // Update data
     const section = statusElement.dataset.section;
     const index = parseInt(statusElement.dataset.index);
     inventoryData[section][index].status = nextStatus;
+    
+    // Re-render shopping sections to move items to correct groups
+    renderShoppingSections();
     
     scheduleAutoSave();
     updateSummary();

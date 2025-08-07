@@ -95,213 +95,174 @@
                 </div>
             </div>
 
-            <!-- CLIFF'S LEAN STARTUP SECTION -->
-            <div class="section lean-startup">
-                <h2>Cliff's Installation - Lean Startup Materials</h2>
+            <!-- MOBILE SHOPPING SECTIONS -->
+            <div class="shopping-sections">
+                <!-- ✅ ALREADY PURCHASED -->
+                <div class="shopping-section completed">
+                    <div class="section-header" onclick="toggleSection('purchased-section')">
+                        <div class="section-info">
+                            <h3>✅ Already Purchased</h3>
+                            <span class="section-total" id="purchased-total">$599.43</span>
+                        </div>
+                        <div class="toggle-icon" id="purchased-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="purchased-section">
+                        <table class="shopping-table">
+                            <tbody id="purchasedTable">
+                                <!-- eBay purchased items will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 🛒 TSC MIDLAND -->
+                <div class="shopping-section priority">
+                    <div class="section-header" onclick="toggleSection('tsc-section')">
+                        <div class="section-info">
+                            <h3>🛒 TSC Midland - PRIORITY</h3>
+                            <span class="section-total" id="tsc-total">$599.00</span>
+                        </div>
+                        <div class="toggle-icon" id="tsc-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="tsc-section">
+                        <div class="store-info">📍 TSC Store - Call ahead for tank availability</div>
+                        <table class="shopping-table">
+                            <tbody id="tscTable">
+                                <!-- TSC items will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 🛒 HOME DEPOT - ELECTRICAL -->
+                <div class="shopping-section">
+                    <div class="section-header" onclick="toggleSection('electrical-section')">
+                        <div class="section-info">
+                            <h3>🛒 Home Depot - Electrical</h3>
+                            <span class="section-total" id="electrical-total">$98.98</span>
+                        </div>
+                        <div class="toggle-icon" id="electrical-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="electrical-section">
+                        <div class="store-info">🏪 Home Depot - Electrical Department</div>
+                        <table class="shopping-table">
+                            <tbody id="electricalTable">
+                                <!-- Electrical items will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 🛒 HOME DEPOT - PLUMBING -->
+                <div class="shopping-section">
+                    <div class="section-header" onclick="toggleSection('plumbing-section')">
+                        <div class="section-info">
+                            <h3>🛒 Home Depot - Plumbing</h3>
+                            <span class="section-total" id="plumbing-total">$214.00</span>
+                        </div>
+                        <div class="toggle-icon" id="plumbing-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="plumbing-section">
+                        <div class="store-info">🔧 Home Depot - Plumbing Department</div>
+                        <table class="shopping-table">
+                            <tbody id="plumbingTable">
+                                <!-- Plumbing items will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 🛒 HOME DEPOT - DECK MATERIALS -->
+                <div class="shopping-section">
+                    <div class="section-header" onclick="toggleSection('deck-section')">
+                        <div class="section-info">
+                            <h3>🛒 Home Depot - Deck Materials</h3>
+                            <span class="section-total" id="deck-total">$675.00</span>
+                        </div>
+                        <div class="toggle-icon" id="deck-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="deck-section">
+                        <div class="store-info">🪵 Home Depot - Lumber & Building Materials</div>
+                        <table class="shopping-table">
+                            <tbody id="deckTable">
+                                <!-- Deck materials will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 🛒 RECOM MATERIALS -->
+                <div class="shopping-section">
+                    <div class="section-header" onclick="toggleSection('recom-section')">
+                        <div class="section-info">
+                            <h3>🛒 Recom Materials - Pickup</h3>
+                            <span class="section-total" id="recom-total">$150.00</span>
+                        </div>
+                        <div class="toggle-icon" id="recom-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="recom-section">
+                        <div class="store-info">🚛 Recom Materials - Call for pickup scheduling</div>
+                        <table class="shopping-table">
+                            <tbody id="recomTable">
+                                <!-- Recom materials will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 🛒 MISCELLANEOUS -->
+                <div class="shopping-section">
+                    <div class="section-header" onclick="toggleSection('misc-section')">
+                        <div class="section-info">
+                            <h3>🛒 Miscellaneous & Labor</h3>
+                            <span class="section-total" id="misc-total">$850.00</span>
+                        </div>
+                        <div class="toggle-icon" id="misc-toggle">▼</div>
+                    </div>
+                    <div class="section-content collapsed" id="misc-section">
+                        <div class="store-info">🔧 Local supplies + Installation labor</div>
+                        <table class="shopping-table">
+                            <tbody id="miscTable">
+                                <!-- Misc items and labor will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEGACY SECTION (HIDDEN) -->
+            <div class="section lean-startup" style="display: none;">
                 <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
                     <tbody id="cliffTable">
                         <!-- Content will be loaded by JavaScript -->
                     </tbody>
                 </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('cliff')">➕ Add Item</button>
-                </div>
-                <div class="section-summary">
-                    <strong>Cliff's Installation Total: <span id="cliff-total">$0</span></strong>
-                    <p>Complete premium 8ft package with salt water, heating, and all accessories</p>
-                </div>
             </div>
 
-            <!-- ONE-TIME TOOLS SECTION -->
-            <div class="section tools">
-                <h2>One-Time Tool Purchases</h2>
+            <!-- LEGACY SECTIONS (HIDDEN FOR MOBILE SHOPPING) -->
+            <div class="section tools" style="display: none;">
                 <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Tool/Equipment</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="toolsTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
+                    <tbody id="toolsTable"></tbody>
                 </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('tools')">➕ Add Tool</button>
-                </div>
             </div>
 
-            <!-- FUTURE INVENTORY TANKS -->
-            <div class="section tanks">
-                <h2>Future Inventory - Additional Tanks</h2>
-                <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Tank Size</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tanksTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('tanks')">➕ Add Tank</button>
-                </div>
+            <div class="section tanks" style="display: none;">
+                <table class="item-table"><tbody id="tanksTable"></tbody></table>
             </div>
-
-            <!-- PUMP SYSTEMS -->
-            <div class="section pumps">
-                <h2>Additional Pump Systems</h2>
-                <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Pump System</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pumpsTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('pumps')">➕ Add Pump System</button>
-                </div>
+            <div class="section pumps" style="display: none;">
+                <table class="item-table"><tbody id="pumpsTable"></tbody></table>
             </div>
-
-            <!-- SALT WATER SYSTEMS INVENTORY -->
-            <div class="section salt">
-                <h2>Salt Water Systems Inventory</h2>
-                <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="saltTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('salt')">➕ Add Salt Water Component</button>
-                </div>
+            <div class="section salt" style="display: none;">
+                <table class="item-table"><tbody id="saltTable"></tbody></table>
             </div>
-
-            <!-- HEATING SYSTEMS INVENTORY -->
-            <div class="section heating">
-                <h2>Heating Systems Inventory</h2>
-                <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="heatingTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('heating')">➕ Add Heating Component</button>
-                </div>
+            <div class="section heating" style="display: none;">
+                <table class="item-table"><tbody id="heatingTable"></tbody></table>
             </div>
-
-            <!-- SITE PREPARATION & PAD INSTALLATION -->
-            <div class="section siteprep">
-                <h2>Site Preparation & Premium Pad Installation</h2>
-                <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Material/Component</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="siteprepTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('siteprep')">➕ Add Site Prep Material</button>
-                </div>
-                <div class="section-summary">
-                    <strong>Professional Pad Installation Standards:</strong>
-                    <p>• 6ft Tank = 8x8 pad (2ft border) • 8ft Tank = 10x10 pad (2ft border) • 10ft Tank = 12x12 pad (2ft border)</p>
-                    <p>Premium permanent installation with excavation, caliche base, landscape fabric, pressure-treated edging, 12"x12" pavers, and limestone backfill. Future-proofed trenching for utilities.</p>
-                </div>
+            <div class="section siteprep" style="display: none;">
+                <table class="item-table"><tbody id="siteprepTable"></tbody></table>
             </div>
-
-            <!-- STANDARD HARDWARE INVENTORY -->
-            <div class="section hardware">
-                <h2>Standard Hardware Inventory (Per Job Components)</h2>
-                <table class="item-table">
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Usage</th>
-                            <th>Location</th>
-                            <th>Supplier Link</th>
-                            <th>Status</th>
-                            <th>Notes & Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="hardwareTable">
-                        <!-- Content will be loaded by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="add-item-container">
-                    <button class="add-item-btn" onclick="addNewItem('hardware')">➕ Add Hardware Component</button>
-                </div>
+            <div class="section hardware" style="display: none;">
+                <table class="item-table"><tbody id="hardwareTable"></tbody></table>
             </div>
 
             <div class="roi-summary">
