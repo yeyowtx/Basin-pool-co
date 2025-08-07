@@ -791,10 +791,10 @@ function updateSummary() {
                 else if (item.status === 'partial') partialItems++;
                 else pendingItems++;
                 
-                // Calculate costs
+                // Calculate costs - actualPrice is already the total cost for the quantity specified
                 const actualPrice = item.actualPrice || 0;
-                const quantity = item.quantity || 1; // Default to 1, not 0
-                const totalPrice = actualPrice * quantity;
+                // Don't multiply by quantity - actualPrice already includes the total cost
+                const totalPrice = actualPrice;
                 
                 if (section === 'cliff') {
                     cliffTotal += totalPrice;
