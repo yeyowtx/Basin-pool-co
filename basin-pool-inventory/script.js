@@ -1010,14 +1010,20 @@ function saveToLocalStorage() {
 function loadFromLocalStorage() {
     try {
         const saved = localStorage.getItem(CONFIG.AUTO_SAVE.LOCAL_STORAGE_KEY);
+        console.log('Loading from localStorage...', saved ? 'DATA FOUND' : 'NO DATA'); // Debug
+        
         if (saved) {
             const parsedData = JSON.parse(saved);
+            console.log('Parsed data cliff length:', parsedData.cliff?.length); // Debug
+            
             // Merge saved data with current data, preserving structure
             Object.keys(inventoryData).forEach(key => {
                 if (parsedData[key] !== undefined) {
                     inventoryData[key] = parsedData[key];
                 }
             });
+            
+            console.log('After loading - inventoryData.cliff length:', inventoryData.cliff?.length); // Debug
             
             // Load project notes
             if (parsedData.projectNotes) {
@@ -1026,6 +1032,11 @@ function loadFromLocalStorage() {
                     notesElement.value = parsedData.projectNotes;
                 }
             }
+            
+            // CRITICAL FIX: Re-render after loading data!
+            renderAllSections();
+            updateSummary();
+            console.log('Data loaded and re-rendered!'); // Debug
         }
     } catch (error) {
         console.error('Failed to load from localStorage:', error);
