@@ -189,14 +189,14 @@ function initializeData() {
         { name: 'Sand Filter Pump', actualPrice: 230.90, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'INTEX 26641EG Krystal Clear Sand Filter - 4,400 GPH pool pump system, open box condition' },
         { name: 'Propane Heater', actualPrice: 299.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'Outdoor Propane Tankless Water Heater - 120,000 BTU instant heater, 5.3 gallon capacity' },
         
-        // ✅ ALREADY PURCHASED - HOME DEPOT ELECTRICAL ($93.24)
-        { name: '2-Gang FSC Box', actualPrice: 8.74, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Cantex 1/2 in. 2-Gang FSC Box' },
-        { name: '4-Gang Deep Box', actualPrice: 18.88, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Commercial Electric 4-Gang Extra Deep Box' },
-        { name: 'Plastic Anchors', actualPrice: 9.91, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Triple Grip Plastic Anchors (15-pack)' },
-        { name: '1-Gang PVC Boxes', actualPrice: 6.60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Carlon 1-Gang PVC Boxes (2)' },
-        { name: 'Box Covers', actualPrice: 4.88, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Carlon Box Covers (2)' },
-        { name: 'Liquid-Tight Conduit', actualPrice: 44.99, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'HYDROMAXX 50ft Liquid-Tight Conduit' },
-        { name: 'Conduit Clamps', actualPrice: 4.98, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Carlon Conduit Clamps (25-pack)' },
+        // 🛒 HOME DEPOT - ELECTRICAL ($98.98)
+        { name: '2-Gang FSC Box', actualPrice: 8.74, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Cantex 1/2 in. 2-Gang FSC Box' },
+        { name: '4-Gang Deep Box', actualPrice: 18.88, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Commercial Electric 4-Gang Extra Deep Box' },
+        { name: 'Plastic Anchors', actualPrice: 9.91, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Triple Grip Plastic Anchors (15-pack)' },
+        { name: '1-Gang PVC Boxes', actualPrice: 6.60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon 1-Gang PVC Boxes (2)' },
+        { name: 'Box Covers', actualPrice: 4.88, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Box Covers (2)' },
+        { name: 'Liquid-Tight Conduit', actualPrice: 44.99, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'HYDROMAXX 50ft Liquid-Tight Conduit' },
+        { name: 'Conduit Clamps', actualPrice: 4.98, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Conduit Clamps (25-pack)' },
         
         // 🛒 TSC MIDLAND - TANK ($599)
         { name: 'Stock Tank (8ft)', actualPrice: 599.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '8ft CountyLine Stock Tank - 8 foot diameter galvanized, 2 foot depth, ~700 gallons. CALL AHEAD FOR AVAILABILITY' },
