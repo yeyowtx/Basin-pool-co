@@ -228,6 +228,9 @@ function initializeData() {
         { name: 'Pea Gravel', actualPrice: 80.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Pea Gravel' },
         { name: 'Landscape Fabric', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Landscape Fabric (45 sq ft)' },
         
+        // 🛒 HOME DEPOT - LANDSCAPE EDGING ($113)
+        { name: 'Landscape Edging', actualPrice: 113.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Colmet 8 ft. x 4 in. 14-Gauge Brown Steel Landscape Edging (5-Pack) - Home Depot' },
+        
         // 🛒 MISCELLANEOUS SUPPLIES ($100)
         { name: 'Extra Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Extra Fittings & Adapters' },
         { name: 'Safety Equipment', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Safety Equipment' },
