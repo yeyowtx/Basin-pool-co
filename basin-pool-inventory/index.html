@@ -95,76 +95,191 @@
                 </div>
             </div>
 
-            <!-- VERTICAL TABS FOR MATERIAL CATEGORIES -->
-            <div class="tabs-container">
-                <div class="vertical-tabs">
-                    <button class="tab-btn active" onclick="switchTab('all')" id="tab-all">
-                        <span class="tab-icon">📋</span>
-                        <span class="tab-text">All Items</span>
-                        <span class="tab-count" id="count-all">0</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('pool')" id="tab-pool">
-                        <span class="tab-icon">🏊</span>
-                        <span class="tab-text">Pool System</span>
-                        <span class="tab-count" id="count-pool">0</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('electrical')" id="tab-electrical">
-                        <span class="tab-icon">⚡</span>
-                        <span class="tab-text">Electrical</span>
-                        <span class="tab-count" id="count-electrical">0</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('plumbing')" id="tab-plumbing">
-                        <span class="tab-icon">🔧</span>
-                        <span class="tab-text">Plumbing</span>
-                        <span class="tab-count" id="count-plumbing">0</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('deck')" id="tab-deck">
-                        <span class="tab-icon">🪵</span>
-                        <span class="tab-text">Deck/Structure</span>
-                        <span class="tab-count" id="count-deck">0</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('siteprep')" id="tab-siteprep">
-                        <span class="tab-icon">🏗️</span>
-                        <span class="tab-text">Site Prep</span>
-                        <span class="tab-count" id="count-siteprep">0</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('labor')" id="tab-labor">
-                        <span class="tab-icon">👷</span>
-                        <span class="tab-text">Labor</span>
-                        <span class="tab-count" id="count-labor">0</span>
-                    </button>
+            <!-- ACCORDION-STYLE COLLAPSIBLE SECTIONS -->
+            <div class="accordion-container">
+                <!-- Pool System Section -->
+                <div class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('pool-section')">
+                        <div class="accordion-info">
+                            <span class="accordion-icon">🏊</span>
+                            <h3>Pool System</h3>
+                            <span class="accordion-count" id="count-pool">0 items</span>
+                        </div>
+                        <div class="accordion-total" id="total-pool">$0.00</div>
+                        <div class="accordion-arrow" id="arrow-pool">▶</div>
+                    </div>
+                    <div class="accordion-content collapsed" id="pool-section">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Supplier Link</th>
+                                    <th>Status</th>
+                                    <th>Notes & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="poolTable"></tbody>
+                        </table>
+                        <button class="add-item-btn" onclick="addCategoryItem('pool')">➕ Add Pool Item</button>
+                    </div>
                 </div>
-                
-                <div class="tab-content">
-                    <!-- EDITABLE INVENTORY TABLE -->
-                    <div class="section cliff-inventory">
-                        <div class="section-header-bar">
-                            <h2>Cliff's Installation Materials</h2>
-                            <div class="header-actions">
-                                <span class="total-display" id="filtered-total">$0.00</span>
-                                <button class="add-item-btn" onclick="addNewItem('cliff')">➕ Add Item</button>
-                            </div>
+
+                <!-- Electrical Section -->
+                <div class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('electrical-section')">
+                        <div class="accordion-info">
+                            <span class="accordion-icon">⚡</span>
+                            <h3>Electrical</h3>
+                            <span class="accordion-count" id="count-electrical">0 items</span>
                         </div>
-                        
-                        <div class="table-container">
-                            <table class="item-table" id="mainInventoryTable">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>Price</th>
-                                        <th>Qty</th>
-                                        <th>Usage</th>
-                                        <th>Location</th>
-                                        <th>Supplier Link</th>
-                                        <th>Status</th>
-                                        <th>Notes & Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cliffTable">
-                                    <!-- Content will be loaded by JavaScript -->
-                                </tbody>
-                            </table>
+                        <div class="accordion-total" id="total-electrical">$0.00</div>
+                        <div class="accordion-arrow" id="arrow-electrical">▶</div>
+                    </div>
+                    <div class="accordion-content collapsed" id="electrical-section">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Supplier Link</th>
+                                    <th>Status</th>
+                                    <th>Notes & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="electricalTable"></tbody>
+                        </table>
+                        <button class="add-item-btn" onclick="addCategoryItem('electrical')">➕ Add Electrical Item</button>
+                    </div>
+                </div>
+
+                <!-- Plumbing Section -->
+                <div class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('plumbing-section')">
+                        <div class="accordion-info">
+                            <span class="accordion-icon">🔧</span>
+                            <h3>Plumbing</h3>
+                            <span class="accordion-count" id="count-plumbing">0 items</span>
                         </div>
+                        <div class="accordion-total" id="total-plumbing">$0.00</div>
+                        <div class="accordion-arrow" id="arrow-plumbing">▶</div>
+                    </div>
+                    <div class="accordion-content collapsed" id="plumbing-section">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Supplier Link</th>
+                                    <th>Status</th>
+                                    <th>Notes & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plumbingTable"></tbody>
+                        </table>
+                        <button class="add-item-btn" onclick="addCategoryItem('plumbing')">➕ Add Plumbing Item</button>
+                    </div>
+                </div>
+
+                <!-- Deck/Structure Section -->
+                <div class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('deck-section')">
+                        <div class="accordion-info">
+                            <span class="accordion-icon">🪵</span>
+                            <h3>Deck & Structure</h3>
+                            <span class="accordion-count" id="count-deck">0 items</span>
+                        </div>
+                        <div class="accordion-total" id="total-deck">$0.00</div>
+                        <div class="accordion-arrow" id="arrow-deck">▶</div>
+                    </div>
+                    <div class="accordion-content collapsed" id="deck-section">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Supplier Link</th>
+                                    <th>Status</th>
+                                    <th>Notes & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deckTable"></tbody>
+                        </table>
+                        <button class="add-item-btn" onclick="addCategoryItem('deck')">➕ Add Deck Item</button>
+                    </div>
+                </div>
+
+                <!-- Site Prep Section -->
+                <div class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('siteprep-section')">
+                        <div class="accordion-info">
+                            <span class="accordion-icon">🏗️</span>
+                            <h3>Site Preparation</h3>
+                            <span class="accordion-count" id="count-siteprep">0 items</span>
+                        </div>
+                        <div class="accordion-total" id="total-siteprep">$0.00</div>
+                        <div class="accordion-arrow" id="arrow-siteprep">▶</div>
+                    </div>
+                    <div class="accordion-content collapsed" id="siteprep-section">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Supplier Link</th>
+                                    <th>Status</th>
+                                    <th>Notes & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="siteprepTable"></tbody>
+                        </table>
+                        <button class="add-item-btn" onclick="addCategoryItem('siteprep')">➕ Add Site Prep Item</button>
+                    </div>
+                </div>
+
+                <!-- Labor Section -->
+                <div class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('labor-section')">
+                        <div class="accordion-info">
+                            <span class="accordion-icon">👷</span>
+                            <h3>Labor</h3>
+                            <span class="accordion-count" id="count-labor">0 items</span>
+                        </div>
+                        <div class="accordion-total" id="total-labor">$0.00</div>
+                        <div class="accordion-arrow" id="arrow-labor">▶</div>
+                    </div>
+                    <div class="accordion-content collapsed" id="labor-section">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Supplier Link</th>
+                                    <th>Status</th>
+                                    <th>Notes & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laborTable"></tbody>
+                        </table>
+                        <button class="add-item-btn" onclick="addCategoryItem('labor')">➕ Add Labor Item</button>
                     </div>
                 </div>
             </div>

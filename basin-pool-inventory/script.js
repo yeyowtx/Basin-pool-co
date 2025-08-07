@@ -415,15 +415,10 @@ function setupEventListeners() {
     });
 }
 
-// Global variable for current tab filter
-let currentTabFilter = 'all';
-
 // Render all inventory sections
 function renderAllSections() {
-    // Render main editable table
-    renderSection('cliff', inventoryData.cliff, 'cliffTable');
-    
     // Render legacy sections (hidden)
+    renderSection('cliff', inventoryData.cliff, 'cliffTable');
     renderSection('tools', inventoryData.tools, 'toolsTable');
     renderSection('tanks', inventoryData.tanks, 'tanksTable');
     renderSection('pumps', inventoryData.pumps, 'pumpsTable');
@@ -432,9 +427,140 @@ function renderAllSections() {
     renderSection('siteprep', inventoryData.siteprep, 'siteprepTable');
     renderSection('hardware', inventoryData.hardware, 'hardwareTable');
     
-    // Update tab counts and apply current filter
-    updateTabCounts();
-    applyTabFilter(currentTabFilter);
+    // Render accordion sections
+    renderAccordionSections();
+}
+
+// Toggle accordion sections
+function toggleAccordion(sectionId) {
+    const content = document.getElementById(sectionId);
+    const arrow = document.getElementById(sectionId.replace('-section', '').replace('arrow-', 'arrow-'));
+    
+    if (content && arrow) {
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            content.classList.add('expanded');
+            arrow.classList.add('expanded');
+        } else {
+            content.classList.remove('expanded');
+            content.classList.add('collapsed');
+            arrow.classList.remove('expanded');
+        }
+    }
+}
+
+// Render accordion sections with categorized items
+function renderAccordionSections() {
+    if (!inventoryData.cliff) return;
+    
+    // Group items by category
+    const categories = {
+        pool: [],
+        electrical: [],
+        plumbing: [],
+        deck: [],
+        siteprep: [],
+        labor: []
+    };
+    
+    inventoryData.cliff.forEach((item, index) => {
+        const category = categorizeItem(item);
+        categories[category].push({ ...item, originalIndex: index });
+    });
+    
+    // Render each category
+    Object.keys(categories).forEach(category => {
+        const tableId = category + 'Table';
+        renderCategorySection(tableId, categories[category]);
+        updateCategoryStats(category, categories[category]);
+    });
+}
+
+// Render items in a category section
+function renderCategorySection(tableId, items) {
+    const tbody = document.getElementById(tableId);
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    items.forEach((item) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <input type="text" class="item-name-input" value="${item.name}" onchange="updateItemField('cliff', ${item.originalIndex}, 'name', this.value)">
+            </td>
+            <td>
+                <input type="number" class="price-input" value="${item.actualPrice || 0}" step="0.01" min="0" onchange="updateItemField('cliff', ${item.originalIndex}, 'actualPrice', parseFloat(this.value))">
+            </td>
+            <td>
+                <input type="number" class="qty-input" value="${item.quantity || 1}" min="0" onchange="updateItemField('cliff', ${item.originalIndex}, 'quantity', parseInt(this.value))">
+            </td>
+            <td>
+                <select class="usage-select" onchange="updateItemField('cliff', ${item.originalIndex}, 'usage', this.value)">
+                    ${Object.keys(CONFIG.USAGE_TYPES).map(usage => 
+                        `<option value="${usage}" ${item.usage === usage ? 'selected' : ''}>${CONFIG.USAGE_TYPES[usage].label}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td>
+                <select class="location-select" onchange="updateItemField('cliff', ${item.originalIndex}, 'location', this.value)">
+                    ${Object.keys(CONFIG.LOCATION_TYPES).map(location => 
+                        `<option value="${location}" ${item.location === location ? 'selected' : ''}>${CONFIG.LOCATION_TYPES[location].label}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td>
+                <input type="url" class="link-input" value="${item.link || ''}" placeholder="Supplier URL" onchange="updateItemField('cliff', ${item.originalIndex}, 'link', this.value)">
+            </td>
+            <td>
+                <button class="status ${item.status}" onclick="cycleStatus(this)" data-section="cliff" data-index="${item.originalIndex}">
+                    ${CONFIG.STATUS_TYPES[item.status]?.label || item.status}
+                </button>
+                ${item.status !== 'purchased' ? `<button class="quick-purchase-btn" onclick="openQuickPurchase('cliff', ${item.originalIndex})" title="Quick Purchase">🛒</button>` : ''}
+            </td>
+            <td>
+                <textarea class="notes-input" placeholder="Notes, supplier info, etc." onchange="updateItemField('cliff', ${item.originalIndex}, 'notes', this.value)">${item.notes || ''}</textarea>
+                <button class="delete-item-btn" onclick="deleteItem('cliff', ${item.originalIndex})" title="Delete Item">🗑️</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Update category statistics
+function updateCategoryStats(category, items) {
+    const count = items.length;
+    const total = items.reduce((sum, item) => sum + (item.actualPrice || 0), 0);
+    
+    const countElement = document.getElementById(`count-${category}`);
+    const totalElement = document.getElementById(`total-${category}`);
+    
+    if (countElement) {
+        countElement.textContent = `${count} item${count !== 1 ? 's' : ''}`;
+    }
+    
+    if (totalElement) {
+        totalElement.textContent = `$${total.toFixed(2)}`;
+    }
+}
+
+// Add new item to specific category
+function addCategoryItem(category) {
+    const newItem = {
+        name: 'New Item',
+        actualPrice: 0,
+        quantity: 1,
+        usage: 'per-job',
+        location: 'local',
+        link: '',
+        status: 'pending',
+        notes: `New ${category} item - please edit`
+    };
+    
+    inventoryData.cliff.push(newItem);
+    renderAccordionSections();
+    updateSummary();
+    scheduleAutoSave();
 }
 
 
@@ -566,23 +692,11 @@ function cycleStatus(statusElement) {
     const index = parseInt(statusElement.dataset.index);
     inventoryData[section][index].status = nextStatus;
     
-    // Re-render and apply current filter
-    updateTabCounts();
-    applyTabFilter(currentTabFilter);
+    // Re-render accordion sections
+    renderAccordionSections();
     
     scheduleAutoSave();
     updateSummary();
-}
-
-// Switch between tabs
-function switchTab(tabType) {
-    // Update active tab
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`tab-${tabType}`).classList.add('active');
-    
-    // Update current filter and apply
-    currentTabFilter = tabType;
-    applyTabFilter(tabType);
 }
 
 // Categorize items by type
@@ -632,64 +746,6 @@ function categorizeItem(item) {
     
     // Default to pool system for uncategorized items
     return 'pool';
-}
-
-// Update tab counts
-function updateTabCounts() {
-    const counts = {
-        all: 0,
-        pool: 0,
-        electrical: 0,
-        plumbing: 0,
-        deck: 0,
-        siteprep: 0,
-        labor: 0
-    };
-    
-    inventoryData.cliff.forEach(item => {
-        counts.all++;
-        const category = categorizeItem(item);
-        counts[category]++;
-    });
-    
-    // Update count displays
-    Object.keys(counts).forEach(category => {
-        const countElement = document.getElementById(`count-${category}`);
-        if (countElement) {
-            countElement.textContent = counts[category];
-        }
-    });
-}
-
-// Apply tab filter to show/hide table rows
-function applyTabFilter(tabType) {
-    const table = document.getElementById('cliffTable');
-    if (!table) return;
-    
-    const rows = table.querySelectorAll('tr');
-    let filteredTotal = 0;
-    let visibleCount = 0;
-    
-    rows.forEach((row, index) => {
-        if (index >= inventoryData.cliff.length) return;
-        
-        const item = inventoryData.cliff[index];
-        const category = categorizeItem(item);
-        
-        if (tabType === 'all' || category === tabType) {
-            row.classList.remove('filtered-out');
-            filteredTotal += item.actualPrice || 0;
-            visibleCount++;
-        } else {
-            row.classList.add('filtered-out');
-        }
-    });
-    
-    // Update filtered total display
-    const filteredTotalElement = document.getElementById('filtered-total');
-    if (filteredTotalElement) {
-        filteredTotalElement.textContent = `$${filteredTotal.toFixed(2)}`;
-    }
 }
 
 // Update summary calculations
