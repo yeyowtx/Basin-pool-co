@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/apple/basin-pool-inventory/logs/.bc8d8ae321fc1b7e23ccc885a7fe3d0e939ab77a-audit.json",
+    "files": [
+        {
+            "date": 1754439256657,
+            "name": "/Users/apple/basin-pool-inventory/logs/mcp-puppeteer-2025-08-05.log",
+            "hash": "70ba2c8ba0828e0852778565d9439a4b7a32d0e9a37043f11ac1fd2b11c416f6"
+        }
+    ],
+    "hashType": "sha256"
+}

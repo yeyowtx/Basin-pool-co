@@ -8,7 +8,7 @@
 
 /* Mobile Navigation Styles */
 .mobile-nav-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2c3e50;
     color: white;
     padding: 15px 20px;
     text-align: center;
@@ -59,13 +59,13 @@
 }
 
 .tab-item:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    background: rgba(44, 62, 80, 0.1);
+    color: #2c3e50;
 }
 
 .tab-item.active {
-    background: rgba(102, 126, 234, 0.15);
-    color: #667eea;
+    background: rgba(44, 62, 80, 0.15);
+    color: #2c3e50;
 }
 
 .tab-icon {
@@ -80,19 +80,21 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: white;
     min-height: 100vh;
     padding: 70px 20px 80px;
     font-size: 16px;
+    color: #333;
 }
 
 .container, .main-content {
     max-width: 1800px;
     margin: 0 auto;
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     overflow: hidden;
+    border: 1px solid #e1e5e9;
 }
 
 .page-header {
@@ -112,11 +114,11 @@ body {
 }
 
 .action-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2c3e50;
     color: white;
     border: none;
     padding: 12px 18px;
-    border-radius: 25px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
@@ -125,12 +127,13 @@ body {
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 4px rgba(44, 62, 80, 0.2);
 }
 
 .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: #34495e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.3);
 }
 
 /* Desktop optimizations */
@@ -648,29 +651,47 @@ body {
 
 /* Status Badges */
 .status {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75em;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8em;
     font-weight: bold;
     text-align: center;
-    min-width: 70px;
+    min-width: 100px;
     transition: all 0.3s;
     cursor: pointer;
     display: inline-block;
+    border: 2px solid transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.status.verified {
+.status:hover {
+    transform: scale(1.05);
+    border-color: rgba(0,0,0,0.1);
+}
+
+.status.pending {
+    background: #e74c3c;
+    color: white;
+}
+
+.status.ordered {
+    background: #f39c12;
+    color: white;
+}
+
+.status.purchased {
     background: #27ae60;
     color: white;
 }
 
 .status.partial {
-    background: #f39c12;
+    background: #8e44ad;
     color: white;
 }
 
-.status.pending {
-    background: #e74c3c;
+.status.verified {
+    background: #2c3e50;
     color: white;
 }
 
@@ -942,7 +963,42 @@ body {
 @media (max-width: 768px) {
     body {
         padding: 8px;
-        font-size: 14px;
+        font-size: 16px;
+    }
+    
+    /* iOS Safari optimized status badges for shopping */
+    .status {
+        padding: 12px 16px;
+        font-size: 0.9em;
+        min-width: 120px;
+        margin: 2px;
+        border-radius: 10px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -webkit-appearance: none;
+        background-clip: padding-box;
+        backface-visibility: hidden;
+        transform: translate3d(0,0,0);
+    }
+    
+    .status:active {
+        transform: scale(0.95);
+        transition: transform 0.1s;
+    }
+    
+    /* Mobile-optimized action buttons */
+    .action-btn {
+        padding: 12px 18px;
+        font-size: 0.9em;
+        min-height: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    }
+    
+    .action-controls {
+        gap: 8px;
     }
     
     .container {
@@ -1076,14 +1132,32 @@ body {
     }
     
     .price-input, .qty-input {
-        width: 50px;
-        padding: 4px;
-        font-size: 0.7em;
+        width: 80px;
+        padding: 10px 8px;
+        font-size: 16px; /* Prevents iOS zoom on input focus */
+        border-radius: 6px;
+        border: 2px solid #ddd;
+        -webkit-appearance: none;
+        -webkit-border-radius: 6px;
+        appearance: none;
+        min-height: 44px;
+        background-clip: padding-box;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-touch-callout: none;
     }
     
     .link-input, .notes-input {
         min-width: 100px;
-        font-size: 0.7em;
+        font-size: 16px; /* Prevents iOS zoom on input focus */
+        padding: 10px 8px;
+        border-radius: 6px;
+        border: 2px solid #ddd;
+        min-height: 44px;
+        -webkit-appearance: none;
+        -webkit-border-radius: 6px;
+        background-clip: padding-box;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-touch-callout: none;
     }
     
     .usage-type, .status {
@@ -1151,25 +1225,28 @@ body {
     
     .item-table tr {
         background: white;
-        border: 1px solid #ccc;
-        margin-bottom: 10px;
-        padding: 10px;
-        border-radius: 5px;
+        border: 2px solid #e1e5e9;
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     
     .item-table td {
         border: none;
         position: relative;
-        padding-left: 30%;
-        padding-bottom: 10px;
+        padding-left: 35%;
+        padding-bottom: 12px;
         white-space: normal;
+        font-size: 0.9em;
+        line-height: 1.4;
     }
     
     .item-table td:before {
         content: attr(data-label) ": ";
         position: absolute;
         left: 6px;
-        width: 25%;
+        width: 30%;
         padding-right: 10px;
         white-space: nowrap;
         font-weight: bold;
@@ -1200,5 +1277,265 @@ body {
     
     .item-table {
         font-size: 0.8em;
+    }
+}
+
+/* Quick Purchase Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px 20px 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.2em;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    color: #2c3e50;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.purchase-item-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-align: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.purchase-input, .purchase-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px; /* Prevents iOS zoom */
+    -webkit-appearance: none;
+    box-sizing: border-box;
+}
+
+.purchase-input:focus, .purchase-textarea:focus {
+    border-color: #2c3e50;
+    outline: none;
+}
+
+.purchase-textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+.photo-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.photo-input {
+    display: none;
+}
+
+.camera-btn {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    min-height: 44px;
+    touch-action: manipulation;
+}
+
+.camera-btn:hover {
+    background: #34495e;
+}
+
+.photo-preview {
+    margin-top: 10px;
+}
+
+.photo-preview-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.preview-image, .receipt-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.clear-photo-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    min-height: 44px;
+    min-width: 120px;
+    touch-action: manipulation;
+}
+
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #219a52;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.quick-purchase-btn, .view-receipt-btn {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px;
+    min-height: 32px;
+    touch-action: manipulation;
+}
+
+.quick-purchase-btn:hover, .view-receipt-btn:hover {
+    background: #34495e;
+}
+
+.receipt-details {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.receipt-details p {
+    margin: 5px 0;
+    color: #2c3e50;
+}
+
+/* Mobile optimizations for modals */
+@media (max-width: 768px) {
+    .modal {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        max-height: 95vh;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .photo-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .camera-btn {
+        width: 100%;
     }
 }

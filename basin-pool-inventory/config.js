@@ -84,9 +84,11 @@ const CONFIG = {
     
     // Status types and their colors
     STATUS_TYPES: {
-        'pending': { label: 'Pending', color: '#e74c3c' },
-        'partial': { label: 'Partial', color: '#f39c12' },
-        'verified': { label: 'Verified', color: '#27ae60' }
+        'pending': { label: '📋 Need to Order', color: '#e74c3c' },
+        'ordered': { label: '🛒 Ordered', color: '#f39c12' },
+        'purchased': { label: '✅ Purchased', color: '#27ae60' },
+        'partial': { label: '⚠️ Partial', color: '#8e44ad' },
+        'verified': { label: '✓ Verified', color: '#2c3e50' }
     },
     
     // Location types and their colors

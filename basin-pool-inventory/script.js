@@ -181,29 +181,60 @@ function updatePresenceDisplay(presenceData) {
 
 // Initialize default inventory data
 function initializeData() {
-    // Cliff's Installation - Lean Startup Materials (template with $0 prices)
+    // Complete Project Shopping List - Cliff's Pool + Deck ($3,116.67 Total)
     inventoryData.cliff = [
-        { name: '8ft CountyLine Tank (700 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Cliff\'s installation' },
-        { name: 'Intex SX2800 Sand Filter Pump', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: '2-day shipping' },
-        { name: 'Filter Balls 4.6lbs', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'REVICOAR brand' },
-        { name: 'Intex QS200 Salt System', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Spa experience' },
-        { name: 'Pool Salt (50 lb bag)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Local supplier' },
-        { name: 'FOGATTI Heater (120k BTU)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'B0CS9M5BFM model' },
-        { name: 'Pool Skimmer', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Surface cleaning' },
-        { name: 'Return Jet Fitting', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1.5 inch' },
-        { name: 'Suction Fitting', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Main drain' },
-        { name: 'PVC Fittings & Pipe', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Elbows, unions' },
-        { name: 'Pool Hoses (25ft x2)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: '1.5 inch diameter' },
-        { name: 'GFCI Outlet & Box', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Outdoor rated' },
-        { name: 'Gas Line Kit', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Propane connection' },
-        { name: 'Heater Mounting Kit', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Brackets, bolts' },
-        { name: 'Temp Controller', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Digital display' },
-        { name: 'Test Strips', actualPrice: 0, quantity: 0, usage: 'consumable', location: 'both', link: '', status: 'pending', notes: '50 count' },
-        { name: 'Chlorine Tablets (starter)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2-week supply' },
-        { name: 'Chlorine Dispenser', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Floating tablet' },
-        { name: 'Pool Thermometer', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Floating digital' },
-        { name: 'Vacuum Head & Hose', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Manual cleaning' },
-        { name: 'Pool Ladder', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'online', link: '', status: 'pending', notes: 'Tank specific' }
+        // ✅ ALREADY PURCHASED - EBAY ($599.43) - Pool System Components
+        { name: 'Filter Balls', actualPrice: 24.79, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'MAQIHAN 50PCS Pool Filter Balls - Replaces 100 lbs pool filter sand, reusable filtration media' },
+        { name: 'Water Transfer Pump', actualPrice: 49.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'VEVOR Water Transfer Removal Pump - 360 GPH utility pump with hose for water transfer operations' },
+        { name: 'Sand Filter Pump', actualPrice: 230.90, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'INTEX 26641EG Krystal Clear Sand Filter - 4,400 GPH pool pump system, open box condition' },
+        { name: 'Propane Heater', actualPrice: 299.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'Outdoor Propane Tankless Water Heater - 120,000 BTU instant heater, 5.3 gallon capacity' },
+        
+        // ✅ ALREADY PURCHASED - HOME DEPOT ELECTRICAL ($93.24)
+        { name: '2-Gang FSC Box', actualPrice: 8.74, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Cantex 1/2 in. 2-Gang FSC Box' },
+        { name: '4-Gang Deep Box', actualPrice: 18.88, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Commercial Electric 4-Gang Extra Deep Box' },
+        { name: 'Plastic Anchors', actualPrice: 9.91, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Triple Grip Plastic Anchors (15-pack)' },
+        { name: '1-Gang PVC Boxes', actualPrice: 6.60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Carlon 1-Gang PVC Boxes (2)' },
+        { name: 'Box Covers', actualPrice: 4.88, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Carlon Box Covers (2)' },
+        { name: 'Liquid-Tight Conduit', actualPrice: 44.99, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'HYDROMAXX 50ft Liquid-Tight Conduit' },
+        { name: 'Conduit Clamps', actualPrice: 4.98, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'purchased', notes: 'Carlon Conduit Clamps (25-pack)' },
+        
+        // 🛒 TSC MIDLAND - TANK ($599)
+        { name: 'Stock Tank (8ft)', actualPrice: 599.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '8ft CountyLine Stock Tank - 8 foot diameter galvanized, 2 foot depth, ~700 gallons. CALL AHEAD FOR AVAILABILITY' },
+        
+        // 🛒 HOME DEPOT - PLUMBING HARDWARE ($150)
+        { name: 'Bulkhead Fittings', actualPrice: 60.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Bulkhead Tank Fittings (2") - Through-wall penetrations with gaskets' },
+        { name: 'PVC Pipe & Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'PVC Pipe & Fittings Kit - 1.5" main line (10 feet), 1/2" heater line (20 feet), elbows, tees, couplers, cement' },
+        { name: 'Check Valves', actualPrice: 30.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Check Valves (1.5" & 1/2")' },
+        { name: 'Gate Valves', actualPrice: 24.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Gate Valves (1.5" & 1/2")' },
+        { name: 'Tank Drain Valve', actualPrice: 20.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Tank Drain Valve Kit' },
+        { name: 'Hose Clamps & Adapters', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Hose Clamps & Adapters' },
+        { name: 'Teflon & Sealant', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Teflon Tape & Sealant' },
+        
+        // 🛒 HOME DEPOT - DECK MATERIALS ($675)
+        { name: 'Concrete Pier Blocks', actualPrice: 108.00, quantity: 9, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '9x Concrete Pier Blocks' },
+        { name: 'PT Posts', actualPrice: 54.00, quantity: 3, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '3x 4x4x8\' PT Posts' },
+        { name: 'PT Boards 8ft', actualPrice: 34.00, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '4x 2x6x8\' PT Boards' },
+        { name: 'PT Boards 12ft', actualPrice: 28.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 2x6x12\' PT Boards' },
+        { name: 'PT Deck Boards', actualPrice: 240.00, quantity: 20, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '20x 5/4"x6"x8\' PT Deck Boards' },
+        { name: 'Stair Stringers', actualPrice: 90.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 3-Step Stair Stringers' },
+        { name: 'Joist Hangers', actualPrice: 30.00, quantity: 12, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12x 2x6 Joist Hangers' },
+        { name: 'Stringer Connectors', actualPrice: 16.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Stair Stringer Connectors' },
+        { name: 'TimberLOK Screws', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'TimberLOK 4" Screws (1 box)' },
+        { name: 'Deck Screws', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Exterior Deck Screws (5 lbs)' },
+        { name: 'Joist Hanger Nails', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Joist Hanger Nails (1 box)' },
+        
+        // 🛒 RECOM MATERIALS - PICKUP ($150)
+        { name: 'Caliche Base', actualPrice: 45.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Caliche Base' },
+        { name: 'Pea Gravel', actualPrice: 80.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Pea Gravel' },
+        { name: 'Landscape Fabric', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Landscape Fabric (45 sq ft)' },
+        
+        // 🛒 MISCELLANEOUS SUPPLIES ($100)
+        { name: 'Extra Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Extra Fittings & Adapters' },
+        { name: 'Safety Equipment', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Safety Equipment' },
+        { name: 'Installation Tools', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Installation Tools/Consumables' },
+        
+        // 🛒 LABOR
+        { name: 'Installation Labor', actualPrice: 750.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Complete Installation Labor' }
     ];
 
     // One-Time Tools (template with $0 prices)
@@ -447,6 +478,12 @@ function renderSection(section, items, tableId) {
             </td>
             <td data-label="Status">
                 <span class="status ${item.status}" data-section="${section}" data-index="${index}">${CONFIG.STATUS_TYPES[item.status]?.label || item.status}</span>
+                ${item.status === 'pending' || item.status === 'ordered' ? 
+                    `<button class="quick-purchase-btn" onclick="openQuickPurchase('${section}', ${index})" title="Quick Purchase (${section}[${index}]: ${item.name})">💳</button>` : 
+                    ''}
+                ${item.receiptPhoto ? 
+                    `<button class="view-receipt-btn" onclick="viewReceipt('${section}', ${index})" title="View Receipt">📷</button>` : 
+                    ''}
             </td>
             <td data-label="Notes">
                 <input type="text" class="notes-input" data-section="${section}" data-index="${index}" data-field="notes" 
@@ -491,9 +528,17 @@ function renderSection(section, items, tableId) {
 
 // Cycle through status options when clicked
 function cycleStatus(statusElement) {
-    const statuses = ['pending', 'partial', 'verified'];
-    const currentStatus = statusElement.classList.contains('pending') ? 'pending' : 
-                         statusElement.classList.contains('partial') ? 'partial' : 'verified';
+    const statuses = ['pending', 'ordered', 'purchased', 'partial', 'verified'];
+    
+    // Determine current status by checking all possible classes
+    let currentStatus = 'pending';
+    for (const status of statuses) {
+        if (statusElement.classList.contains(status)) {
+            currentStatus = status;
+            break;
+        }
+    }
+    
     const currentIndex = statuses.indexOf(currentStatus);
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
     
@@ -1186,3 +1231,234 @@ function showNotification(message, type = 'info') {
         }, 300);
     }, duration);
 }
+
+// Quick Purchase Modal Functions
+let currentPurchaseItem = null;
+
+function openQuickPurchase(section, index) {
+    // Convert index to number to ensure proper array access
+    const numIndex = parseInt(index);
+    currentPurchaseItem = { section, index: numIndex };
+    
+    console.log('openQuickPurchase:', { section, index, numIndex, arrayLength: inventoryData[section]?.length });
+    
+    if (!inventoryData[section] || !inventoryData[section][numIndex]) {
+        console.error('Invalid section or index:', { section, numIndex, availableIndices: inventoryData[section]?.length });
+        showNotification('Error: Invalid item selected', 'error');
+        return;
+    }
+    
+    const item = inventoryData[section][numIndex];
+    console.log('Selected item:', item);
+    
+    document.getElementById('purchaseItemName').textContent = item.name;
+    document.getElementById('purchasePrice').value = item.actualPrice || '';
+    document.getElementById('purchaseNotes').value = item.notes || '';
+    document.getElementById('photoPreview').innerHTML = '';
+    
+    document.getElementById('quickPurchaseModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeQuickPurchase() {
+    document.getElementById('quickPurchaseModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    currentPurchaseItem = null;
+}
+
+function triggerCamera() {
+    console.log('Triggering camera');
+    const photoInput = document.getElementById('receiptPhoto');
+    if (photoInput) {
+        console.log('Photo input found, triggering click');
+        photoInput.click();
+    } else {
+        console.error('Photo input not found when triggering camera');
+        showNotification('Camera not available', 'error');
+    }
+}
+
+// Handle photo selection - Ensure this runs after DOM is fully loaded
+function initializePhotoHandler() {
+    const photoInput = document.getElementById('receiptPhoto');
+    if (photoInput) {
+        console.log('Photo input found, adding event listener');
+        photoInput.addEventListener('change', function(e) {
+            console.log('Photo input changed, file count:', e.target.files.length);
+            if (e.target.files.length > 0) {
+                handlePhotoSelection(e.target.files[0]);
+            }
+        });
+    } else {
+        console.warn('Photo input not found');
+    }
+}
+
+// Initialize photo handler when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing photo handler');
+    initializePhotoHandler();
+});
+
+function handlePhotoSelection(file) {
+    if (!file) {
+        console.log('No file selected');
+        return;
+    }
+    
+    console.log('Handling photo selection:', { name: file.name, size: file.size, type: file.type });
+    
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+        console.error('Selected file is not an image:', file.type);
+        showNotification('Please select an image file', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        console.log('Photo loaded successfully');
+        const preview = document.getElementById('photoPreview');
+        if (preview) {
+            preview.innerHTML = `
+                <div class="photo-preview-container">
+                    <img src="${e.target.result}" alt="Receipt Preview" class="preview-image">
+                    <button type="button" onclick="clearPhoto()" class="clear-photo-btn">&times;</button>
+                </div>
+            `;
+            console.log('Photo preview updated');
+        } else {
+            console.error('Photo preview element not found');
+        }
+    };
+    
+    reader.onerror = function(e) {
+        console.error('Error reading file:', e);
+        showNotification('Error reading photo file', 'error');
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function clearPhoto() {
+    console.log('Clearing photo');
+    const preview = document.getElementById('photoPreview');
+    const input = document.getElementById('receiptPhoto');
+    
+    if (preview) {
+        preview.innerHTML = '';
+        console.log('Photo preview cleared');
+    } else {
+        console.error('Photo preview element not found');
+    }
+    
+    if (input) {
+        input.value = '';
+        console.log('Photo input cleared');
+    } else {
+        console.error('Photo input element not found');
+    }
+}
+
+function completePurchase() {
+    if (!currentPurchaseItem) {
+        console.error('No current purchase item');
+        return;
+    }
+    
+    const { section, index } = currentPurchaseItem;
+    console.log('completePurchase:', { section, index });
+    
+    if (!inventoryData[section] || !inventoryData[section][index]) {
+        console.error('Invalid purchase item:', { section, index });
+        showNotification('Error: Invalid item for purchase', 'error');
+        return;
+    }
+    
+    const price = parseFloat(document.getElementById('purchasePrice').value) || 0;
+    const notes = document.getElementById('purchaseNotes').value;
+    const photoFile = document.getElementById('receiptPhoto').files[0];
+    
+    console.log('Purchase data:', { price, notes, hasPhoto: !!photoFile });
+    
+    // Update item data
+    inventoryData[section][index].actualPrice = price;
+    inventoryData[section][index].status = 'purchased';
+    inventoryData[section][index].notes = notes;
+    inventoryData[section][index].purchaseDate = new Date().toISOString();
+    
+    // Store photo as base64 for now (in production, you'd upload to Firebase Storage)
+    if (photoFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            inventoryData[section][index].receiptPhoto = e.target.result;
+            console.log('Photo stored for item:', inventoryData[section][index].name);
+            finalizePurchase();
+        };
+        reader.readAsDataURL(photoFile);
+    } else {
+        finalizePurchase();
+    }
+}
+
+function finalizePurchase() {
+    // Re-render the section to show updated data
+    renderSection(currentPurchaseItem.section, CONFIG.SECTIONS[currentPurchaseItem.section]);
+    updateSummary();
+    scheduleAutoSave();
+    
+    // Show success notification
+    showNotification(`Purchase completed! Item marked as purchased.`, 'success');
+    
+    closeQuickPurchase();
+}
+
+function viewReceipt(section, index) {
+    const numIndex = parseInt(index);
+    console.log('viewReceipt:', { section, index, numIndex });
+    
+    if (!inventoryData[section] || !inventoryData[section][numIndex]) {
+        console.error('Invalid receipt view request:', { section, numIndex });
+        return;
+    }
+    
+    const item = inventoryData[section][numIndex];
+    if (!item.receiptPhoto) {
+        console.log('No receipt photo for item:', item.name);
+        return;
+    }
+    
+    document.getElementById('receiptImageContainer').innerHTML = `
+        <img src="${item.receiptPhoto}" alt="Receipt for ${item.name}" class="receipt-image">
+        <div class="receipt-details">
+            <p><strong>Item:</strong> ${item.name}</p>
+            <p><strong>Price:</strong> $${item.actualPrice?.toFixed(2) || 'N/A'}</p>
+            <p><strong>Purchase Date:</strong> ${item.purchaseDate ? new Date(item.purchaseDate).toLocaleDateString() : 'N/A'}</p>
+        </div>
+    `;
+    
+    document.getElementById('receiptModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReceiptModal() {
+    document.getElementById('receiptModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Debug function to help troubleshoot index issues
+function debugInventoryStructure() {
+    console.log('=== INVENTORY DEBUG ===');
+    Object.keys(inventoryData).forEach(section => {
+        if (Array.isArray(inventoryData[section])) {
+            console.log(`Section: ${section} (${inventoryData[section].length} items)`);
+            inventoryData[section].forEach((item, index) => {
+                console.log(`  [${index}] ${item.name} - Status: ${item.status}`);
+            });
+        }
+    });
+    console.log('=== END DEBUG ===');
+}
+
+// Add debug function to global scope for console access
+window.debugInventory = debugInventoryStructure;
