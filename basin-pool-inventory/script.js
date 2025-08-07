@@ -571,18 +571,63 @@ function addCategoryItem(category) {
 
 // Update individual item field
 function updateItemField(section, index, field, value) {
+    console.log('updateItemField called:', { section, index, field, value }); // Debug
     
     if (inventoryData[section] && inventoryData[section][index]) {
         inventoryData[section][index][field] = value;
+        console.log('Data updated:', inventoryData[section][index]); // Debug
         
         // Re-render accordion sections to update categories and totals
         renderAccordionSections();
         updateSummary();
-        scheduleAutoSave();
+        
+        // Force immediate save
+        forceSave();
         
     } else {
         console.error('Could not update field - invalid section or index:', section, index);
     }
+}
+
+// Force immediate save (both Firebase and localStorage)
+function forceSave() {
+    console.log('Force saving data...'); // Debug
+    
+    // Always save to localStorage as backup
+    saveToLocalStorage();
+    
+    // Also try Firebase if available
+    if (isFirebaseReady && dataRef) {
+        console.log('Saving to Firebase...'); // Debug
+        saveToFirebase();
+    } else {
+        console.log('Firebase not ready, localStorage only'); // Debug
+    }
+    
+    showSaveIndicator('Saved');
+}
+
+// Test function - call from browser console: testSave()
+function testSave() {
+    console.log('=== TESTING SAVE SYSTEM ===');
+    console.log('Current inventoryData.cliff length:', inventoryData.cliff?.length);
+    console.log('Firebase ready:', isFirebaseReady);
+    console.log('DataRef exists:', !!dataRef);
+    console.log('LocalStorage key:', CONFIG.AUTO_SAVE.LOCAL_STORAGE_KEY);
+    
+    // Test localStorage
+    console.log('Testing localStorage save...');
+    forceSave();
+    
+    // Check what's in localStorage
+    setTimeout(() => {
+        const saved = localStorage.getItem(CONFIG.AUTO_SAVE.LOCAL_STORAGE_KEY);
+        console.log('Data in localStorage:', saved ? 'EXISTS' : 'MISSING');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            console.log('Saved cliff items count:', parsed.cliff?.length);
+        }
+    }, 1000);
 }
 
 
@@ -952,9 +997,13 @@ function saveToLocalStorage() {
             ...inventoryData,
             lastSaved: new Date().toISOString()
         };
+        console.log('Saving to localStorage:', CONFIG.AUTO_SAVE.LOCAL_STORAGE_KEY); // Debug
         localStorage.setItem(CONFIG.AUTO_SAVE.LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+        console.log('Successfully saved to localStorage'); // Debug
+        showSaveIndicator('Saved locally');
     } catch (error) {
         console.error('Failed to save to localStorage:', error);
+        showNotification('Save failed!', 'error');
     }
 }
 
