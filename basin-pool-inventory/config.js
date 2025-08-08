@@ -66,9 +66,10 @@ const CONFIG = {
         ENABLED: true,
         // Veryfi OCR API Configuration
         OCR_API: {
-            CLIENT_ID: 'vrfy_basin_pool_co_client_id_placeholder', // Replace with your Client ID
-            USERNAME: 'basin_pool_co_username_placeholder',          // Replace with your Username  
-            API_KEY: 'your_veryfi_api_key_here',                     // Replace with your API Key
+            CLIENT_ID: 'vrfYuAkF09UCcDSpXj5d9f709HPac4OgrxWlLRy',
+            CLIENT_SECRET: 'kUUrmvDGRIVIiubePwzkS976vjCinuXJWp3XTpZyyuWuISpZ3J95pRCfjP2UOdt8gnpywKAbTdktpTw5dNxTw8Hx7I6P6e2hJ9CmTlBjaVUxMVRI64WfJT8xl4yZx4Pb',
+            USERNAME: 'laurencio',
+            API_KEY: '5841efd7cc615eaebd8726a53f1a8ffc',
             BASE_URL: 'https://api.veryfi.com/api/v8/partner/documents/',
             TIMEOUT: 30000, // 30 seconds
             // Production settings
