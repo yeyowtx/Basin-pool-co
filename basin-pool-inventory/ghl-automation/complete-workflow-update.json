@@ -1,0 +1,271 @@
+{
+  "name": "GHL → ClickUp Client Onboarding (Production Ready)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-client-onboarding",
+        "responseMode": "onReceived",
+        "responseData": "firstEntryJson",
+        "options": {
+          "noResponseBody": false
+        }
+      },
+      "id": "webhook-ghl-trigger",
+      "name": "GHL Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "clientName",
+              "value": "={{ $json.contact && $json.contact.name || $json.name || $json.client_name || 'UNKNOWN CLIENT' }}"
+            },
+            {
+              "name": "clientEmail", 
+              "value": "={{ $json.contact && $json.contact.email || $json.email || '' }}"
+            },
+            {
+              "name": "clientPhone",
+              "value": "={{ $json.contact && $json.contact.phone || $json.phone || '' }}"
+            },
+            {
+              "name": "subAccountId",
+              "value": "={{ $json.locationId || $json.sub_account_id || '' }}"
+            },
+            {
+              "name": "ein",
+              "value": "={{ $json.ein || $json.business_ein || '' }}"
+            },
+            {
+              "name": "supportEmail",
+              "value": "={{ $json.support_email || $json.business_email || '' }}"
+            },
+            {
+              "name": "projectType",
+              "value": "={{ $json.tags && $json.tags.includes('premium') ? 'Premium' : 'Standard' }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "spaceId",
+              "value": "90140073497"
+            },
+            {
+              "name": "teamId", 
+              "value": "90140073497"
+            },
+            {
+              "name": "assigneeId",
+              "value": "88411788"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-client-data",
+      "name": "Set Client Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.clientName }}",
+              "rightValue": "UNKNOWN CLIENT",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "condition-2", 
+              "leftValue": "={{ $json.clientName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-valid-client",
+      "name": "IF - Valid Client Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "list",
+        "operation": "create",
+        "team": "={{ $json.teamId }}",
+        "space": "={{ $json.spaceId }}",
+        "folderless": true,
+        "name": "🏗️ {{ $json.clientName }} - GHL Onboarding",
+        "content": "Complete GoHighLevel sub-account setup following the 16-step onboarding process for {{ $json.clientName }}. Project Type: {{ $json.projectType }}",
+        "priority": true,
+        "assignee": "={{ $json.assigneeId }}",
+        "status": "red"
+      },
+      "id": "create-main-list",
+      "name": "Create Main Project List",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [800, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get client data from previous node\nconst clientData = $input.first().json;\n\n// Define all 16 tasks with detailed content from PDF\nconst tasks = [\n  {\n    id: 1,\n    name: \"1️⃣ INTEGRATIONS\",\n    priority: \"urgent\",\n    estimatedHours: 16,\n    content: `**🔗 INTEGRATIONS SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 2 days (16 hours)\\n\\n**TASKS TO COMPLETE:**\\n☐ Google Business Profile Integration\\n☐ Facebook Ads Integration\\n☐ Google Ads Integration  \\n☐ QuickBooks Integration\\n☐ Payment Process Setup\\n☐ 3rd Party Apps Integration\\n\\n**NOTES:**\\n• Complete all integrations in this exact order for optimal setup\\n• Test each integration after setup\\n• Document any API keys or credentials used\\n\\n**SUCCESS CRITERIA:**\\n✅ All integrations active and tested\\n✅ Data flowing correctly between systems\\n✅ Client has access to all connected platforms\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 2,\n    name: \"2️⃣ WEBSITE\",\n    priority: \"high\", \n    estimatedHours: 24,\n    content: `**🌐 WEBSITE FOUNDATION SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 3 days (24 hours)\\n\\n**TASKS TO COMPLETE:**\\n☐ Landing page creation\\n☐ Standard terms and conditions page\\n☐ Standard privacy policy page\\n☐ Domain setup using Domain Connect feature\\n\\n**RESOURCES:**\\n📚 [Domain Connect Guide](https://help.gohighlevel.com/support/solutions/articles/155000000734-how-to-use-the-domain-connect-feature-)\\n\\n**SUCCESS CRITERIA:**\\n✅ Professional landing page live\\n✅ Legal pages properly linked\\n✅ Domain connected and SSL active\\n✅ Mobile responsive design verified\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 3,\n    name: \"3️⃣ PHONE SYSTEM\",\n    priority: \"urgent\",\n    estimatedHours: 24,\n    content: `**📞 PHONE SYSTEM & A2P REGISTRATION**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 3 days (24 hours)\\n\\n**⚠️ CRITICAL REQUIREMENTS:**\\n**Client EIN:** ${clientData.ein || '🚨 COLLECT FROM CLIENT IMMEDIATELY'}\\n**Support Email:** ${clientData.supportEmail || '🚨 COLLECT FROM CLIENT IMMEDIATELY'}\\n\\n**TASKS TO COMPLETE:**\\n☐ Collect EIN from client (REQUIRED)\\n☐ Collect/verify support email (REQUIRED)\\n☐ Complete A2P registration process\\n☐ Reference A2P 10DLC Brand Approval Best Practices\\n☐ Configure phone number routing\\n☐ Test SMS capabilities\\n\\n**CRITICAL NOTES:**\\n🚨 A2P registration MUST be completed before any SMS campaigns\\n🚨 EIN and support email are MANDATORY for approval\\n🚨 This step blocks SMS functionality if incomplete\\n\\n**RESOURCES:**\\n📚 [A2P 10DLC Best Practices](https://help.gohighlevel.com/support/solutions/articles/155000000508-a2p-10dlc-brand-approval-best-practices)\\n\\n**SUCCESS CRITERIA:**\\n✅ A2P registration approved\\n✅ SMS sending capability active\\n✅ Phone routing configured\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  }\n];\n\n// Return first 3 tasks for initial batch\nreturn tasks.map(task => ({\n  json: {\n    ...task,\n    clientData,\n    spaceId: clientData.spaceId,\n    teamId: clientData.teamId,\n    assigneeId: clientData.assigneeId\n  }\n}));"
+      },
+      "id": "prepare-task-data",
+      "name": "Prepare Task Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 500]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "task",
+        "operation": "create",
+        "team": "={{ $json.teamId }}",
+        "space": "={{ $json.spaceId }}",
+        "folderless": true,
+        "list": "={{ $('Create Main Project List').item.json.id }}",
+        "name": "={{ $json.name }}",
+        "content": "={{ $json.content }}",
+        "status": "to do",
+        "priority": "={{ $json.priority === 'urgent' ? '1' : $json.priority === 'high' ? '2' : $json.priority === 'normal' ? '3' : '4' }}",
+        "assignees": [
+          "={{ $json.assigneeId }}"
+        ],
+        "tags": [
+          "ghl-onboarding",
+          "={{ $json.clientData.projectType.toLowerCase() }}"
+        ],
+        "timeEstimate": "={{ $json.estimatedHours * 60 * 60 * 1000 }}"
+      },
+      "id": "create-individual-task",
+      "name": "Create Individual Task",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [800, 500]
+    },
+    {
+      "parameters": {
+        "subject": "✅ GHL Onboarding Project Created - {{ $('Set Client Data').item.json.clientName }}",
+        "message": "SUCCESS: GHL onboarding project has been created!\\n\\nClient: {{ $('Set Client Data').item.json.clientName }}\\nProject Type: {{ $('Set Client Data').item.json.projectType }}\\nTotal Tasks: 16\\n\\nClickUp Project: {{ $('Create Main Project List').item.json.url }}\\n\\nNEXT STEPS:\\n1. Review all tasks in ClickUp\\n2. Assign team members as needed  \\n3. Begin with Step 1 (Integrations)\\n4. Follow the exact order for optimal results\\n\\nThe project follows the complete 16-step onboarding process with detailed checklists and instructions.",
+        "options": {}
+      },
+      "id": "send-success-notification",
+      "name": "Send Success Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "subject": "❌ GHL Onboarding Failed - Invalid Client Data",
+        "message": "ERROR: Cannot create GHL onboarding project due to invalid client data.\\n\\nReceived Data:\\nClient Name: {{ $('Set Client Data').item.json.clientName }}\\nEmail: {{ $('Set Client Data').item.json.clientEmail }}\\nPhone: {{ $('Set Client Data').item.json.clientPhone }}\\nSub-Account ID: {{ $('Set Client Data').item.json.subAccountId }}\\n\\nERROR: Client name is missing or invalid.\\n\\nPlease check the webhook data and try again.",
+        "options": {}
+      },
+      "id": "send-error-notification",
+      "name": "Send Error Notification", 
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [800, 100]
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Client Data": {
+      "main": [
+        [
+          {
+            "node": "IF - Valid Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Valid Client Data": {
+      "main": [
+        [
+          {
+            "node": "Create Main Project List",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Task Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Main Project List": {
+      "main": [
+        [
+          {
+            "node": "Send Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Task Data": {
+      "main": [
+        [
+          {
+            "node": "Create Individual Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

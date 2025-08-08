@@ -1980,34 +1980,99 @@ async function toggleCamera() {
     await initializeCamera();
 }
 
-// Capture receipt photo
+// Enhanced receipt capture with image processing for better OCR
 function captureReceipt() {
     const video = document.getElementById('cameraVideo');
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw current frame to canvas
-    context.drawImage(video, 0, 0);
-    
-    // Convert to base64 with quality setting
-    capturedImageData = canvas.toDataURL('image/jpeg', CONFIG.RECEIPT_SCANNER.CAMERA.PHOTO_QUALITY);
-    
-    // Show captured image
-    document.getElementById('cameraPreview').style.display = 'none';
-    document.getElementById('capturedImage').style.display = 'block';
-    document.getElementById('receiptImage').src = capturedImageData;
-    
-    // Stop camera stream
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
+    // Wait for auto-focus if configured
+    const autoFocusDelay = CONFIG.RECEIPT_SCANNER.CAMERA.RECEIPT_CAPTURE?.AUTO_FOCUS_DELAY || 0;
+    if (autoFocusDelay > 0) {
+        showNotification('📷 Focusing...', 'info');
+        setTimeout(() => performCapture(), autoFocusDelay);
+    } else {
+        performCapture();
     }
     
-    showNotification('Receipt captured! Review and process.', 'success');
+    function performCapture() {
+        // Set canvas dimensions to match video with high resolution
+        const maxWidth = 2048; // High res for better OCR
+        const aspectRatio = video.videoHeight / video.videoWidth;
+        
+        canvas.width = Math.min(video.videoWidth, maxWidth);
+        canvas.height = canvas.width * aspectRatio;
+        
+        // Enable image smoothing for better quality
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        
+        // Draw current frame to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Apply image enhancements for better OCR
+        const receiptConfig = CONFIG.RECEIPT_SCANNER.CAMERA.RECEIPT_CAPTURE;
+        if (receiptConfig?.BRIGHTNESS_ADJUSTMENT || receiptConfig?.CONTRAST_ENHANCEMENT) {
+            enhanceImageForOCR(context, canvas.width, canvas.height, receiptConfig);
+        }
+        
+        // Convert to base64 with high quality for OCR
+        const quality = CONFIG.RECEIPT_SCANNER.CAMERA.PHOTO_QUALITY || 0.92;
+        capturedImageData = canvas.toDataURL('image/jpeg', quality);
+        
+        // Show captured image
+        document.getElementById('cameraPreview').style.display = 'none';
+        document.getElementById('capturedImage').style.display = 'block';
+        document.getElementById('receiptImage').src = capturedImageData;
+        
+        // Stop camera stream
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        
+        showNotification('📄 Receipt captured! Ready to process.', 'success');
+    }
+}
+
+// Image enhancement function for better OCR results
+function enhanceImageForOCR(context, width, height, config) {
+    if (!config.CONTRAST_ENHANCEMENT && !config.BRIGHTNESS_ADJUSTMENT) {
+        return; // No enhancements needed
+    }
+    
+    try {
+        const imageData = context.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        const brightness = config.BRIGHTNESS_ADJUSTMENT || 0;
+        const contrast = config.CONTRAST_ENHANCEMENT ? 1.2 : 1; // 20% contrast boost
+        
+        // Apply brightness and contrast adjustments
+        for (let i = 0; i < data.length; i += 4) {
+            // Red, Green, Blue channels (skip Alpha)
+            for (let j = 0; j < 3; j++) {
+                let pixel = data[i + j];
+                
+                // Apply contrast
+                pixel = ((pixel - 128) * contrast) + 128;
+                
+                // Apply brightness
+                pixel = pixel + (brightness * 255);
+                
+                // Clamp to valid range
+                data[i + j] = Math.max(0, Math.min(255, pixel));
+            }
+        }
+        
+        // Put the enhanced image data back
+        context.putImageData(imageData, 0, 0);
+        
+        console.log('Applied OCR image enhancements:', { brightness, contrast });
+    } catch (error) {
+        console.warn('Failed to enhance image for OCR:', error);
+        // Continue without enhancement
+    }
 }
 
 // Retake photo

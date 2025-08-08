@@ -1,0 +1,176 @@
+{
+  "name": "GHL → ClickUp Client Onboarding (Production Ready)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-client-onboarding",
+        "responseMode": "onReceived",
+        "responseData": "firstEntryJson",
+        "options": {
+          "noResponseBody": false
+        }
+      },
+      "id": "webhook-ghl-trigger",
+      "name": "GHL Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 300],
+      "webhookId": "ghl-client-webhook"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "clientName",
+              "value": "={{ $json.contact && $json.contact.name || $json.name || $json.client_name || 'UNKNOWN CLIENT' }}"
+            },
+            {
+              "name": "clientEmail", 
+              "value": "={{ $json.contact && $json.contact.email || $json.email || '' }}"
+            },
+            {
+              "name": "clientPhone",
+              "value": "={{ $json.contact && $json.contact.phone || $json.phone || '' }}"
+            },
+            {
+              "name": "subAccountId",
+              "value": "={{ $json.locationId || $json.sub_account_id || '' }}"
+            },
+            {
+              "name": "ein",
+              "value": "={{ $json.ein || $json.business_ein || '' }}"
+            },
+            {
+              "name": "supportEmail",
+              "value": "={{ $json.support_email || $json.business_email || '' }}"
+            },
+            {
+              "name": "projectType",
+              "value": "={{ $json.tags && $json.tags.includes('premium') ? 'Premium' : 'Standard' }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "spaceId",
+              "value": "90140073497"
+            },
+            {
+              "name": "teamId", 
+              "value": "90140073497"
+            },
+            {
+              "name": "assigneeId",
+              "value": "88411788"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-client-data",
+      "name": "Set Client Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.clientName }}",
+              "rightValue": "UNKNOWN CLIENT",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "condition-2", 
+              "leftValue": "={{ $json.clientName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-valid-client",
+      "name": "IF - Valid Client Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "list",
+        "operation": "create",
+        "team": "={{ $json.teamId }}",
+        "space": "={{ $json.spaceId }}",
+        "folderless": true,
+        "name": "🏗️ {{ $json.clientName }} - GHL Onboarding",
+        "content": "Complete GoHighLevel sub-account setup following the 16-step onboarding process for {{ $json.clientName }}. Project Type: {{ $json.projectType }}",
+        "priority": true,
+        "assignee": "={{ $json.assigneeId }}",
+        "status": "red"
+      },
+      "id": "create-main-list",
+      "name": "Create Main Project List",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [800, 200]
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Client Data": {
+      "main": [
+        [
+          {
+            "node": "IF - Valid Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Valid Client Data": {
+      "main": [
+        [
+          {
+            "node": "Create Main Project List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

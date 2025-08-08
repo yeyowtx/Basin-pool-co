@@ -1,0 +1,167 @@
+{
+  "name": "GHL → ClickUp Client Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-new-client",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      "name": "GHL Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "webhookId": "ghl-webhook-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process incoming GHL webhook data\nconst webhookData = $input.first().json;\n\n// Extract client information from GHL webhook\nconst clientData = {\n  clientName: webhookData.contact?.name || webhookData.name || 'Unknown Client',\n  clientEmail: webhookData.contact?.email || webhookData.email || '',\n  clientPhone: webhookData.contact?.phone || webhookData.phone || '',\n  subAccountId: webhookData.locationId || webhookData.sub_account_id || '',\n  projectType: webhookData.tags?.includes('premium') ? 'premium' : 'standard',\n  timestamp: new Date().toISOString(),\n  source: 'GoHighLevel'\n};\n\n// Process steps configuration from config\nconst PROCESS_STEPS = {\n  '01_integrations': {\n    name: '1️⃣ INTEGRATIONS',\n    description: 'Set up all required integrations',\n    priority: 'high',\n    estimatedDays: 2,\n    subtasks: [\n      'Google Business Profile Integration',\n      'Facebook Ads Integration', \n      'Google Ads Integration',\n      'QuickBooks Integration',\n      'Payment Process Setup',\n      '3rd Party Apps Integration'\n    ]\n  },\n  '02_website': {\n    name: '2️⃣ WEBSITE',\n    description: 'Build website foundation',\n    priority: 'high', \n    estimatedDays: 3,\n    subtasks: [\n      'Landing page creation',\n      'Standard terms and conditions',\n      'Standard privacy policy',\n      'Domain setup (Domain Connect feature)'\n    ]\n  },\n  '03_phone_system': {\n    name: '3️⃣ PHONE SYSTEM',\n    description: 'Configure phone system with A2P registration',\n    priority: 'high',\n    estimatedDays: 3,\n    subtasks: [\n      'A2P registration (CRITICAL: Need EIN + support email)',\n      'Reference A2P 10DLC Brand Approval Best Practices'\n    ],\n    criticalRequirements: ['EIN', 'support_email']\n  },\n  '04_pipelines': {\n    name: '4️⃣ PIPELINES', \n    description: 'PRESENT EXACT PIPELINES AND SEE WHAT DIFFERENCES THE CLIENT LIKES',\n    priority: 'high',\n    estimatedDays: 2,\n    pipelines: {\n      sales: 'New Lead → Pending Designer Acceptance → Assigned Lead → On-Site Estimate Scheduled → Need To Send Proposal → Proposal Sent → Proposal Accepted → Deposit Paid',\n      masterPlan: 'Build/Edit Master Plan → Designer Review → Ready For Shakedown → PSD Revisions Needed → Master Plan Completed → Drop/Cancelled Project',\n      activeJob: 'Book Pre-CW → Pre-CW Booked → Change Order Needed → Active Job → Book Post-CW → Post-CW Booked → Address Punch List → Awaiting Final Payment → Job Closed → Dropped/Cancelled Project',\n      changeOrder: 'New Change Order Request → Change Order Sent → Change Order Paid + Closed → Change Order Cancelled',\n      review: 'Review Requested → Left Review → Stale Review Request → DO NOT ASK FOR REVIEW',\n      referral: 'Referral Requested → Referral Shared → Stale Referral Request → DO NOT ASK FOR REFERRAL'\n    }\n  },\n  '05_custom_field_folders': {\n    name: '5️⃣ CUSTOM FIELD FOLDERS',\n    description: 'Create all required custom field folders',\n    priority: 'medium',\n    estimatedDays: 1,\n    folders: [\n      'New Project Questionnaire (Intake)',\n      'Qualification Questionnaire',\n      'On-Site Consultation Questionnaire', \n      'Design Questionnaire',\n      'Pre-CW Questionnaire',\n      'Post-CW Questionnaire'\n    ]\n  },\n  '06_custom_value_folders': {\n    name: '6️⃣ CUSTOM VALUE FOLDERS',\n    description: 'Set up custom value organization',\n    priority: 'medium',\n    estimatedDays: 1,\n    folders: [\n      'Calendar Links',\n      'Form/Survey Links'\n    ]\n  },\n  '07_forms_surveys': {\n    name: '7️⃣ FORMS/SURVEYS',\n    description: 'Create all forms and surveys',\n    priority: 'medium',\n    estimatedDays: 2,\n    forms: [\n      'Calendar forms',\n      'Qualification forms (**based on client\\'s specific qualification process**)',\n      'On-Site Consultation (1st Appointment Form)',\n      'Shakedown/Project Prep Meeting',\n      'Pre-Construction Walkthrough',\n      'Post-Construction Walkthrough',\n      'Project Photoshoot Checklist'\n    ]\n  },\n  '08_custom_values_trigger_links': {\n    name: '8️⃣ CUSTOM VALUES + TRIGGER LINKS',\n    description: 'Save surveys as custom values with trigger links',\n    priority: 'medium',\n    estimatedDays: 1,\n    format: '?contact_id={{contact.id}}',\n    example: '{{custom_values.landscaping_job_outcome_survey}}?contact_id={{contact.id}}'\n  },\n  '09_add_users': {\n    name: '9️⃣ ADD USERS',\n    description: 'Add all users to sub-account BEFORE creating calendars',\n    priority: 'high',\n    estimatedDays: 1,\n    requirements: [\n      'Add owner',\n      'Add all users to sub-account BEFORE creating calendars',\n      'COLLECT ALL CONTACTS + PHONE + EMAIL'\n    ]\n  },\n  '10_calendars': {\n    name: '🔟 CALENDARS',\n    description: 'Set up SERVICE CALENDARS with different colors',\n    priority: 'high',\n    estimatedDays: 2,\n    calendarGroups: [\n      'Consultation Calendar Group',\n      'Construction Calendars Group'\n    ],\n    calendars: {\n      'On-Site Consultation': 'Light Blue',\n      'On-Site Project Presentation': 'Dark Green',\n      'Pre-Construction Walkthrough': 'Dark Red',\n      'Post-Construction Walkthrough': 'Purple',\n      'Project Photoshoot': 'Dark Blue'\n    }\n  },\n  '11_estimate_invoice_settings': {\n    name: '1️⃣1️⃣ ESTIMATE & INVOICE SETTINGS',\n    description: 'Configure payment processing',\n    priority: 'medium',\n    estimatedDays: 1,\n    tasks: [\n      'Setup Stripe account if needed',\n      'Connect payment processor',\n      'Turn auto invoice on'\n    ]\n  },\n  '12_automations_tags': {\n    name: '1️⃣2️⃣ AUTOMATIONS + TAG SETUP',\n    description: 'Build all automation workflows',\n    priority: 'high',\n    estimatedDays: 3,\n    automations: [\n      'Sales automations',\n      'Job management',\n      'Project stacking',\n      'Review management',\n      'Schedule Review Post in Social Planner'\n    ]\n  },\n  '13_dashboards': {\n    name: '1️⃣3️⃣ DASHBOARDS',\n    description: 'Create Sales Dashboard with specific layout',\n    priority: 'medium',\n    estimatedDays: 2,\n    layout: {\n      row1: 'Opportunity Status, Value, Conversion Rate',\n      row2: 'Sales Funnel',\n      row3: 'Lead Source Report',\n      row4: 'GBP',\n      row5: 'Facebook + PPC reporting',\n      row6: 'Sales Efficiency'\n    }\n  },\n  '14_custom_reports': {\n    name: '1️⃣4️⃣ CUSTOM REPORTS',\n    description: 'Set up custom reporting system',\n    priority: 'low',\n    estimatedDays: 1,\n    reference: 'How to create and schedule reports'\n  },\n  '15_domain_setup': {\n    name: '1️⃣5️⃣ DOMAIN SETUP',\n    description: 'Connect or purchase domain',\n    priority: 'medium',\n    estimatedDays: 1,\n    options: [\n      'Connect existing domain',\n      'Buy new domain'\n    ],\n    reference: 'Domain Connect feature guide'\n  },\n  '16_email_system': {\n    name: '1️⃣6️⃣ EMAIL SYSTEM',\n    description: 'Configure email infrastructure',\n    priority: 'high',\n    estimatedDays: 2,\n    components: [\n      'G Suite Setup',\n      'Dedicated subdomain setup'\n    ],\n    reference: 'How to Set Up a Dedicated Sending Domain'\n  }\n};\n\n// Create task data for each step\nconst tasksToCreate = [];\nlet cumulativeDays = 0;\n\nObject.entries(PROCESS_STEPS).forEach(([stepId, stepConfig]) => {\n  const startDate = new Date();\n  startDate.setDate(startDate.getDate() + cumulativeDays);\n  \n  const dueDate = new Date(startDate);\n  dueDate.setDate(dueDate.getDate() + stepConfig.estimatedDays);\n\n  // Build detailed description\n  let description = `${stepConfig.description}\\n\\n`;\n  description += `**Client:** ${clientData.clientName}\\n`;\n  description += `**Project Type:** ${clientData.projectType || 'Standard Onboarding'}\\n`;\n  description += `**Estimated Duration:** ${stepConfig.estimatedDays} days\\n\\n`;\n\n  // Add subtasks with checkboxes\n  if (stepConfig.subtasks) {\n    description += `**Tasks to Complete:**\\n`;\n    stepConfig.subtasks.forEach(subtask => {\n      description += `- [ ] ${subtask}\\n`;\n    });\n    description += '\\n';\n  }\n\n  // Add specific configurations\n  if (stepConfig.pipelines) {\n    description += `**Pipeline Configurations:**\\n`;\n    Object.entries(stepConfig.pipelines).forEach(([name, pipeline]) => {\n      description += `- [ ] **${name.charAt(0).toUpperCase() + name.slice(1)} Pipeline:** ${pipeline}\\n`;\n    });\n    description += '\\n';\n  }\n\n  if (stepConfig.calendars) {\n    description += `**Calendar Setup:**\\n`;\n    Object.entries(stepConfig.calendars).forEach(([name, color]) => {\n      description += `- [ ] ${name} (${color})\\n`;\n    });\n    description += '\\n';\n  }\n\n  if (stepConfig.folders) {\n    description += `**Folders to Create:**\\n`;\n    stepConfig.folders.forEach(folder => {\n      description += `- [ ] ${folder}\\n`;\n    });\n    description += '\\n';\n  }\n\n  if (stepConfig.forms) {\n    description += `**Forms to Create:**\\n`;\n    stepConfig.forms.forEach(form => {\n      description += `- [ ] ${form}\\n`;\n    });\n    description += '\\n';\n  }\n\n  if (stepConfig.requirements) {\n    description += `**Requirements:**\\n`;\n    stepConfig.requirements.forEach(req => {\n      description += `- [ ] ${req}\\n`;\n    });\n    description += '\\n';\n  }\n\n  // Add critical requirements\n  if (stepConfig.criticalRequirements) {\n    description += `**⚠️ CRITICAL REQUIREMENTS:**\\n`;\n    stepConfig.criticalRequirements.forEach(req => {\n      description += `- [ ] ${req}\\n`;\n    });\n    description += '\\n';\n  }\n\n  // Add references\n  if (stepConfig.reference) {\n    description += `**📚 Reference:** ${stepConfig.reference}\\n\\n`;\n  }\n\n  // Add reminder\n  description += `**💡 Remember:** \"When in doubt, map it out. If you go in the order of this document, you will have the fewest amount of interruptions (if any).\"\\n\\n`;\n\n  tasksToCreate.push({\n    stepId,\n    name: stepConfig.name,\n    description,\n    priority: stepConfig.priority || 'normal',\n    estimatedDays: stepConfig.estimatedDays,\n    startDate: startDate.toISOString(),\n    dueDate: dueDate.toISOString(),\n    tags: ['ghl-onboarding', 'automation', stepId, clientData.projectType || 'standard']\n  });\n\n  cumulativeDays += stepConfig.estimatedDays;\n});\n\nreturn [{\n  json: {\n    clientData,\n    tasksToCreate,\n    projectDetails: {\n      totalSteps: Object.keys(PROCESS_STEPS).length,\n      totalEstimatedDays: cumulativeDays,\n      projectName: `GHL Sub-Account Onboarding - ${clientData.clientName}`,\n      spaceId: '90140073497',\n      userId: '88411788'\n    }\n  }\n}];"
+      },
+      "id": "2a3b4c5d-6e7f-8a9b-0c1d-2e3f4a5b6c7d",
+      "name": "Process Client Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "folder",
+        "operation": "create",
+        "space": "={{$json.projectDetails.spaceId}}",
+        "name": "={{$json.projectDetails.projectName}}",
+        "hidden": false
+      },
+      "id": "3a4b5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d",
+      "name": "Create ClickUp Folder",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "list",
+        "operation": "create",
+        "folder": "={{$json.id}}",
+        "name": "Onboarding Tasks",
+        "content": "GoHighLevel sub-account onboarding tasks following the 16-step process",
+        "priority": true,
+        "assignee": "={{$('Process Client Data').item.json.projectDetails.userId}}",
+        "status": "red"
+      },
+      "id": "4a5b6c7d-8e9f-0a1b-2c3d-4e5f6a7b8c9d",
+      "name": "Create Task List",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [600, 500]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "task",
+        "operation": "create",
+        "team": "90140073497",
+        "space": "={{$('Process Client Data').item.json.projectDetails.spaceId}}",
+        "folderless": false,
+        "folder": "={{$('Create ClickUp Folder').item.json.id}}",
+        "list": "={{$('Create Task List').item.json.id}}",
+        "name": "={{$json.name}}",
+        "content": "={{$json.description}}",
+        "status": "to do",
+        "priority": "={{$json.priority === 'high' ? '1' : $json.priority === 'medium' ? '2' : '3'}}",
+        "assignees": [
+          "={{$('Process Client Data').item.json.projectDetails.userId}}"
+        ],
+        "tags": "={{$json.tags}}",
+        "dueDate": "={{new Date($json.dueDate).getTime()}}",
+        "timeEstimate": "={{$json.estimatedDays * 8 * 60 * 60 * 1000}}"
+      },
+      "id": "6a7b8c9d-0e1f-2a3b-4c5d-6e7f8a9b0c1d",
+      "name": "Create Tasks",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [800, 500]
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Client Data": {
+      "main": [
+        [
+          {
+            "node": "Create ClickUp Folder",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create ClickUp Folder": {
+      "main": [
+        [
+          {
+            "node": "Create Task List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Create Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "errorWorkflow": {
+      "isActive": false
+    },
+    "timezone": "America/New_York",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1"
+  },
+  "staticData": {},
+  "tags": ["ghl", "clickup", "automation", "onboarding"],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-08T19:46:27.000Z",
+  "versionId": "1"
+}

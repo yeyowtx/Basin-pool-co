@@ -1,0 +1,403 @@
+{
+  "name": "GHL → ClickUp Client Onboarding (Production Ready)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-client-onboarding",
+        "responseMode": "onReceived",
+        "responseData": "firstEntryJson",
+        "options": {
+          "noResponseBody": false
+        }
+      },
+      "id": "webhook-ghl-trigger",
+      "name": "GHL Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 300],
+      "webhookId": "ghl-client-webhook"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "clientName",
+              "value": "={{ $json.contact && $json.contact.name || $json.name || $json.client_name || 'UNKNOWN CLIENT' }}"
+            },
+            {
+              "name": "clientEmail", 
+              "value": "={{ $json.contact && $json.contact.email || $json.email || '' }}"
+            },
+            {
+              "name": "clientPhone",
+              "value": "={{ $json.contact && $json.contact.phone || $json.phone || '' }}"
+            },
+            {
+              "name": "subAccountId",
+              "value": "={{ $json.locationId || $json.sub_account_id || '' }}"
+            },
+            {
+              "name": "ein",
+              "value": "={{ $json.ein || $json.business_ein || '' }}"
+            },
+            {
+              "name": "supportEmail",
+              "value": "={{ $json.support_email || $json.business_email || '' }}"
+            },
+            {
+              "name": "projectType",
+              "value": "={{ $json.tags && $json.tags.includes('premium') ? 'Premium' : 'Standard' }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "spaceId",
+              "value": "90140073497"
+            },
+            {
+              "name": "teamId", 
+              "value": "90140073497"
+            },
+            {
+              "name": "assigneeId",
+              "value": "88411788"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-client-data",
+      "name": "Set Client Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.clientName }}",
+              "rightValue": "UNKNOWN CLIENT",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "condition-2", 
+              "leftValue": "={{ $json.clientName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-valid-client",
+      "name": "IF - Valid Client Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "list",
+        "operation": "create",
+        "team": "={{ $json.teamId }}",
+        "space": "={{ $json.spaceId }}",
+        "folderless": true,
+        "name": "🏗️ {{ $json.clientName }} - GHL Onboarding",
+        "content": "Complete GoHighLevel sub-account setup following the 16-step onboarding process for {{ $json.clientName }}. Project Type: {{ $json.projectType }}",
+        "priority": true,
+        "assignee": "={{ $json.assigneeId }}",
+        "status": "red"
+      },
+      "id": "create-main-list",
+      "name": "Create Main Project List",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [800, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get client data from previous node\nconst clientData = $input.first().json;\n\n// Define all 16 tasks with detailed content from PDF\nconst tasks = [\n  {\n    id: 1,\n    name: \"1️⃣ INTEGRATIONS\",\n    priority: \"urgent\",\n    estimatedHours: 16,\n    content: `**🔗 INTEGRATIONS SETUP**\n\n**Client:** ${clientData.clientName}\n**Project:** GHL Sub-Account Onboarding\n**Estimated Time:** 2 days (16 hours)\n\n**TASKS TO COMPLETE:**\n☐ Google Business Profile Integration\n☐ Facebook Ads Integration\n☐ Google Ads Integration  \n☐ QuickBooks Integration\n☐ Payment Process Setup\n☐ 3rd Party Apps Integration\n\n**NOTES:**\n• Complete all integrations in this exact order for optimal setup\n• Test each integration after setup\n• Document any API keys or credentials used\n\n**SUCCESS CRITERIA:**\n✅ All integrations active and tested\n✅ Data flowing correctly between systems\n✅ Client has access to all connected platforms\n\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 2,\n    name: \"2️⃣ WEBSITE\",\n    priority: \"high\", \n    estimatedHours: 24,\n    content: `**🌐 WEBSITE FOUNDATION SETUP**\n\n**Client:** ${clientData.clientName}\n**Project:** GHL Sub-Account Onboarding\n**Estimated Time:** 3 days (24 hours)\n\n**TASKS TO COMPLETE:**\n☐ Landing page creation\n☐ Standard terms and conditions page\n☐ Standard privacy policy page\n☐ Domain setup using Domain Connect feature\n\n**RESOURCES:**\n📚 [Domain Connect Guide](https://help.gohighlevel.com/support/solutions/articles/155000000734-how-to-use-the-domain-connect-feature-)\n\n**SUCCESS CRITERIA:**\n✅ Professional landing page live\n✅ Legal pages properly linked\n✅ Domain connected and SSL active\n✅ Mobile responsive design verified\n\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 3,\n    name: \"3️⃣ PHONE SYSTEM\",\n    priority: \"urgent\",\n    estimatedHours: 24,\n    content: `**📞 PHONE SYSTEM & A2P REGISTRATION**\n\n**Client:** ${clientData.clientName}\n**Project:** GHL Sub-Account Onboarding\n**Estimated Time:** 3 days (24 hours)\n\n**⚠️ CRITICAL REQUIREMENTS:**\n**Client EIN:** ${clientData.ein || '🚨 COLLECT FROM CLIENT IMMEDIATELY'}\n**Support Email:** ${clientData.supportEmail || '🚨 COLLECT FROM CLIENT IMMEDIATELY'}\n\n**TASKS TO COMPLETE:**\n☐ Collect EIN from client (REQUIRED)\n☐ Collect/verify support email (REQUIRED)\n☐ Complete A2P registration process\n☐ Reference A2P 10DLC Brand Approval Best Practices\n☐ Configure phone number routing\n☐ Test SMS capabilities\n\n**CRITICAL NOTES:**\n🚨 A2P registration MUST be completed before any SMS campaigns\n🚨 EIN and support email are MANDATORY for approval\n🚨 This step blocks SMS functionality if incomplete\n\n**RESOURCES:**\n📚 [A2P 10DLC Best Practices](https://help.gohighlevel.com/support/solutions/articles/155000000508-a2p-10dlc-brand-approval-best-practices)\n\n**SUCCESS CRITERIA:**\n✅ A2P registration approved\n✅ SMS sending capability active\n✅ Phone routing configured\n\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 4,\n    name: \"4️⃣ PIPELINES\",\n    priority: \"high\",\n    estimatedHours: 16,\n    content: `**🏗️ PIPELINE CONFIGURATION**\n\n**Client:** ${clientData.clientName}\n**Project:** GHL Sub-Account Onboarding\n**Estimated Time:** 2 days (16 hours)\n\n**⚠️ IMPORTANT:** PRESENT EXACT PIPELINES TO CLIENT AND GET THEIR FEEDBACK ON ANY DIFFERENCES\n\n**PIPELINES TO CONFIGURE:**\n\n**1. SALES PIPELINE:**\n☐ New Lead → Pending Designer Acceptance → Assigned Lead → On-Site Estimate Scheduled → Need To Send Proposal → Proposal Sent → Proposal Accepted → Deposit Paid\n\n**2. MASTER PLAN PIPELINE:**\n☐ Build/Edit Master Plan → Designer Review → Ready For Shakedown → PSD Revisions Needed → Master Plan Completed → Drop/Cancelled Project\n\n**3. ACTIVE JOB PIPELINE:**\n☐ Book Pre-CW → Pre-CW Booked → Change Order Needed → Active Job → Book Post-CW → Post-CW Booked → Address Punch List → Awaiting Final Payment → Job Closed → Dropped/Cancelled Project\n\n**4. CHANGE ORDER PIPELINE:**\n☐ New Change Order Request → Change Order Sent → Change Order Paid + Closed → Change Order Cancelled\n\n**5. REVIEW PIPELINE:**\n☐ Review Requested → Left Review → Stale Review Request → DO NOT ASK FOR REVIEW\n\n**6. REFERRAL PIPELINE:**\n☐ Referral Requested → Referral Shared → Stale Referral Request → DO NOT ASK FOR REFERRAL\n\n**CLIENT APPROVAL REQUIRED:**\n🎯 Schedule pipeline review meeting with client\n🎯 Present exact pipeline structure\n🎯 Document any requested changes\n🎯 Get written approval before implementation\n\n**SUCCESS CRITERIA:**\n✅ All pipelines configured exactly as specified\n✅ Client has reviewed and approved pipeline structure\n✅ Pipeline automation triggers set up\n\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  }\n];\n\n// Continue with remaining 12 tasks...\nconst remainingTasks = [\n  {\n    id: 5,\n    name: \"5️⃣ CUSTOM FIELD FOLDERS\",\n    priority: \"normal\",\n    estimatedHours: 8,\n    content: `**📁 CUSTOM FIELD FOLDERS SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**FOLDERS TO CREATE:**\\n☐ New Project Questionnaire (Intake)\\n☐ Qualification Questionnaire\\n☐ On-Site Consultation Questionnaire\\n☐ Design Questionnaire\\n☐ Pre-CW Questionnaire\\n☐ Post-CW Questionnaire\\n\\n**SUCCESS CRITERIA:**\\n✅ All custom field folders created\\n✅ Proper data validation in place\\n✅ Integration with contact records working\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 6,\n    name: \"6️⃣ CUSTOM VALUE FOLDERS\",\n    priority: \"normal\",\n    estimatedHours: 8,\n    content: `**📂 CUSTOM VALUE FOLDERS SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**FOLDERS TO CREATE:**\\n☐ Calendar Links folder\\n☐ Form/Survey Links folder\\n\\n**SUCCESS CRITERIA:**\\n✅ Both custom value folders created\\n✅ Logical organization structure implemented\\n✅ Easy access for team members\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 7,\n    name: \"7️⃣ FORMS/SURVEYS\",\n    priority: \"normal\",\n    estimatedHours: 16,\n    content: `**📋 FORMS & SURVEYS CREATION**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 2 days (16 hours)\\n\\n**⚠️ IMPORTANT:** Qualification forms must be based on CLIENT'S SPECIFIC qualification process\\n\\n**FORMS TO CREATE:**\\n☐ Calendar forms (for booking appointments)\\n☐ Qualification forms (**CUSTOMIZE based on client's specific qualification process**)\\n☐ On-Site Consultation (1st Appointment Form)\\n☐ Shakedown/Project Prep Meeting form\\n☐ Pre-Construction Walkthrough form\\n☐ Post-Construction Walkthrough form\\n☐ Project Photoshoot Checklist form\\n\\n**SUCCESS CRITERIA:**\\n✅ All forms created and tested\\n✅ Qualification forms match client's process exactly\\n✅ Forms integrate properly with contact records\\n✅ Auto-responses configured\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 8,\n    name: \"8️⃣ CUSTOM VALUES + TRIGGER LINKS\",\n    priority: \"normal\",\n    estimatedHours: 8,\n    content: `**🔗 CUSTOM VALUES & TRIGGER LINKS**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**LINK FORMAT:** ?contact_id={{contact.id}}\\n\\n**TASKS TO COMPLETE:**\\n☐ Convert all survey forms to custom value format\\n☐ Add trigger links with contact ID parameter\\n☐ Test trigger link functionality\\n☐ Create documentation for team on how to use links\\n☐ Set up automation triggers for survey responses\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 9,\n    name: \"9️⃣ ADD USERS\",\n    priority: \"urgent\",\n    estimatedHours: 8,\n    dependency: \"MUST_COMPLETE_BEFORE_CALENDARS\",\n    content: `**👥 ADD USERS TO SUB-ACCOUNT**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**⚠️ CRITICAL DEPENDENCY:** Users MUST be added BEFORE creating calendars (Step 10)\\n\\n**REQUIREMENTS:**\\n🚨 COLLECT ALL USER CONTACTS + PHONE + EMAIL from client\\n\\n**TASKS TO COMPLETE:**\\n☐ Add owner to sub-account\\n☐ Collect complete user list from client\\n☐ Add all users to sub-account with proper permissions\\n☐ Verify each user can access their account\\n☐ Set up user roles and permissions\\n☐ Send welcome emails to all users\\n\\n**⚠️ CRITICAL:** Do NOT proceed to Step 10 (Calendars) until ALL users are added\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 10,\n    name: \"🔟 CALENDARS\",\n    priority: \"urgent\",\n    estimatedHours: 16,\n    dependency: \"REQUIRES_STEP_9_COMPLETE\",\n    content: `**📅 SERVICE CALENDARS SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 2 days (16 hours)\\n\\n**⚠️ DEPENDENCY CHECK:** Verify Step 9 (Add Users) is COMPLETE before starting\\n\\n**CALENDAR GROUPS TO CREATE:**\\n\\n**1. CONSULTATION CALENDAR GROUP**\\n☐ On-Site Consultation (Light Blue)\\n☐ On-Site Project Presentation (Dark Green)\\n\\n**2. CONSTRUCTION CALENDARS GROUP**\\n☐ Pre-Construction Walkthrough (Dark Red)\\n☐ Post-Construction Walkthrough (Purple)\\n☐ Project Photoshoot (Dark Blue)\\n\\n**SUCCESS CRITERIA:**\\n✅ All calendar groups created with proper colors\\n✅ Service calendars configured and tested\\n✅ Booking workflows functioning\\n✅ Team trained on calendar usage\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 11,\n    name: \"1️⃣1️⃣ ESTIMATE & INVOICE SETTINGS\",\n    priority: \"normal\",\n    estimatedHours: 8,\n    content: `**💳 PAYMENT PROCESSING SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**TASKS TO COMPLETE:**\\n☐ Setup Stripe account (if needed)\\n☐ Connect payment processor to GHL\\n☐ Turn auto invoice generation ON\\n☐ Configure payment terms and methods\\n☐ Set up automated payment reminders\\n☐ Test payment processing workflow\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 12,\n    name: \"1️⃣2️⃣ AUTOMATIONS + TAG SETUP\",\n    priority: \"urgent\",\n    estimatedHours: 24,\n    content: `**🤖 AUTOMATION WORKFLOWS & TAGGING**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 3 days (24 hours)\\n\\n**AUTOMATION WORKFLOWS TO BUILD:**\\n\\n**1. SALES AUTOMATIONS**\\n☐ Lead capture and assignment\\n☐ Follow-up sequences\\n☐ Proposal delivery automation\\n☐ Deposit payment workflows\\n\\n**4. REVIEW MANAGEMENT**\\n☐ Review request automation\\n☐ Review follow-up sequences\\n☐ **Schedule Review Post in Social Planner**\\n☐ Review response management\\n\\n🎯 **CRITICAL:** Schedule Review Post in Social Planner for each completed project\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 13,\n    name: \"1️⃣3️⃣ DASHBOARDS\",\n    priority: \"normal\",\n    estimatedHours: 16,\n    content: `**📊 SALES DASHBOARD CREATION**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 2 days (16 hours)\\n\\n**DASHBOARD LAYOUT (Exact Row Configuration):**\\n\\n**ROW 1: CORE METRICS**\\n☐ Opportunity Status widget\\n☐ Value tracking widget\\n☐ Conversion Rate widget\\n\\n**ROW 2: SALES FUNNEL**\\n☐ Sales Funnel visualization\\n☐ Pipeline progression tracking\\n\\n**ROW 3: LEAD SOURCES**\\n☐ Lead Source Report\\n☐ Source performance analytics\\n\\n**ROW 4: GOOGLE BUSINESS PROFILE**\\n☐ GBP performance metrics\\n☐ Review tracking\\n☐ Local search visibility\\n\\n**ROW 5: ADVERTISING PERFORMANCE**\\n☐ Facebook Ads reporting\\n☐ PPC (Google Ads) reporting\\n☐ Campaign performance metrics\\n\\n**ROW 6: SALES EFFICIENCY**\\n☐ Sales team performance\\n☐ Close rate analytics\\n☐ Revenue per lead metrics\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 14,\n    name: \"1️⃣4️⃣ CUSTOM REPORTS\",\n    priority: \"low\",\n    estimatedHours: 8,\n    content: `**📈 CUSTOM REPORTING SYSTEM**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**CUSTOM REPORTS TO CREATE:**\\n☐ Monthly performance summary\\n☐ Pipeline conversion analysis\\n☐ Lead source ROI report\\n☐ Team productivity report\\n☐ Customer satisfaction metrics\\n☐ Revenue forecasting report\\n\\n**RESOURCES:**\\n📚 **Reference:** How to create and schedule reports (GHL Help Center)\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 15,\n    name: \"1️⃣5️⃣ DOMAIN SETUP\",\n    priority: \"normal\",\n    estimatedHours: 8,\n    content: `**🌐 DOMAIN CONNECTION & SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 1 day (8 hours)\\n\\n**DOMAIN OPTIONS:**\\n\\n**OPTION 1: CONNECT EXISTING DOMAIN**\\n☐ Verify domain ownership\\n☐ Configure DNS settings\\n☐ Set up CNAME records\\n☐ Verify SSL certificate\\n☐ Test domain connection\\n\\n**OPTION 2: BUY NEW DOMAIN**\\n☐ Research and select domain name\\n☐ Purchase through GHL or external registrar\\n☐ Configure domain settings\\n☐ Set up DNS management\\n☐ Install SSL certificate\\n\\n**RESOURCES:**\\n📚 **Reference:** [Domain Connect Feature Guide](https://help.gohighlevel.com/support/solutions/articles/155000000734-how-to-use-the-domain-connect-feature-)\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  },\n  {\n    id: 16,\n    name: \"1️⃣6️⃣ EMAIL SYSTEM\",\n    priority: \"urgent\",\n    estimatedHours: 16,\n    content: `**📧 EMAIL INFRASTRUCTURE SETUP**\\n\\n**Client:** ${clientData.clientName}\\n**Project:** GHL Sub-Account Onboarding\\n**Estimated Time:** 2 days (16 hours)\\n\\n**EMAIL SYSTEM COMPONENTS:**\\n\\n**1. G SUITE SETUP**\\n☐ Create G Suite/Google Workspace account\\n☐ Configure custom email addresses\\n☐ Set up user accounts and permissions\\n☐ Configure email forwarding and aliases\\n☐ Set up mobile email access\\n\\n**2. DEDICATED SUBDOMAIN SETUP**\\n☐ Create dedicated sending subdomain\\n☐ Configure DNS records for email authentication\\n☐ Set up SPF records\\n☐ Configure DKIM signing\\n☐ Implement DMARC policy\\n\\n**RESOURCES:**\\n📚 **Reference:** [How to Set Up a Dedicated Sending Domain](https://help.gohighlevel.com/support/solutions/articles/155000001051-how-to-set-up-a-dedicated-sending-domain)\\n\\n**SUCCESS CRITERIA:**\\n✅ G Suite/Google Workspace fully configured\\n✅ Dedicated subdomain properly set up\\n✅ Email authentication (SPF/DKIM/DMARC) configured\\n✅ Email deliverability optimized and tested\\n✅ All email workflows functioning properly\\n\\n💡 **Remember:** \"When in doubt, map it out. Follow this document order for fewest interruptions.\"`\n  }\n];\n\n// Combine all tasks\nconst allTasks = tasks.concat(remainingTasks);\n\n// Return all tasks for processing\nreturn allTasks.map(task => ({\n  json: {\n    ...task,\n    clientData,\n    spaceId: clientData.spaceId,\n    teamId: clientData.teamId,\n    assigneeId: clientData.assigneeId\n  }\n}));"
+      },
+      "id": "prepare-task-data",
+      "name": "Prepare All 16 Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 500]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-into-batches",
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [800, 500]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonData": "{ \"milliseconds\": 2000 }",
+        "options": {}
+      },
+      "id": "delay-between-tasks",
+      "name": "Delay Between Tasks",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "task",
+        "operation": "create",
+        "team": "={{ $json.teamId }}",
+        "space": "={{ $json.spaceId }}",
+        "folderless": true,
+        "list": "={{ $('Create Main Project List').item.json.id }}",
+        "name": "={{ $json.name }}",
+        "content": "={{ $json.content }}",
+        "status": "to do",
+        "priority": "={{ $json.priority === 'urgent' ? '1' : $json.priority === 'high' ? '2' : $json.priority === 'normal' ? '3' : '4' }}",
+        "assignees": [
+          "={{ $json.assigneeId }}"
+        ],
+        "tags": [
+          "ghl-onboarding",
+          "={{ $json.clientData.projectType.toLowerCase() }}"
+        ],
+        "timeEstimate": "={{ $json.estimatedHours * 60 * 60 * 1000 }}"
+      },
+      "id": "create-individual-task",
+      "name": "Create Individual Task",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [1000, 500],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "missing-ein",
+              "leftValue": "={{ $('Set Client Data').item.json.ein }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "check-critical-data",
+      "name": "Check Critical Data Missing",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "subject": "🚨 CRITICAL DATA MISSING - GHL Onboarding for {{ $('Set Client Data').item.json.clientName }}",
+        "message": "URGENT: Missing critical information for client onboarding\\n\\nClient: {{ $('Set Client Data').item.json.clientName }}\\nEmail: {{ $('Set Client Data').item.json.clientEmail }}\\nPhone: {{ $('Set Client Data').item.json.clientPhone }}\\n\\nMISSING CRITICAL DATA:\\n{{ $('Set Client Data').item.json.ein ? '' : '❌ EIN (Required for A2P registration)' }}\\n{{ $('Set Client Data').item.json.supportEmail ? '' : '❌ Support Email (Required for A2P registration)' }}\\n\\nACTION REQUIRED:\\nPlease collect this information immediately and update the ClickUp project:\\n{{ $('Create Main Project List').item.json.url }}\\n\\nWithout this information, SMS capabilities cannot be activated.",
+        "options": {}
+      },
+      "id": "send-critical-alert",
+      "name": "Send Critical Data Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1400, 300],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "subject": "✅ GHL Onboarding Project Created - {{ $('Set Client Data').item.json.clientName }}",
+        "message": "SUCCESS: GHL onboarding project has been created!\\n\\nClient: {{ $('Set Client Data').item.json.clientName }}\\nProject Type: {{ $('Set Client Data').item.json.projectType }}\\nTotal Tasks: 16\\n\\nClickUp Project: {{ $('Create Main Project List').item.json.url }}\\n\\nNEXT STEPS:\\n1. Review all 16 tasks in ClickUp\\n2. Assign team members as needed  \\n3. Begin with Step 1 (Integrations)\\n4. Follow the exact order for optimal results\\n\\n{{ $('Set Client Data').item.json.ein ? '' : '⚠️ Remember to collect EIN for A2P registration' }}\\n{{ $('Set Client Data').item.json.supportEmail ? '' : '⚠️ Remember to collect support email for A2P registration' }}\\n\\nThe project follows the complete 16-step onboarding process with detailed checklists and instructions.",
+        "options": {}
+      },
+      "id": "send-success-notification",
+      "name": "Send Success Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1400, 500],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "subject": "❌ GHL Onboarding Failed - Invalid Client Data",
+        "message": "ERROR: Cannot create GHL onboarding project due to invalid client data.\\n\\nReceived Data:\\nClient Name: {{ $('Set Client Data').item.json.clientName }}\\nEmail: {{ $('Set Client Data').item.json.clientEmail }}\\nPhone: {{ $('Set Client Data').item.json.clientPhone }}\\nSub-Account ID: {{ $('Set Client Data').item.json.subAccountId }}\\n\\nERROR: Client name is missing or invalid.\\n\\nPlease check the webhook data and try again.",
+        "options": {}
+      },
+      "id": "send-error-notification",
+      "name": "Send Error Notification", 
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [800, 100],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Client Data": {
+      "main": [
+        [
+          {
+            "node": "IF - Valid Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Valid Client Data": {
+      "main": [
+        [
+          {
+            "node": "Create Main Project List",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare All 16 Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Main Project List": {
+      "main": [
+        [
+          {
+            "node": "Check Critical Data Missing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare All 16 Tasks": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Delay Between Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay Between Tasks": {
+      "main": [
+        [
+          {
+            "node": "Create Individual Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Individual Task": {
+      "main": [
+        [
+          {
+            "node": "Send Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Critical Data Missing": {
+      "main": [
+        [
+          {
+            "node": "Send Critical Data Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "errorWorkflow": {
+      "isActive": false
+    },
+    "timezone": "America/New_York",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner", 
+    "executionOrder": "v1"
+  },
+  "staticData": {},
+  "tags": [
+    "ghl",
+    "clickup", 
+    "automation",
+    "onboarding",
+    "production"
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-08T19:46:27.000Z",
+  "versionId": "3"
+}

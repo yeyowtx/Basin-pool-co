@@ -96,11 +96,22 @@ const CONFIG = {
         CAMERA: {
             PREFERRED_CAMERA: 'environment', // 'environment' for back camera, 'user' for front
             VIDEO_CONSTRAINTS: {
-                width: { ideal: 1920, max: 1920 },
-                height: { ideal: 1080, max: 1080 },
-                facingMode: 'environment'
+                width: { ideal: 1080, max: 1920 },
+                height: { ideal: 1920, max: 2560 }, // Portrait orientation for receipts
+                facingMode: 'environment',
+                // Enhanced settings for better receipt scanning
+                focusMode: 'continuous',
+                exposureMode: 'continuous',
+                whiteBalanceMode: 'continuous'
             },
-            PHOTO_QUALITY: 0.9 // JPEG quality 0-1
+            PHOTO_QUALITY: 0.92, // Slightly higher quality for OCR
+            // Receipt-specific capture settings
+            RECEIPT_CAPTURE: {
+                ASPECT_RATIO: 0.7, // Typical receipt width/height ratio
+                AUTO_FOCUS_DELAY: 500, // ms before capture for auto-focus
+                BRIGHTNESS_ADJUSTMENT: 0.1, // Slight brightness boost for OCR
+                CONTRAST_ENHANCEMENT: true
+            }
         }
     },
     
