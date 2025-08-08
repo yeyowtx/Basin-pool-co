@@ -2008,11 +2008,19 @@ async function processReceipt() {
     document.getElementById('processingIndicator').style.display = 'block';
     
     try {
-        // For demo purposes, let's use a mock OCR result
-        // In production, this would call the Veryfi API
-        const ocrResults = await mockOCRProcessing(capturedImageData);
+        // Use real Veryfi API if configured, otherwise fall back to mock
+        let ocrResults;
+        const apiConfig = CONFIG.RECEIPT_SCANNER.OCR_API;
         
-        if (ocrResults && ocrResults.line_items && ocrResults.line_items.length > 0) {
+        if (apiConfig.API_KEY && apiConfig.API_KEY !== 'your_veryfi_api_key_here') {
+            console.log('Using Veryfi API for OCR processing...');
+            ocrResults = await callVeryfiAPI(capturedImageData);
+        } else {
+            console.log('Using mock OCR for demo (configure Veryfi API keys for production)');
+            ocrResults = await mockOCRProcessing(capturedImageData);
+        }
+        
+        if (ocrResults && ((ocrResults.line_items && ocrResults.line_items.length > 0) || ocrResults.vendor)) {
             extractedReceiptData = ocrResults;
             displayOCRResults(ocrResults);
         } else {
@@ -2079,28 +2087,53 @@ async function callVeryfiAPI(imageData) {
     
     try {
         // Convert base64 to blob
-        const response = await fetch(imageData);
-        const blob = await response.blob();
+        const base64Response = await fetch(imageData);
+        const blob = await base64Response.blob();
         
         // Create form data
         const formData = new FormData();
         formData.append('file', blob, 'receipt.jpg');
         
-        // Call Veryfi API
+        // Add optional parameters for better accuracy
+        if (apiConfig.AUTO_ROTATE) formData.append('auto_rotate', 'true');
+        if (apiConfig.BOOST_MODE) formData.append('boost_mode', 'true');
+        if (apiConfig.CATEGORIES) formData.append('categories', apiConfig.CATEGORIES.join(','));
+        
+        // Call Veryfi API with proper authentication
         const apiResponse = await fetch(apiConfig.BASE_URL, {
             method: 'POST',
             headers: {
                 'CLIENT-ID': apiConfig.CLIENT_ID,
-                'AUTHORIZATION': `apikey ${apiConfig.USERNAME}:${apiConfig.API_KEY}`
+                'AUTHORIZATION': `apikey ${apiConfig.USERNAME}:${apiConfig.API_KEY}`,
+                'Accept': 'application/json'
             },
             body: formData
         });
         
         if (!apiResponse.ok) {
-            throw new Error(`Veryfi API error: ${apiResponse.status}`);
+            const errorText = await apiResponse.text();
+            throw new Error(`Veryfi API error ${apiResponse.status}: ${errorText}`);
         }
         
-        return await apiResponse.json();
+        const veryfiData = await apiResponse.json();
+        
+        // Convert Veryfi format to our internal format
+        return {
+            vendor: {
+                name: veryfiData.vendor?.name || 'Unknown Store',
+                address: veryfiData.vendor?.address || ''
+            },
+            date: veryfiData.date || new Date().toISOString().split('T')[0],
+            total: veryfiData.total || 0,
+            tax: veryfiData.tax || 0,
+            line_items: (veryfiData.line_items || []).map(item => ({
+                description: item.description || item.name || 'Unknown Item',
+                sku: item.sku || item.upc || null,
+                quantity: item.quantity || 1,
+                unit_price: item.unit_price || (item.total / (item.quantity || 1)),
+                total: item.total || 0
+            }))
+        };
         
     } catch (error) {
         console.error('Veryfi API call failed:', error);
@@ -2190,4 +2223,117 @@ function addExtractedItems() {
 function resetScanner() {
     resetScannerState();
     initializeCamera();
+}
+
+// ===========================
+// PRODUCT LOOKUP & VERIFICATION
+// ===========================
+
+// Verify extracted items with Home Depot API
+async function verifyExtractedItems(extractedData) {
+    const config = CONFIG.RECEIPT_SCANNER.PRODUCT_LOOKUP;
+    
+    if (!config.ENABLED || !config.HOME_DEPOT_API_KEY || config.HOME_DEPOT_API_KEY === 'your_bigbox_api_key_here') {
+        console.log('Product lookup disabled or API key not configured');
+        return extractedData; // Return original data unchanged
+    }
+    
+    console.log('Verifying products with Home Depot API...');
+    
+    try {
+        const verifiedItems = await Promise.all(
+            extractedData.line_items.map(async (item) => {
+                try {
+                    const productInfo = await lookupProduct(item.sku || item.description);
+                    return enhanceItemWithProductData(item, productInfo);
+                } catch (error) {
+                    console.warn(`Could not verify product: ${item.description}`, error);
+                    return item; // Return original item if lookup fails
+                }
+            })
+        );
+        
+        return {
+            ...extractedData,
+            line_items: verifiedItems
+        };
+        
+    } catch (error) {
+        console.error('Product verification failed:', error);
+        return extractedData; // Return original data if verification fails
+    }
+}
+
+// Lookup individual product with BigBox API
+async function lookupProduct(skuOrDescription) {
+    const config = CONFIG.RECEIPT_SCANNER.PRODUCT_LOOKUP;
+    
+    const params = new URLSearchParams({
+        api_key: config.HOME_DEPOT_API_KEY,
+        type: 'search',
+        search_term: skuOrDescription,
+        max_page: 1
+    });
+    
+    const response = await fetch(`${config.BASE_URL}?${params}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    if (!response.ok) {
+        throw new Error(`BigBox API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.search_results && data.search_results.length > 0) {
+        return data.search_results[0]; // Return first match
+    }
+    
+    throw new Error('No product found');
+}
+
+// Enhance item with verified product data
+function enhanceItemWithProductData(originalItem, productData) {
+    const config = CONFIG.RECEIPT_SCANNER.PRODUCT_LOOKUP;
+    
+    // Check price difference if verification is enabled
+    let priceVerification = null;
+    if (config.VERIFY_PRICES && productData.price?.value) {
+        const storePriceCents = productData.price.value * 100;
+        const receiptPriceCents = originalItem.unit_price * 100;
+        const difference = Math.abs(storePriceCents - receiptPriceCents) / storePriceCents;
+        
+        if (difference > config.PRICE_TOLERANCE) {
+            priceVerification = {
+                status: 'warning',
+                message: `Price difference detected: Receipt $${originalItem.unit_price.toFixed(2)} vs Store $${productData.price.value.toFixed(2)}`,
+                receipt_price: originalItem.unit_price,
+                store_price: productData.price.value,
+                difference_percent: (difference * 100).toFixed(1)
+            };
+        } else {
+            priceVerification = {
+                status: 'verified',
+                message: 'Price verified'
+            };
+        }
+    }
+    
+    return {
+        ...originalItem,
+        // Enhanced product information
+        verified_name: productData.title || originalItem.description,
+        brand: productData.brand || null,
+        model: productData.model || null,
+        verified_sku: productData.asin || productData.item_id || originalItem.sku,
+        product_url: productData.link || null,
+        availability: productData.availability || null,
+        price_verification: priceVerification,
+        // Metadata
+        verification_status: 'verified',
+        verification_confidence: productData.position <= 3 ? 'high' : 'medium' // First 3 results are high confidence
+    };
 }

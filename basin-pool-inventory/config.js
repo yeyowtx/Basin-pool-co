@@ -66,20 +66,29 @@ const CONFIG = {
         ENABLED: true,
         // Veryfi OCR API Configuration
         OCR_API: {
-            CLIENT_ID: 'vrfy_basin_pool_co_client_id_placeholder',
-            USERNAME: 'basin_pool_co_username_placeholder',
-            API_KEY: 'your_veryfi_api_key_here',
+            CLIENT_ID: 'vrfy_basin_pool_co_client_id_placeholder', // Replace with your Client ID
+            USERNAME: 'basin_pool_co_username_placeholder',          // Replace with your Username  
+            API_KEY: 'your_veryfi_api_key_here',                     // Replace with your API Key
             BASE_URL: 'https://api.veryfi.com/api/v8/partner/documents/',
-            TIMEOUT: 30000 // 30 seconds
+            TIMEOUT: 30000, // 30 seconds
+            // Production settings
+            AUTO_DELETE: false,    // Keep processed documents 
+            AUTO_ROTATE: true,     // Auto-rotate receipt images
+            BOOST_MODE: true,      // Enhanced accuracy mode
+            CATEGORIES: ['office supplies', 'hardware', 'materials'] // Receipt categorization
         },
         
         // Home Depot Product Lookup
         PRODUCT_LOOKUP: {
-            ENABLED: true,
-            // BigBox API for Home Depot
-            HOME_DEPOT_API_KEY: 'your_bigbox_api_key_here',
-            BASE_URL: 'https://api.bigboxapi.com/products/',
-            TIMEOUT: 10000 // 10 seconds
+            ENABLED: false, // Enable after getting BigBox API key
+            // BigBox API for Home Depot  
+            HOME_DEPOT_API_KEY: 'your_bigbox_api_key_here', // Replace with your BigBox API key
+            BASE_URL: 'https://api.bigboxapi.com/request',
+            TIMEOUT: 10000, // 10 seconds
+            // Product lookup settings
+            VERIFY_PRICES: true,        // Cross-check receipt prices with store prices
+            AUTO_CORRECT: false,        // Don't auto-correct, just flag differences
+            PRICE_TOLERANCE: 0.05       // 5% tolerance for price differences
         },
         
         // Camera Settings
