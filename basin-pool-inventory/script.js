@@ -40,14 +40,19 @@ document.addEventListener('DOMContentLoaded', function() {
     renderAllSections();
     updateSummary();
     
-    // Check if Firebase is available
-    if (CONFIG.FIREBASE_SYNC.ENABLED && window.database) {
-        initializeFirebase();
-    } else {
-        // Fallback to local storage
-        loadFromLocalStorage();
-        startAutoSave();
-    }
+    // Wait for Firebase to be ready then initialize
+    setTimeout(() => {
+        console.log('Firebase check:', CONFIG.FIREBASE_SYNC.ENABLED, window.database, window.Firebase);
+        if (CONFIG.FIREBASE_SYNC.ENABLED && window.database && window.Firebase) {
+            console.log('Starting Firebase initialization...');
+            initializeFirebase();
+        } else {
+            console.log('Firebase not available, using localStorage fallback');
+            // Fallback to local storage
+            loadFromLocalStorage();
+            startAutoSave();
+        }
+    }, 1000); // Give Firebase modules time to load
     
     setupEventListeners();
     showConnectionStatus();
@@ -76,11 +81,11 @@ function getRandomColor() {
 function initializeFirebase() {
     try {
         database = window.database;
-        dataRef = Firebase.ref(database, 'inventory');
-        presenceRef = Firebase.ref(database, 'presence');
+        dataRef = window.Firebase.ref(database, 'inventory');
+        presenceRef = window.Firebase.ref(database, 'presence');
         
         // Set up real-time data listener
-        Firebase.onValue(dataRef, (snapshot) => {
+        window.Firebase.onValue(dataRef, (snapshot) => {
             if (snapshot.exists()) {
                 const firebaseData = snapshot.val();
                 if (firebaseData.lastUpdated > lastUpdateTimestamp) {
@@ -113,8 +118,8 @@ function initializeFirebase() {
         }
         
         // Handle connection state
-        const connectedRef = Firebase.ref(database, '.info/connected');
-        Firebase.onValue(connectedRef, (snapshot) => {
+        const connectedRef = window.Firebase.ref(database, '.info/connected');
+        window.Firebase.onValue(connectedRef, (snapshot) => {
             if (snapshot.val() === true) {
                 connectionStatus = 'connected';
                 isFirebaseReady = true;
@@ -142,20 +147,20 @@ function initializeFirebase() {
 function setupPresence() {
     if (!presenceRef || !currentUser) return;
     
-    const userPresenceRef = Firebase.ref(database, `presence/${currentUser.id}`);
+    const userPresenceRef = window.Firebase.ref(database, `presence/${currentUser.id}`);
     
     // Set user as online
-    Firebase.set(userPresenceRef, {
+    window.Firebase.set(userPresenceRef, {
         ...currentUser,
         online: true,
-        lastSeen: Firebase.serverTimestamp()
+        lastSeen: window.Firebase.serverTimestamp()
     });
     
     // Remove user when they disconnect
-    Firebase.onDisconnect(userPresenceRef).remove();
+    window.Firebase.onDisconnect(userPresenceRef).remove();
     
     // Listen for presence changes
-    Firebase.onValue(presenceRef, (snapshot) => {
+    window.Firebase.onValue(presenceRef, (snapshot) => {
         updatePresenceDisplay(snapshot.val());
     });
 }
@@ -230,6 +235,18 @@ function initializeData() {
         
         // 🛒 HOME DEPOT - LANDSCAPE EDGING ($113)
         { name: 'Landscape Edging', actualPrice: 113.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Colmet 8 ft. x 4 in. 14-Gauge Brown Steel Landscape Edging (5-Pack) - Home Depot' },
+        
+        // 🛒 PURCHASED TOOLS - HOME DEPOT ($134)
+        { name: 'Dewalt 66" Landscape Rake', actualPrice: 53.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Site leveling and debris removal' },
+        { name: 'Husky 8"x8" Steel Tamper', actualPrice: 39.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Base compaction tool' },
+        { name: '250ft Mason Line', actualPrice: 5.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Layout and leveling guide' },
+        { name: '44in Digging Shovel', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Excavation work' },
+        { name: 'Metal Stakes', actualPrice: 7.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Marking and layout' },
+        { name: 'Marking Spray Paint', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Site marking' },
+        
+        // 🛒 PURCHASED TOOLS - HARBOR FREIGHT ($30)
+        { name: 'Drain Spade 46in Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight - Narrow trench digging' },
+        { name: 'Square Point Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight - General excavation' },
         
         // 🛒 MISCELLANEOUS SUPPLIES ($100)
         { name: 'Extra Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Extra Fittings & Adapters' },
@@ -591,20 +608,21 @@ function updateItemField(section, index, field, value) {
 
 // Force immediate save (both Firebase and localStorage)
 function forceSave() {
-    console.log('Force saving data...'); // Debug
+    console.log('Force saving data...'); 
+    console.log('Firebase ready:', isFirebaseReady, 'DataRef exists:', !!dataRef);
     
     // Always save to localStorage as backup
     saveToLocalStorage();
     
-    // Also try Firebase if available
+    // Always try Firebase if available - prioritize cloud save
     if (isFirebaseReady && dataRef) {
-        console.log('Saving to Firebase...'); // Debug
+        console.log('Saving to Firebase...');
         saveToFirebase();
+        showSaveIndicator('☁️ Saved to cloud');
     } else {
-        console.log('Firebase not ready, localStorage only'); // Debug
+        console.log('Firebase not ready, localStorage only');
+        showSaveIndicator('💾 Saved locally');
     }
-    
-    showSaveIndicator('Saved');
 }
 
 // Test function - call from browser console: testSave()
@@ -975,11 +993,11 @@ function saveToFirebase() {
         
         lastUpdateTimestamp = dataToSave.lastUpdated;
         
-        Firebase.set(dataRef, dataToSave).then(() => {
-            console.log('Data saved to Firebase');
-            showSaveIndicator('Synced to cloud');
+        window.Firebase.set(dataRef, dataToSave).then(() => {
+            console.log('✅ Data saved to Firebase successfully');
+            showSaveIndicator('☁️ Synced to cloud');
         }).catch((error) => {
-            console.error('Firebase save error:', error);
+            console.error('❌ Firebase save error:', error);
             showNotification('Failed to sync to cloud', 'error');
             // Fallback to local storage
             saveToLocalStorage();
