@@ -1179,15 +1179,34 @@ body {
     
     /* Mobile-optimized action buttons */
     .action-btn {
-        padding: 12px 18px;
-        font-size: 0.9em;
-        min-height: 44px;
+        padding: 8px 10px; /* Smaller padding */
+        font-size: 0.7rem; /* Even smaller text */
+        min-height: 34px; /* Smaller height */
+        min-width: auto; /* Don't force width */
         touch-action: manipulation;
         -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        flex: 1; /* Take equal space */
+        max-width: 70px; /* Smaller max width */
+        text-align: center;
+        justify-content: center;
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+    
+    /* Scan button gets special treatment */
+    .scan-btn {
+        background: #27ae60 !important; /* Green color */
+        font-weight: bold;
+        max-width: 75px; /* Slightly wider */
+    }
+    
+    .scan-btn:hover {
+        background: #2ecc71 !important;
     }
     
     .action-controls {
-        gap: 8px;
+        gap: 4px; /* Tighter spacing */
+        padding: 0 10px; /* Add side padding */
+        margin-bottom: 15px; /* Space before content */
     }
     
     .container {

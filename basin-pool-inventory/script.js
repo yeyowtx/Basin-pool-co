@@ -628,9 +628,8 @@ function updateItemField(section, index, field, value) {
         
         console.log('Data updated:', inventoryData[section][index]); // Debug
         
-        // Re-render accordion sections to update categories and totals
-        renderAccordionSections();
-        updateSummary();
+        // Re-render accordion sections to update categories and totals (throttled)
+        throttledRender();
         
         // Force immediate save
         forceSave();
@@ -884,11 +883,9 @@ function cycleStatus(statusElement) {
     const index = parseInt(statusElement.dataset.index);
     inventoryData[section][index].status = nextStatus;
     
-    // Re-render accordion sections
-    renderAccordionSections();
-    
+    // Re-render accordion sections (throttled)
+    throttledRender();
     scheduleAutoSave();
-    updateSummary();
 }
 
 // Categorize items by type
@@ -1879,6 +1876,37 @@ let cameraStream = null;
 let currentCamera = 'environment';
 let capturedImageData = null;
 let extractedReceiptData = null;
+
+// UI render throttling
+let renderThrottle = null;
+let lastRenderTime = 0;
+const RENDER_THROTTLE_MS = 500; // Only allow renders every 500ms
+
+// Throttled render function to prevent excessive refreshing
+function throttledRender() {
+    const now = Date.now();
+    
+    if (renderThrottle) {
+        clearTimeout(renderThrottle);
+    }
+    
+    const timeSinceLastRender = now - lastRenderTime;
+    
+    if (timeSinceLastRender >= RENDER_THROTTLE_MS) {
+        // Render immediately if enough time has passed
+        lastRenderTime = now;
+        renderAccordionSections();
+        updateSummary();
+    } else {
+        // Schedule render for later
+        const delay = RENDER_THROTTLE_MS - timeSinceLastRender;
+        renderThrottle = setTimeout(() => {
+            lastRenderTime = Date.now();
+            renderAccordionSections();
+            updateSummary();
+        }, delay);
+    }
+}
 
 // Open receipt scanner modal
 function openReceiptScanner() {

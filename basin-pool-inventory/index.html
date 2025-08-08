@@ -38,11 +38,11 @@
     <div class="main-content">
         <div class="page-header">
             <div class="action-controls">
-                <button class="action-btn" onclick="openReceiptScanner()">📷 Scan Receipt</button>
+                <button class="action-btn scan-btn" onclick="openReceiptScanner()">📷 Scan</button>
                 <button class="action-btn" onclick="exportData()">💾 Backup</button>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
                 <button class="action-btn" onclick="document.getElementById('importFile').click()">📂 Restore</button>
-                <button class="action-btn" onclick="clearAllData()">🗑️ Clear All</button>
+                <button class="action-btn" onclick="clearAllData()">🗑️ Clear</button>
                 <button class="action-btn" onclick="syncToCloud()">☁️ Sync</button>
             </div>
         </div>
