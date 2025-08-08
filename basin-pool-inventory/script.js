@@ -1079,15 +1079,9 @@ function scheduleAutoSave() {
 }
 
 function startAutoSave() {
-    if (CONFIG.AUTO_SAVE.ENABLED) {
-        setInterval(() => {
-            if (isFirebaseReady && dataRef) {
-                saveToFirebase();
-            } else {
-                saveToLocalStorage();
-            }
-        }, CONFIG.AUTO_SAVE.INTERVAL);
-    }
+    // Auto-save is now handled by scheduleAutoSave() on changes only
+    // No more automatic interval saving to reduce sync frequency
+    console.log('Auto-save initialized - will save on changes only');
 }
 
 // Firebase save function
@@ -1177,11 +1171,9 @@ function loadFromLocalStorage() {
 
 // Cloud sync functionality
 function startCloudSync() {
-    if (CONFIG.CLOUD_SYNC.ENABLED) {
-        setInterval(() => {
-            syncToCloud();
-        }, CONFIG.CLOUD_SYNC.INTERVAL);
-    }
+    // Cloud sync is now manual only - click the "☁️ Sync" button to sync
+    // No more automatic background syncing to reduce server calls
+    console.log('Cloud sync disabled - use manual sync button');
 }
 
 async function syncToCloud() {
@@ -2105,6 +2097,7 @@ async function callVeryfiAPI(imageData) {
             headers: {
                 'CLIENT-ID': apiConfig.CLIENT_ID,
                 'AUTHORIZATION': `apikey ${apiConfig.USERNAME}:${apiConfig.API_KEY}`,
+                'X-Veryfi-Request-Timestamp': Math.floor(Date.now() / 1000).toString(),
                 'Accept': 'application/json'
             },
             body: formData
