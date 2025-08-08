@@ -360,21 +360,21 @@
             </div>
 
             <div class="deposit-summary">
-                <h2>💳 Working Capital Requirements</h2>
+                <h2>💰 Actual Money Spent</h2>
                 <div class="deposit-row">
-                    <span>One-Time Tools:</span>
+                    <span>Tools Purchased:</span>
                     <span id="depositOneTime">$0</span>
                 </div>
                 <div class="deposit-row">
-                    <span>Per-Job Materials:</span>
+                    <span>Materials Purchased:</span>
                     <span id="depositPerJob">$0</span>
                 </div>
                 <div class="deposit-row">
-                    <span>Cliff's Materials:</span>
+                    <span>Cliff's Purchases:</span>
                     <span id="depositCliff">$0</span>
                 </div>
                 <div class="deposit-row">
-                    <span><strong>TOTAL REQUIRED DEPOSIT:</strong></span>
+                    <span><strong>TOTAL SPENT:</strong></span>
                     <span id="depositTotal">$0</span>
                 </div>
             </div>
@@ -426,14 +426,20 @@
             onDisconnect
         };
         
-        // Initialize Firebase when config is loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Firebase immediately when modules are loaded
+        console.log('Initializing Firebase with config:', CONFIG.FIREBASE);
+        try {
             if (CONFIG.FIREBASE_SYNC.ENABLED) {
-                window.firebaseApp = Firebase.initializeApp(CONFIG.FIREBASE);
-                window.database = Firebase.getDatabase(window.firebaseApp);
-                console.log('Firebase initialized for real-time collaboration');
+                window.firebaseApp = initializeApp(CONFIG.FIREBASE);
+                window.database = getDatabase(window.firebaseApp);
+                console.log('Firebase initialized successfully');
+                console.log('Database instance:', window.database);
+            } else {
+                console.log('Firebase sync disabled in config');
             }
-        });
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+        }
     </script>
 
     <!-- Quick Purchase Modal -->

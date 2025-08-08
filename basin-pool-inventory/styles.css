@@ -86,8 +86,8 @@
 
 .accordion-content {
     border-top: none;
-    overflow: hidden;
-    transition: max-height 0.4s ease, padding 0.3s ease;
+    overflow: visible;
+    transition: all 0.3s ease;
     background: white;
 }
 
@@ -97,7 +97,8 @@
 }
 
 .accordion-content.expanded {
-    max-height: 2000px;
+    max-height: none;
+    height: auto;
     padding: 20px;
 }
 
@@ -174,6 +175,8 @@
     }
     
     .accordion-content.expanded {
+        max-height: none;
+        height: auto;
         padding: 16px;
     }
     

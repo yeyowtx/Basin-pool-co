@@ -92,14 +92,19 @@ function initializeFirebase() {
                     lastUpdateTimestamp = firebaseData.lastUpdated;
                     // Merge Firebase data with default template to ensure new sections exist
                     inventoryData = mergeWithDefaultData(firebaseData.data);
+                    // CRITICAL FIX: Add purchased tools to merged data
+                    addNewToolsToInventory();
                     renderAllSections();
                     updateSummary();
                     loadProjectNotes();
+                    // Save back to Firebase with new tools included
+                    saveToFirebase();
                     showSaveIndicator('Synced from cloud');
                 }
             } else {
                 // Firebase is empty, save default data to it
                 console.log('Firebase is empty, initializing with default data');
+                addNewToolsToInventory();
                 saveToFirebase();
                 renderAllSections();
                 updateSummary();
@@ -111,6 +116,9 @@ function initializeFirebase() {
             // Fallback to local storage
             loadFromLocalStorage();
         });
+        
+        // Tools will be added when Firebase data loads/syncs
+        console.log('Firebase initialization complete - tools will be added during data sync');
         
         // Set up presence system
         if (CONFIG.FIREBASE_SYNC.PRESENCE_ENABLED) {
@@ -189,87 +197,87 @@ function initializeData() {
     // Complete Project Shopping List - Cliff's Pool + Deck ($3,116.67 Total)
     inventoryData.cliff = [
         // ✅ ALREADY PURCHASED - EBAY ($599.43) - Pool System Components
-        { name: 'Filter Balls', actualPrice: 24.79, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'MAQIHAN 50PCS Pool Filter Balls - Replaces 100 lbs pool filter sand, reusable filtration media' },
-        { name: 'Water Transfer Pump', actualPrice: 49.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'VEVOR Water Transfer Removal Pump - 360 GPH utility pump with hose for water transfer operations' },
-        { name: 'Sand Filter Pump', actualPrice: 230.90, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'INTEX 26641EG Krystal Clear Sand Filter - 4,400 GPH pool pump system, open box condition' },
-        { name: 'Propane Heater', actualPrice: 299.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'Outdoor Propane Tankless Water Heater - 120,000 BTU instant heater, 5.3 gallon capacity' },
+        { name: 'Filter Balls', actualPrice: 24.79, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'MAQIHAN 50PCS Pool Filter Balls // Replaces 100 lbs pool filter sand for filtration system' },
+        { name: 'Water Transfer Pump', actualPrice: 49.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'VEVOR Water Transfer Removal Pump 360 GPH // Water transfer operations and tank filling' },
+        { name: 'Sand Filter Pump', actualPrice: 230.90, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'INTEX 26641EG Krystal Clear Sand Filter 4,400 GPH // Main pool pump and filtration system' },
+        { name: 'Propane Heater', actualPrice: 299.99, quantity: 1, usage: 'per-job', location: 'online', link: '', status: 'purchased', notes: 'Outdoor Propane Tankless Water Heater 120,000 BTU 5.3 gallon // Pool water heating system' },
         
         // 🛒 HOME DEPOT - ELECTRICAL ($98.98)
-        { name: '2-Gang FSC Box', actualPrice: 8.74, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Cantex 1/2 in. 2-Gang FSC Box' },
-        { name: '4-Gang Deep Box', actualPrice: 18.88, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Commercial Electric 4-Gang Extra Deep Box' },
-        { name: 'Plastic Anchors', actualPrice: 9.91, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Triple Grip Plastic Anchors (15-pack)' },
-        { name: '1-Gang PVC Boxes', actualPrice: 6.60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon 1-Gang PVC Boxes (2)' },
-        { name: 'Box Covers', actualPrice: 4.88, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Box Covers (2)' },
-        { name: 'Liquid-Tight Conduit', actualPrice: 44.99, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'HYDROMAXX 50ft Liquid-Tight Conduit' },
-        { name: 'Conduit Clamps', actualPrice: 4.98, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Conduit Clamps (25-pack)' },
+        { name: '2-Gang FSC Box', actualPrice: 8.74, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Cantex 1/2 in. 2-Gang FSC Box // Electrical junction box for pump and heater connections' },
+        { name: '4-Gang Deep Box', actualPrice: 18.88, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Commercial Electric 4-Gang Extra Deep Box // Main electrical distribution box' },
+        { name: 'Plastic Anchors', actualPrice: 9.91, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Triple Grip Plastic Anchors 15-pack // Securing electrical boxes to concrete/masonry' },
+        { name: '1-Gang PVC Boxes', actualPrice: 6.60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon 1-Gang PVC Boxes (2) // Individual component electrical enclosures' },
+        { name: 'Box Covers', actualPrice: 4.88, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Box Covers (2) // Weather protection for electrical boxes' },
+        { name: 'Liquid-Tight Conduit', actualPrice: 44.99, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'HYDROMAXX 50ft Liquid-Tight Conduit // Waterproof electrical wire protection' },
+        { name: 'Conduit Clamps', actualPrice: 4.98, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Conduit Clamps 25-pack // Securing conduit to surfaces' },
         
         // 🛒 TSC MIDLAND - TANK ($599)
-        { name: 'Stock Tank (8ft)', actualPrice: 599.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '8ft CountyLine Stock Tank - 8 foot diameter galvanized, 2 foot depth, ~700 gallons. CALL AHEAD FOR AVAILABILITY' },
+        { name: 'Stock Tank (8ft)', actualPrice: 599.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'CountyLine 8ft Stock Tank Galvanized 2ft Depth 700 Gallon // Main pool container structure' },
         
         // 🛒 HOME DEPOT - PLUMBING HARDWARE ($150)
-        { name: 'Bulkhead Fittings', actualPrice: 60.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Bulkhead Tank Fittings (2") - Through-wall penetrations with gaskets' },
-        { name: 'PVC Pipe & Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'PVC Pipe & Fittings Kit - 1.5" main line (10 feet), 1/2" heater line (20 feet), elbows, tees, couplers, cement' },
-        { name: 'Check Valves', actualPrice: 30.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Check Valves (1.5" & 1/2")' },
-        { name: 'Gate Valves', actualPrice: 24.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Gate Valves (1.5" & 1/2")' },
-        { name: 'Tank Drain Valve', actualPrice: 20.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Tank Drain Valve Kit' },
-        { name: 'Hose Clamps & Adapters', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Hose Clamps & Adapters' },
-        { name: 'Teflon & Sealant', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Teflon Tape & Sealant' },
+        { name: 'Bulkhead Fittings', actualPrice: 60.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Bulkhead Tank Fittings 2 inch with gaskets // Through-wall water connections' },
+        { name: 'PVC Pipe & Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'PVC Pipe & Fittings Kit 1.5 inch main 1/2 inch heater lines with elbows tees couplers cement // Pool plumbing system' },
+        { name: 'Check Valves', actualPrice: 30.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Check Valves 1.5 inch and 1/2 inch // Prevent water backflow' },
+        { name: 'Gate Valves', actualPrice: 24.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Gate Valves 1.5 inch and 1/2 inch // Water flow control' },
+        { name: 'Tank Drain Valve', actualPrice: 20.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Tank Drain Valve Kit // Pool draining and maintenance' },
+        { name: 'Hose Clamps & Adapters', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Hose Clamps & Adapters Assortment // Secure hose connections' },
+        { name: 'Teflon & Sealant', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Teflon Tape & Pipe Sealant // Thread sealing and waterproofing' },
         
         // 🛒 HOME DEPOT - DECK MATERIALS ($675)
-        { name: 'Concrete Pier Blocks', actualPrice: 108.00, quantity: 9, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '9x Concrete Pier Blocks' },
-        { name: 'PT Posts', actualPrice: 54.00, quantity: 3, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '3x 4x4x8\' PT Posts' },
-        { name: 'PT Boards 8ft', actualPrice: 34.00, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '4x 2x6x8\' PT Boards' },
-        { name: 'PT Boards 12ft', actualPrice: 28.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 2x6x12\' PT Boards' },
-        { name: 'PT Deck Boards', actualPrice: 240.00, quantity: 20, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '20x 5/4"x6"x8\' PT Deck Boards' },
-        { name: 'Stair Stringers', actualPrice: 90.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 3-Step Stair Stringers' },
-        { name: 'Joist Hangers', actualPrice: 30.00, quantity: 12, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12x 2x6 Joist Hangers' },
-        { name: 'Stringer Connectors', actualPrice: 16.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Stair Stringer Connectors' },
-        { name: 'TimberLOK Screws', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'TimberLOK 4" Screws (1 box)' },
-        { name: 'Deck Screws', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Exterior Deck Screws (5 lbs)' },
-        { name: 'Joist Hanger Nails', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Joist Hanger Nails (1 box)' },
+        { name: 'Concrete Pier Blocks', actualPrice: 108.00, quantity: 9, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '9x Concrete Pier Blocks // Deck foundation support' },
+        { name: 'PT Posts', actualPrice: 54.00, quantity: 3, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '3x 4x4x8 ft Pressure Treated Posts // Vertical deck support structure' },
+        { name: 'PT Boards 8ft', actualPrice: 34.00, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '4x 2x6x8 ft Pressure Treated Boards // Deck frame construction' },
+        { name: 'PT Boards 12ft', actualPrice: 28.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 2x6x12 ft Pressure Treated Boards // Extended deck frame spans' },
+        { name: 'PT Deck Boards', actualPrice: 240.00, quantity: 20, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '20x 5/4 inch x 6 inch x 8 ft Pressure Treated Deck Boards // Deck surface planking' },
+        { name: 'Stair Stringers', actualPrice: 90.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 3-Step Stair Stringers // Deck access stairs structure' },
+        { name: 'Joist Hangers', actualPrice: 30.00, quantity: 12, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12x 2x6 Joist Hangers // Connect joists to beam structure' },
+        { name: 'Stringer Connectors', actualPrice: 16.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Stair Stringer Connectors // Attach stairs to deck frame' },
+        { name: 'TimberLOK Screws', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'TimberLOK 4 inch Screws 1 box // Heavy-duty structural connections' },
+        { name: 'Deck Screws', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Exterior Deck Screws 5 lbs // Attach deck boards to frame' },
+        { name: 'Joist Hanger Nails', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Joist Hanger Nails 1 box // Secure joist hangers to wood' },
         
         // 🛒 RECOM MATERIALS - PICKUP ($150)
-        { name: 'Caliche Base', actualPrice: 45.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Caliche Base' },
-        { name: 'Pea Gravel', actualPrice: 80.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Pea Gravel' },
-        { name: 'Landscape Fabric', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Landscape Fabric (45 sq ft)' },
+        { name: 'Caliche Base', actualPrice: 45.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Caliche Base // Foundation base material for tank leveling' },
+        { name: 'Pea Gravel', actualPrice: 80.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1 Yard Pea Gravel // Drainage layer under tank foundation' },
+        { name: 'Landscape Fabric', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Landscape Fabric 45 sq ft // Weed barrier under gravel base' },
         
         // 🛒 HOME DEPOT - LANDSCAPE EDGING ($113)
-        { name: 'Landscape Edging', actualPrice: 113.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Colmet 8 ft. x 4 in. 14-Gauge Brown Steel Landscape Edging (5-Pack) - Home Depot' },
+        { name: 'Landscape Edging', actualPrice: 113.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Colmet 8 ft x 4 in 14-Gauge Brown Steel Landscape Edging 5-Pack // Pool perimeter edging and landscaping' },
         
         // 🛒 PURCHASED TOOLS - HOME DEPOT ($134)
-        { name: 'Dewalt 66" Landscape Rake', actualPrice: 53.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Site leveling and debris removal' },
-        { name: 'Husky 8"x8" Steel Tamper', actualPrice: 39.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Base compaction tool' },
-        { name: '250ft Mason Line', actualPrice: 5.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Layout and leveling guide' },
-        { name: '44in Digging Shovel', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Excavation work' },
-        { name: 'Metal Stakes', actualPrice: 7.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Marking and layout' },
-        { name: 'Marking Spray Paint', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Home Depot - Site marking' },
+        { name: 'Dewalt 66" Landscape Rake', actualPrice: 53.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'DEWALT 66 inch Landscape Rake DXPGR66 // Site leveling and debris removal' },
+        { name: 'Husky 8"x8" Steel Tamper', actualPrice: 39.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'HUSKY 8x8 inch Steel Tamper // Base compaction and soil preparation' },
+        { name: '250ft Mason Line', actualPrice: 5.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: '250 ft Mason Line String // Layout and leveling guide lines' },
+        { name: '44in Digging Shovel', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: '44 inch Digging Shovel // Excavation and trenching work' },
+        { name: 'Metal Stakes', actualPrice: 7.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Metal Survey Stakes // Site marking and layout reference points' },
+        { name: 'Marking Spray Paint', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Marking Spray Paint // Site boundary and utility marking' },
         
         // 🛒 PURCHASED TOOLS - HARBOR FREIGHT ($30)
-        { name: 'Drain Spade 46in Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight - Narrow trench digging' },
-        { name: 'Square Point Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight - General excavation' },
+        { name: 'Drain Spade 46in Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight 46 inch Drain Spade Shovel // Narrow trench digging and drainage work' },
+        { name: 'Square Point Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight Square Point Shovel // General excavation and soil moving' },
         
         // 🛒 MISCELLANEOUS SUPPLIES ($100)
-        { name: 'Extra Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Extra Fittings & Adapters' },
-        { name: 'Safety Equipment', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Safety Equipment' },
-        { name: 'Installation Tools', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Installation Tools/Consumables' },
+        { name: 'Extra Fittings', actualPrice: 40.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Miscellaneous Extra Fittings & Adapters // Backup plumbing connections' },
+        { name: 'Safety Equipment', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Safety Equipment Kit // Work site safety compliance' },
+        { name: 'Installation Tools', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Installation Tools & Consumables // Project-specific tools and supplies' },
         
         // 🛒 LABOR
-        { name: 'Installation Labor', actualPrice: 750.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Complete Installation Labor' }
+        { name: 'Installation Labor', actualPrice: 750.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Complete Installation Labor // Full pool system installation service' }
     ];
 
     // One-Time Tools (template with $0 prices)
     inventoryData.tools = [
         // Tank Installation Tools
-        { name: 'Hole Saw Set (1.5", 2", 3")', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Tank fittings' },
-        { name: 'Cordless Drill (if needed)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'May already have' },
-        { name: 'Step Bit Set', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Clean holes' },
-        { name: 'Level (4ft)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Tank leveling' },
-        { name: 'Socket Set & Wrenches', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'Pump assembly' },
-        { name: 'Shop Vacuum (wet/dry)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Cleanup' },
+        { name: 'Hole Saw Set (1.5", 2", 3")', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Hole Saw Set 1.5 2 3 inch // Tank bulkhead fitting installation' },
+        { name: 'Cordless Drill (if needed)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'Cordless Drill // Drilling holes and driving screws' },
+        { name: 'Step Bit Set', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Step Bit Set // Clean precise holes in metal' },
+        { name: 'Level (4ft)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: '4 ft Level // Tank and deck leveling' },
+        { name: 'Socket Set & Wrenches', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'both', link: '', status: 'pending', notes: 'Socket Set & Wrenches // Pump and hardware assembly' },
+        { name: 'Shop Vacuum (wet/dry)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Shop Vacuum Wet/Dry // Site cleanup and debris removal' },
         
         // Professional Excavation & Site Prep Tools
-        { name: 'Mini Excavator Rental (per day)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Large pad excavation' },
-        { name: 'Trenching Shovel', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Hand excavation' },
+        { name: 'Mini Excavator Rental (per day)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Mini Excavator Rental per day // Large pad excavation projects' },
+        { name: 'Trenching Shovel', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Trenching Shovel // Hand excavation and trenching work' },
         { name: 'Mattock/Pick', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Hard soil breaking' },
         { name: 'Hand Tamper (steel)', actualPrice: 0, quantity: 0, usage: 'one-time', location: 'local', link: '', status: 'pending', notes: 'Caliche compaction' },
         { name: 'Plate Compactor Rental', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Professional compaction' },
@@ -486,9 +494,16 @@ function renderAccordionSections() {
         labor: []
     };
     
+    // Add items from cliff section
     inventoryData.cliff.forEach((item, index) => {
         const category = categorizeItem(item);
-        categories[category].push({ ...item, originalIndex: index });
+        categories[category].push({ ...item, originalIndex: index, section: 'cliff' });
+    });
+    
+    // Add items from siteprep section
+    inventoryData.siteprep.forEach((item, index) => {
+        const category = categorizeItem(item);
+        categories[category].push({ ...item, originalIndex: index, section: 'siteprep' });
     });
     
     // Render each category
@@ -510,40 +525,42 @@ function renderCategorySection(tableId, items) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                <input type="text" class="item-name-input" value="${item.name}" onchange="updateItemField('cliff', ${item.originalIndex}, 'name', this.value)">
+                <input type="text" class="item-name-input" value="${item.name}" onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'name', this.value)">
             </td>
             <td>
-                <input type="number" class="price-input" value="${item.actualPrice || 0}" step="0.01" min="0" onchange="updateItemField('cliff', ${item.originalIndex}, 'actualPrice', parseFloat(this.value))">
+                <input type="number" class="price-input" value="${item.actualPrice || 0}" step="0.01" min="0" 
+                       onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'actualPrice', parseFloat(this.value))"
+                       title="${isItemTaxable(item) ? 'Taxable item - 8.25% TX tax will be added automatically' : 'Non-taxable item (labor/materials exempt in TX)'}">
             </td>
             <td>
-                <input type="number" class="qty-input" value="${item.quantity || 1}" min="0" onchange="updateItemField('cliff', ${item.originalIndex}, 'quantity', parseInt(this.value))">
+                <input type="number" class="qty-input" value="${item.quantity || 1}" min="0" onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'quantity', parseInt(this.value))">
             </td>
             <td>
-                <select class="usage-select" onchange="updateItemField('cliff', ${item.originalIndex}, 'usage', this.value)">
+                <select class="usage-select" onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'usage', this.value)">
                     ${Object.keys(CONFIG.USAGE_TYPES).map(usage => 
                         `<option value="${usage}" ${item.usage === usage ? 'selected' : ''}>${CONFIG.USAGE_TYPES[usage].label}</option>`
                     ).join('')}
                 </select>
             </td>
             <td>
-                <select class="location-select" onchange="updateItemField('cliff', ${item.originalIndex}, 'location', this.value)">
+                <select class="location-select" onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'location', this.value)">
                     ${Object.keys(CONFIG.LOCATION_TYPES).map(location => 
                         `<option value="${location}" ${item.location === location ? 'selected' : ''}>${CONFIG.LOCATION_TYPES[location].label}</option>`
                     ).join('')}
                 </select>
             </td>
             <td>
-                <input type="url" class="link-input" value="${item.link || ''}" placeholder="Supplier URL" onchange="updateItemField('cliff', ${item.originalIndex}, 'link', this.value)">
+                <input type="url" class="link-input" value="${item.link || ''}" placeholder="Supplier URL" onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'link', this.value)">
             </td>
             <td>
-                <button class="status ${item.status}" onclick="cycleStatus(this)" data-section="cliff" data-index="${item.originalIndex}">
+                <button class="status ${item.status}" onclick="cycleStatus(this)" data-section="${item.section || 'cliff'}" data-index="${item.originalIndex}">
                     ${CONFIG.STATUS_TYPES[item.status]?.label || item.status}
                 </button>
-                ${item.status !== 'purchased' ? `<button class="quick-purchase-btn" onclick="openQuickPurchase('cliff', ${item.originalIndex})" title="Quick Purchase">🛒</button>` : ''}
+                ${item.status !== 'purchased' ? `<button class="quick-purchase-btn" onclick="openQuickPurchase('${item.section || 'cliff'}', ${item.originalIndex})" title="Quick Purchase">🛒</button>` : ''}
             </td>
             <td>
-                <textarea class="notes-input" placeholder="Notes, supplier info, etc." onchange="updateItemField('cliff', ${item.originalIndex}, 'notes', this.value)">${item.notes || ''}</textarea>
-                <button class="delete-item-btn" onclick="deleteItem('cliff', ${item.originalIndex})" title="Delete Item">🗑️</button>
+                <textarea class="notes-input" placeholder="Notes, supplier info, etc." onchange="updateItemField('${item.section || 'cliff'}', ${item.originalIndex}, 'notes', this.value)">${item.notes || ''}</textarea>
+                <button class="delete-item-btn" onclick="deleteItem('${item.section || 'cliff'}', ${item.originalIndex})" title="Delete Item">🗑️</button>
             </td>
         `;
         tbody.appendChild(row);
@@ -591,7 +608,24 @@ function updateItemField(section, index, field, value) {
     console.log('updateItemField called:', { section, index, field, value }); // Debug
     
     if (inventoryData[section] && inventoryData[section][index]) {
-        inventoryData[section][index][field] = value;
+        // If updating price, automatically calculate tax-inclusive price
+        if (field === 'actualPrice' && value > 0) {
+            const item = inventoryData[section][index];
+            const retailPrice = parseFloat(value);
+            
+            // Calculate tax-inclusive price if item is taxable
+            const finalPrice = calculateTaxablePrice(retailPrice, item);
+            
+            if (finalPrice !== retailPrice) {
+                console.log(`Applied ${(CONFIG.TAX.RATE * 100).toFixed(2)}% tax: $${retailPrice.toFixed(2)} → $${finalPrice.toFixed(2)}`);
+                inventoryData[section][index][field] = finalPrice;
+            } else {
+                inventoryData[section][index][field] = retailPrice;
+            }
+        } else {
+            inventoryData[section][index][field] = value;
+        }
+        
         console.log('Data updated:', inventoryData[section][index]); // Debug
         
         // Re-render accordion sections to update categories and totals
@@ -622,6 +656,79 @@ function forceSave() {
     } else {
         console.log('Firebase not ready, localStorage only');
         showSaveIndicator('💾 Saved locally');
+    }
+}
+
+// Manually add new purchased tools to inventory
+function addNewToolsToInventory() {
+    console.log('Adding new purchased tools to site prep...');
+    
+    const newTools = [
+        { name: 'Dewalt 66" Landscape Rake', actualPrice: 53.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'DEWALT 66 inch Landscape Rake DXPGR66 // Site leveling and debris removal' },
+        { name: 'Husky 8"x8" Steel Tamper', actualPrice: 39.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'HUSKY 8x8 inch Steel Tamper // Base compaction and soil preparation' },
+        { name: '250ft Mason Line', actualPrice: 5.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: '250 ft Mason Line String // Layout and leveling guide lines' },
+        { name: '44in Digging Shovel', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: '44 inch Digging Shovel // Excavation and trenching work' },
+        { name: 'Metal Stakes', actualPrice: 7.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Metal Survey Stakes // Site marking and layout reference points' },
+        { name: 'Marking Spray Paint', actualPrice: 10.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Marking Spray Paint // Site boundary and utility marking' },
+        { name: 'Drain Spade 46in Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight 46 inch Drain Spade Shovel // Narrow trench digging and drainage work' },
+        { name: 'Square Point Shovel', actualPrice: 15.00, quantity: 1, usage: 'one-time', location: 'owned', link: '', status: 'verified', notes: 'Harbor Freight Square Point Shovel // General excavation and soil moving' }
+    ];
+    
+    // Check if tools already exist, if not add them
+    newTools.forEach(newTool => {
+        const exists = inventoryData.siteprep.some(item => item.name === newTool.name);
+        if (!exists) {
+            console.log(`Adding ${newTool.name} to site prep`);
+            inventoryData.siteprep.push(newTool);
+        } else {
+            console.log(`${newTool.name} already exists in site prep`);
+        }
+    });
+}
+
+// Texas Sales Tax Calculation Functions
+function isItemTaxable(item) {
+    if (!CONFIG.TAX.ENABLED) return false;
+    
+    // Check if usage type is non-taxable
+    if (CONFIG.TAX.NON_TAXABLE_USAGE.includes(item.usage)) {
+        return false;
+    }
+    
+    // Check if item name or notes contain non-taxable keywords
+    const itemText = `${item.name} ${item.notes}`.toLowerCase();
+    const isExempt = CONFIG.TAX.NON_TAXABLE_KEYWORDS.some(keyword => 
+        itemText.includes(keyword.toLowerCase())
+    );
+    
+    return !isExempt;
+}
+
+function calculateTaxablePrice(retailPrice, item) {
+    if (!isItemTaxable(item)) {
+        return retailPrice;
+    }
+    
+    const taxAmount = retailPrice * CONFIG.TAX.RATE;
+    return retailPrice + taxAmount;
+}
+
+function getTaxAmount(retailPrice, item) {
+    if (!isItemTaxable(item)) {
+        return 0;
+    }
+    
+    return retailPrice * CONFIG.TAX.RATE;
+}
+
+function formatPriceWithTax(retailPrice, item) {
+    const finalPrice = calculateTaxablePrice(retailPrice, item);
+    const taxAmount = getTaxAmount(retailPrice, item);
+    
+    if (taxAmount > 0) {
+        return `$${finalPrice.toFixed(2)} (inc. $${taxAmount.toFixed(2)} tax)`;
+    } else {
+        return `$${finalPrice.toFixed(2)} (no tax)`;
     }
 }
 
@@ -818,9 +925,15 @@ function categorizeItem(item) {
         return 'deck';
     }
     
-    // Site Prep
+    // Site Prep (includes tools and materials)
     if (notes.includes('caliche') || notes.includes('gravel') || notes.includes('landscape') ||
-        notes.includes('fabric') || name.includes('caliche') || name.includes('gravel')) {
+        notes.includes('fabric') || notes.includes('home depot') || notes.includes('harbor freight') ||
+        notes.includes('site leveling') || notes.includes('compaction') || notes.includes('layout') ||
+        notes.includes('marking') || notes.includes('excavation') || notes.includes('digging') ||
+        name.includes('caliche') || name.includes('gravel') || name.includes('landscape') ||
+        name.includes('rake') || name.includes('tamper') || name.includes('shovel') ||
+        name.includes('mason') || name.includes('stakes') || name.includes('spray') ||
+        name.includes('dewalt') || name.includes('husky') || name.includes('drain spade')) {
         return 'siteprep';
     }
     
@@ -854,17 +967,18 @@ function updateSummary() {
                 else if (item.status === 'partial') partialItems++;
                 else pendingItems++;
                 
-                // Calculate costs - actualPrice is already the total cost for the quantity specified
-                const actualPrice = item.actualPrice || 0;
-                // Don't multiply by quantity - actualPrice already includes the total cost
-                const totalPrice = actualPrice;
-                
-                if (section === 'cliff') {
-                    cliffTotal += totalPrice;
-                } else if (item.usage === 'one-time') {
-                    oneTimeTotal += totalPrice;
-                } else {
-                    perJobTotal += totalPrice;
+                // Only count actual purchases (verified items) in financial calculations
+                if (item.status === 'verified') {
+                    const actualPrice = item.actualPrice || 0;
+                    const totalPrice = actualPrice;
+                    
+                    if (section === 'cliff') {
+                        cliffTotal += totalPrice;
+                    } else if (item.usage === 'one-time') {
+                        oneTimeTotal += totalPrice;
+                    } else {
+                        perJobTotal += totalPrice;
+                    }
                 }
             });
         }
@@ -1255,6 +1369,7 @@ function clearAllData() {
         inventoryData.pumps = [];
         inventoryData.salt = [];
         inventoryData.heating = [];
+        inventoryData.siteprep = [];
         inventoryData.hardware = [];
         inventoryData.projectNotes = '';
         
@@ -1412,6 +1527,9 @@ function addNewItem(section) {
     
     renderSection(section, inventoryData[section], tableMap[section]);
     
+    // CRITICAL: Also re-render accordion sections to update UI
+    renderAccordionSections();
+    
     // Update summary and save
     updateSummary();
     scheduleAutoSave();
@@ -1456,6 +1574,9 @@ function deleteItem(section, index) {
         };
         
         renderSection(section, inventoryData[section], tableMap[section]);
+        
+        // CRITICAL: Also re-render accordion sections to update UI
+        renderAccordionSections();
         
         // Update summary and save
         updateSummary();

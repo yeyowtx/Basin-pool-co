@@ -48,6 +48,19 @@ const CONFIG = {
         COMPANY: 'Basin Pool Co.'
     },
     
+    // Texas Sales Tax Settings
+    TAX: {
+        RATE: 0.0825, // 8.25% Texas sales tax
+        ENABLED: true,
+        // Items exempt from sales tax in Texas
+        NON_TAXABLE_KEYWORDS: [
+            'labor', 'installation', 'service', 'caliche', 'gravel', 'sand',
+            'excavation', 'leveling'
+        ],
+        // Force non-taxable for specific usage types
+        NON_TAXABLE_USAGE: ['labor-service']
+    },
+    
     // Notification settings
     NOTIFICATIONS: {
         SAVE_DURATION: 2000, // 2 seconds
