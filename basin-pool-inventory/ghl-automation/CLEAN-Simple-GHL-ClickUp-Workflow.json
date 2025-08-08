@@ -1,0 +1,137 @@
+{
+  "name": "GHL → ClickUp Simple Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-client-onboarding",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "id": "webhook",
+      "name": "GHL Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client_name",
+              "name": "clientName",
+              "value": "={{ $json.body.first_name }} {{ $json.body.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "company_name", 
+              "name": "companyName",
+              "value": "={{ $json.body.company_name }}",
+              "type": "string"
+            },
+            {
+              "id": "location_id",
+              "name": "locationId", 
+              "value": "={{ $json.body.location.id }}",
+              "type": "string"
+            },
+            {
+              "id": "first_name",
+              "name": "firstName",
+              "value": "={{ $json.body.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "last_name",
+              "name": "lastName",
+              "value": "={{ $json.body.last_name }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "extract-data",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "list",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "name": "{{ $json.clientName }} | {{ $json.companyName }} - Onboarding"
+      },
+      "id": "create-list",
+      "name": "Create ClickUp List",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [600, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst tasks = [\n  {\n    name: \"1. Integrations\",\n    content: `**INTEGRATIONS SETUP**\\n\\nClient: ${data.clientName} | ${data.companyName}\\nLocation: ${data.locationId}\\n\\n• Google Business Profile\\n• Facebook Ads\\n• Google Ads\\n• QuickBooks\\n• Payment Process\\n• 3rd Party Apps`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"2. Website\",\n    content: `**WEBSITE SETUP**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Landing Page\\n• Terms & Conditions\\n• Privacy Policy\\n• Domain Setup`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"3. Phone System - A2P\",\n    content: `**PHONE SYSTEM & A2P REGISTRATION**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• A2P Registration\\n• Need EIN from client\\n• Need support email from client\\n\\n⚠️ CRITICAL STEP`,\n    assigneeId: \"44371660\"\n  },\n  {\n    name: \"4. Pipelines\",\n    content: `**PIPELINE SETUP**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n⚠️ PRESENT EXACT PIPELINES TO CLIENT\\n\\n• Sales Pipeline\\n• Master Plan Pipeline\\n• Active Job Pipeline\\n• Review Pipeline`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"5. Custom Field Folders\",\n    content: `**CUSTOM FIELD FOLDERS**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• New Project Questionnaire\\n• Qualification Questionnaire\\n• On-Site Consultation Questionnaire\\n• Design Questionnaire\\n• Pre-CW Questionnaire\\n• Post-CW Questionnaire`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"6. Custom Value Folders\",\n    content: `**CUSTOM VALUE FOLDERS**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Calendar Links\\n• Form/Survey Links`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"7. Forms/Surveys\",\n    content: `**FORMS & SURVEYS**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Calendar Forms\\n• Qualification Forms (client-specific)\\n• On-Site Consultation\\n• Pre-Construction Walkthrough\\n• Post-Construction Walkthrough\\n• Project Photoshoot Checklist`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"8. Custom Values + Trigger Links\",\n    content: `**CUSTOM VALUES & TRIGGER LINKS**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Save surveys as custom values\\n• Add trigger links: ?contact_id={{contact.id}}\\n• Example: {{custom_values.survey}}?contact_id={{contact.id}}`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"9. Add Users\",\n    content: `**ADD USERS TO SUB-ACCOUNT**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Add owner\\n• Add all users BEFORE creating calendars\\n• COLLECT ALL CONTACTS + PHONE + EMAIL\\n\\n⚠️ DO THIS BEFORE CALENDARS`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"10. Calendars\",\n    content: `**CALENDAR SETUP**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n**Calendar Groups:**\\n• Consultation Calendar Group\\n• Construction Calendars Group\\n\\n**Calendars:**\\n• On-Site Consultation (Light Blue)\\n• On-Site Project Presentation (Dark Green)\\n• Pre-Construction Walkthrough (Dark Red)\\n• Post-Construction Walkthrough (Purple)\\n• Project Photoshoot (Dark Blue)`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"11. Estimate & Invoice Settings\",\n    content: `**PAYMENT PROCESSING**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Setup Stripe\\n• Connect payment processor\\n• Turn auto invoice on`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"12. Automations + Tag Setup\",\n    content: `**AUTOMATION WORKFLOWS**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Sales Automations\\n• Job Management\\n• Project Stacking\\n• Review Management\\n• Social Planner`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"13. Dashboards\",\n    content: `**SALES DASHBOARD**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Row 1: Opportunity Status, Value, Conversion\\n• Row 2: Sales Funnel\\n• Row 3: Lead Source Report\\n• Row 4: GBP\\n• Row 5: Facebook + PPC\\n• Row 6: Sales Efficiency`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"14. Custom Reports\",\n    content: `**CUSTOM REPORTING**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Create and schedule reports`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"15. Domain Setup\",\n    content: `**DOMAIN CONFIGURATION**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• Connect existing domain OR\\n• Buy new domain`,\n    assigneeId: \"88411787\"\n  },\n  {\n    name: \"16. Email System\",\n    content: `**EMAIL INFRASTRUCTURE**\\n\\nClient: ${data.clientName} | ${data.companyName}\\n\\n• G Suite Setup\\n• Dedicated Subdomain Setup`,\n    assigneeId: \"88411787\"\n  }\n];\n\nreturn tasks.map(task => ({ json: task }));"
+      },
+      "id": "prepare-tasks",
+      "name": "Prepare 16 Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "={{ $('Create ClickUp List').item.json.id }}",
+        "name": "={{ $json.name }}",
+        "additionalFields": {
+          "content": "={{ $json.content }}",
+          "assignees": "={{ [$json.assigneeId] }}",
+          "status": "backlog"
+        }
+      },
+      "id": "create-task",
+      "name": "Create Task",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [[{"node": "Extract Data", "type": "main", "index": 0}]]
+    },
+    "Extract Data": {
+      "main": [[{"node": "Create ClickUp List", "type": "main", "index": 0}]]
+    },
+    "Create ClickUp List": {
+      "main": [[{"node": "Prepare 16 Tasks", "type": "main", "index": 0}]]
+    },
+    "Prepare 16 Tasks": {
+      "main": [[{"node": "Create Task", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

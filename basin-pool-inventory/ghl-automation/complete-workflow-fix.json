@@ -1,0 +1,123 @@
+{
+  "name": "GHL → ClickUp Client Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-client-onboarding",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [17.5, 0],
+      "id": "webhook-node",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "clientName",
+              "value": "={{ $json.body?.full_name || $json.full_name || $json.contact?.name || 'New Client' }}"
+            },
+            {
+              "name": "clientEmail",
+              "value": "={{ $json.body?.email || $json.email || $json.contact?.email || 'test@example.com' }}"
+            },
+            {
+              "name": "clientPhone", 
+              "value": "={{ $json.body?.phone || $json.phone || $json.contact?.phone || '' }}"
+            },
+            {
+              "name": "subAccountId",
+              "value": "={{ $json.body?.location?.id || $json.location?.id || $json.locationId || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "extract-data",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "list",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "name": "{{ $json.clientName }} - GHL Sub-Account Setup",
+        "content": "Complete GoHighLevel sub-account setup following chronological checklist. Client: {{ $json.clientName }} | Sub-Account: {{ $json.subAccountId }}"
+      },
+      "id": "create-list",
+      "name": "Create List",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [600, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const clientData = $input.first().json;\n\nconst tasks = [\n  { \n    name: \"1. Integrations\", \n    content: `**INTEGRATIONS SETUP**\\n\\nClient: ${clientData.clientName}\\nSub-Account: ${clientData.subAccountId}\\n\\n• Google Business Profile\\n• Facebook Ads\\n• Google Ads\\n• QuickBooks\\n• Payment Process\\n• 3rd Party Apps\\n\\n⚠️ Critical for client onboarding success` \n  },\n  { \n    name: \"2. Website\", \n    content: `**WEBSITE SETUP**\\n\\nClient: ${clientData.clientName}\\n\\n• Landing Page creation\\n• Standard Terms & Conditions\\n• Standard Privacy Policy\\n• Domain Setup (Domain Connect feature)\\n\\n📚 Resource: How to use Domain Connect feature` \n  },\n  { \n    name: \"3. Phone System\", \n    content: `**PHONE SYSTEM & A2P REGISTRATION**\\n\\nClient: ${clientData.clientName}\\n\\n• A2P Registration (CRITICAL)\\n• Need EIN: COLLECT FROM CLIENT\\n• Need Support Email: COLLECT FROM CLIENT\\n\\n📚 Resource: A2P 10DLC Brand Approval Best Practices\\n\\n⚠️ Cannot proceed without EIN and support email` \n  },\n  { \n    name: \"4. Pipelines\", \n    content: `**PIPELINE SETUP**\\n\\nClient: ${clientData.clientName}\\n\\n⚠️ PRESENT EXACT PIPELINES TO CLIENT\\n\\nInclude all pipeline stages in chronological order:\\n• Sales Pipeline\\n• Master Plan Pipeline\\n• Active Job Pipeline\\n• Review Pipeline` \n  },\n  { \n    name: \"5. Custom Field Folders\", \n    content: `**CUSTOM FIELD FOLDERS**\\n\\nClient: ${clientData.clientName}\\n\\n• New Project Questionnaire (Intake)\\n• Qualification Questionnaire\\n• On-Site Consultation Questionnaire\\n• Design Questionnaire\\n• Pre-CW Questionnaire\\n• Post-CW Questionnaire\\n\\n📋 Create folders first, then add fields` \n  }\n];\n\nreturn tasks.map(task => ({ json: { ...task, clientData } }));"
+      },
+      "id": "prepare-tasks",
+      "name": "Prepare Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "={{ $('Create List').item.json.id }}",
+        "name": "={{ $json.name }}",
+        "content": "={{ $json.content }}",
+        "assignees": ["88411788"],
+        "status": "backlog",
+        "priority": "high"
+      },
+      "id": "create-task",
+      "name": "Create Task",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Extract Data", "type": "main", "index": 0}]]
+    },
+    "Extract Data": {
+      "main": [[{"node": "Create List", "type": "main", "index": 0}]]
+    },
+    "Create List": {
+      "main": [[{"node": "Prepare Tasks", "type": "main", "index": 0}]]
+    },
+    "Prepare Tasks": {
+      "main": [[{"node": "Create Task", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

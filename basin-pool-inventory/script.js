@@ -206,6 +206,12 @@ function initializeData() {
         { name: '2-Gang FSC Box', actualPrice: 8.74, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Cantex 1/2 in. 2-Gang FSC Box // Electrical junction box for pump and heater connections' },
         { name: '4-Gang Deep Box', actualPrice: 18.88, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Commercial Electric 4-Gang Extra Deep Box // Main electrical distribution box' },
         { name: 'Plastic Anchors', actualPrice: 9.91, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Triple Grip Plastic Anchors 15-pack // Securing electrical boxes to concrete/masonry' },
+        
+        // 🔌 LOWES - ELECTRICAL & SAFETY
+        { name: '#8 AWG Copper Bonding Wire (50 ft)', actualPrice: 25, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Pool equipment bonding for safety' },
+        { name: 'Bonding Lugs (4x)', actualPrice: 15, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Secure bonding wire connections' },
+        { name: 'GFCI Outlet (if needed)', actualPrice: 45, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Ground fault protection' },
+        { name: 'Electrical Conduit (10 ft)', actualPrice: 20, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Wire protection and routing' },
         { name: '1-Gang PVC Boxes', actualPrice: 6.60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon 1-Gang PVC Boxes (2) // Individual component electrical enclosures' },
         { name: 'Box Covers', actualPrice: 4.88, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Carlon Box Covers (2) // Weather protection for electrical boxes' },
         { name: 'Liquid-Tight Conduit', actualPrice: 44.99, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'HYDROMAXX 50ft Liquid-Tight Conduit // Waterproof electrical wire protection' },
@@ -223,17 +229,19 @@ function initializeData() {
         { name: 'Hose Clamps & Adapters', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Hose Clamps & Adapters Assortment // Secure hose connections' },
         { name: 'Teflon & Sealant', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Teflon Tape & Pipe Sealant // Thread sealing and waterproofing' },
         
-        // 🛒 HOME DEPOT - DECK MATERIALS ($675)
-        { name: 'Concrete Pier Blocks', actualPrice: 108.00, quantity: 9, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '9x Concrete Pier Blocks // Deck foundation support' },
-        { name: 'PT Posts', actualPrice: 54.00, quantity: 3, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '3x 4x4x8 ft Pressure Treated Posts // Vertical deck support structure' },
-        { name: 'PT Boards 8ft', actualPrice: 34.00, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '4x 2x6x8 ft Pressure Treated Boards // Deck frame construction' },
-        { name: 'PT Boards 12ft', actualPrice: 28.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 2x6x12 ft Pressure Treated Boards // Extended deck frame spans' },
-        { name: 'PT Deck Boards', actualPrice: 240.00, quantity: 20, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '20x 5/4 inch x 6 inch x 8 ft Pressure Treated Deck Boards // Deck surface planking' },
-        { name: 'Stair Stringers', actualPrice: 90.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x 3-Step Stair Stringers // Deck access stairs structure' },
-        { name: 'Joist Hangers', actualPrice: 30.00, quantity: 12, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12x 2x6 Joist Hangers // Connect joists to beam structure' },
-        { name: 'Stringer Connectors', actualPrice: 16.00, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '2x Stair Stringer Connectors // Attach stairs to deck frame' },
-        { name: 'TimberLOK Screws', actualPrice: 35.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'TimberLOK 4 inch Screws 1 box // Heavy-duty structural connections' },
-        { name: 'Deck Screws', actualPrice: 25.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Exterior Deck Screws 5 lbs // Attach deck boards to frame' },
+        // 🛒 LOWES - DECK LUMBER (EXACT FROM PLANS) ($329)
+        { name: '4x4x8\' Posts (3)', actualPrice: 45, quantity: 3, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Pressure treated vertical deck support structure' },
+        { name: '2x6x8\' Boards (4)', actualPrice: 48, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Pressure treated deck frame construction' },
+        { name: '2x6x12\' Boards (2)', actualPrice: 36, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Pressure treated extended deck frame spans' },
+        { name: '5/4 x 8\' Deck Boards (~20)', actualPrice: 200, quantity: 20, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Pressure treated deck surface planking' },
+        
+        // 🛒 LOWES - DECK HARDWARE (EXACT FROM PLANS) ($216)
+        { name: 'TimberLOK 4" Screws (1 box)', actualPrice: 25, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Heavy-duty structural connections' },
+        { name: 'Deck Screws (exterior rated)', actualPrice: 35, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Attach deck boards to frame' },
+        { name: 'Concrete Pier Blocks (9)', actualPrice: 45, quantity: 9, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Deck foundation support' },
+        { name: '3-Step Stair Stringers (2)', actualPrice: 60, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Pressure treated deck access stairs structure' },
+        { name: '2x6 Joist Hangers (12)', actualPrice: 36, quantity: 12, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Connect joists to beam structure' },
+        { name: 'Stair Stringer Connectors (2)', actualPrice: 15, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Attach stairs to deck frame' },
         { name: 'Joist Hanger Nails', actualPrice: 15.00, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Joist Hanger Nails 1 box // Secure joist hangers to wood' },
         
         // 🛒 RECOM MATERIALS - PICKUP ($150)
@@ -293,7 +301,7 @@ function initializeData() {
     // Additional Tanks (template with $0 prices)
     inventoryData.tanks = [
         { name: '6ft CountyLine (390 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Singles/couples' },
-        { name: '8ft CountyLine (700 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Most popular' },
+        { name: '8ft CountyLine Stock Tank', actualPrice: 650, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'TSC - Most popular size, 8ft diameter, galvanized' },
         { name: '10ft Behlen (1,117 gal)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Premium families' }
     ];
 
@@ -327,8 +335,10 @@ function initializeData() {
         { name: 'Excavation & Leveling (10ft = 12x12)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '12ft x 12ft pad area' },
         
         // Foundation Materials
-        { name: 'Caliche Base (per cubic yard)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Hand compacted solid foundation' },
-        { name: 'Landscape Fabric (100ft roll)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Full coverage weed prevention' },
+        { name: 'Caliche Base (1 cubic yard)', actualPrice: 45, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Recom Materials - Hand compacted solid foundation' },
+        { name: 'Pea Gravel (1 cubic yard)', actualPrice: 80, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Recom Materials - Drainage and leveling' },
+        { name: 'Landscape Fabric (900 sq ft roll)', actualPrice: 105, quantity: 1, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Recom Materials or Lowes - Full coverage weed prevention' },
+        { name: 'Sand/Leveling Material (50lb bags)', actualPrice: 15, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Fine leveling under tank' },
         
         // Professional Edging
         { name: 'Pressure Treated Edging 2x8', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Professional border definition' },
@@ -353,8 +363,21 @@ function initializeData() {
 
     // Standard Hardware (template with $0 prices)
     inventoryData.hardware = [
-        { name: 'Pool Skimmers', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: 'Surface cleaning' },
-        { name: 'Return Jet Fittings', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: '1.5 inch' },
+        // Pool-Specific Items
+        { name: 'Pool Skimmer Assembly', actualPrice: 35, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Complete skimmer unit for surface cleaning' },
+        { name: 'Return Jet Fittings (2x)', actualPrice: 20, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - 1.5 inch return jets' },
+        { name: 'Ball Valves 1.5" (2x)', actualPrice: 30, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Shutoff valves for pump connections' },
+        { name: 'Hose Clamps (pack)', actualPrice: 10, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Secure hose connections' },
+        { name: 'Teflon Tape (2 rolls)', actualPrice: 5, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Thread sealing' },
+        
+        // PVC Plumbing Fittings
+        { name: '1.5" PVC Elbows (4x)', actualPrice: 6, quantity: 4, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - 90 degree connections' },
+        { name: '1.5" PVC Tees (2x)', actualPrice: 4, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - T-junction connections' },
+        { name: '1.5" to 1.25" Adapters (2x)', actualPrice: 6, quantity: 2, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Size transition fittings' },
+        { name: '1.5" PVC Pipe (10 ft)', actualPrice: 8, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Main plumbing runs' },
+        { name: 'PVC Primer & Cement', actualPrice: 15, quantity: 1, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Lowes - Joint sealing compound' },
+        
+        // Legacy Items
         { name: 'Suction Fittings', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'local', link: '', status: 'pending', notes: 'Main drains' },
         { name: 'Pool Hoses (25ft pairs)', actualPrice: 0, quantity: 0, usage: 'per-job', location: 'both', link: '', status: 'pending', notes: '1.5 inch diameter' }
     ];

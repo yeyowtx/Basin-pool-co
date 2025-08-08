@@ -15,7 +15,7 @@ const AUTOMATION_CONFIG = {
   // n8n Cloud Configuration  
   n8n: {
     url: 'https://yeyo.app.n8n.cloud',
-    apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTc5NmJlZi02ZTliLTRkN2EtODZkNC1hNzU0ODRkZTBjZTgiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU0NjMxOTg0fQ.j2B0IwzWGu_VnlobQtL5crS9QI21d82Zs-vU-ErtNHc'
+    apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTc5NmJlZi02ZTliLTRkN2EtODZkNC1hNzU0ODRkZTBjZTgiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU0NjgxNjk0fQ.LVE0NWx77CSmWNno2ooG4j4JyszXJi1lglcNOmK-pLM'
   },
 
   // GoHighLevel Integration Points
