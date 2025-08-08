@@ -61,6 +61,39 @@ const CONFIG = {
         NON_TAXABLE_USAGE: ['labor-service']
     },
     
+    // Receipt Scanner & OCR Settings
+    RECEIPT_SCANNER: {
+        ENABLED: true,
+        // Veryfi OCR API Configuration
+        OCR_API: {
+            CLIENT_ID: 'vrfy_basin_pool_co_client_id_placeholder',
+            USERNAME: 'basin_pool_co_username_placeholder',
+            API_KEY: 'your_veryfi_api_key_here',
+            BASE_URL: 'https://api.veryfi.com/api/v8/partner/documents/',
+            TIMEOUT: 30000 // 30 seconds
+        },
+        
+        // Home Depot Product Lookup
+        PRODUCT_LOOKUP: {
+            ENABLED: true,
+            // BigBox API for Home Depot
+            HOME_DEPOT_API_KEY: 'your_bigbox_api_key_here',
+            BASE_URL: 'https://api.bigboxapi.com/products/',
+            TIMEOUT: 10000 // 10 seconds
+        },
+        
+        // Camera Settings
+        CAMERA: {
+            PREFERRED_CAMERA: 'environment', // 'environment' for back camera, 'user' for front
+            VIDEO_CONSTRAINTS: {
+                width: { ideal: 1920, max: 1920 },
+                height: { ideal: 1080, max: 1080 },
+                facingMode: 'environment'
+            },
+            PHOTO_QUALITY: 0.9 // JPEG quality 0-1
+        }
+    },
+    
     // Notification settings
     NOTIFICATIONS: {
         SAVE_DURATION: 2000, // 2 seconds

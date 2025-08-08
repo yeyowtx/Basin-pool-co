@@ -1877,3 +1877,317 @@ function debugInventoryStructure() {
 
 // Add debug function to global scope for console access
 window.debugInventory = debugInventoryStructure;
+
+// ===========================
+// RECEIPT SCANNER FUNCTIONALITY
+// ===========================
+
+// Global scanner state
+let cameraStream = null;
+let currentCamera = 'environment';
+let capturedImageData = null;
+let extractedReceiptData = null;
+
+// Open receipt scanner modal
+function openReceiptScanner() {
+    if (!CONFIG.RECEIPT_SCANNER.ENABLED) {
+        showNotification('Receipt scanner is disabled in configuration', 'error');
+        return;
+    }
+    
+    document.getElementById('receiptScannerModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Reset scanner state
+    resetScannerState();
+    
+    // Initialize camera
+    initializeCamera();
+}
+
+// Close receipt scanner modal
+function closeReceiptScanner() {
+    document.getElementById('receiptScannerModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    
+    // Stop camera stream
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+}
+
+// Reset scanner to initial state
+function resetScannerState() {
+    document.getElementById('cameraPreview').style.display = 'block';
+    document.getElementById('capturedImage').style.display = 'none';
+    document.getElementById('processingIndicator').style.display = 'none';
+    document.getElementById('ocrResults').style.display = 'none';
+    capturedImageData = null;
+    extractedReceiptData = null;
+}
+
+// Initialize camera access
+async function initializeCamera() {
+    try {
+        const constraints = {
+            video: {
+                ...CONFIG.RECEIPT_SCANNER.CAMERA.VIDEO_CONSTRAINTS,
+                facingMode: currentCamera
+            }
+        };
+        
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = cameraStream;
+        
+        console.log('Camera initialized successfully');
+        showNotification('Camera ready - position receipt in frame', 'success');
+        
+    } catch (error) {
+        console.error('Camera access error:', error);
+        showNotification('Camera access denied. Please allow camera permissions.', 'error');
+    }
+}
+
+// Toggle between front and back camera
+async function toggleCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+    }
+    
+    currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+    await initializeCamera();
+}
+
+// Capture receipt photo
+function captureReceipt() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw current frame to canvas
+    context.drawImage(video, 0, 0);
+    
+    // Convert to base64 with quality setting
+    capturedImageData = canvas.toDataURL('image/jpeg', CONFIG.RECEIPT_SCANNER.CAMERA.PHOTO_QUALITY);
+    
+    // Show captured image
+    document.getElementById('cameraPreview').style.display = 'none';
+    document.getElementById('capturedImage').style.display = 'block';
+    document.getElementById('receiptImage').src = capturedImageData;
+    
+    // Stop camera stream
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+    
+    showNotification('Receipt captured! Review and process.', 'success');
+}
+
+// Retake photo
+function retakePhoto() {
+    resetScannerState();
+    initializeCamera();
+}
+
+// Process receipt with OCR
+async function processReceipt() {
+    if (!capturedImageData) {
+        showNotification('No image captured to process', 'error');
+        return;
+    }
+    
+    // Show processing indicator
+    document.getElementById('capturedImage').style.display = 'none';
+    document.getElementById('processingIndicator').style.display = 'block';
+    
+    try {
+        // For demo purposes, let's use a mock OCR result
+        // In production, this would call the Veryfi API
+        const ocrResults = await mockOCRProcessing(capturedImageData);
+        
+        if (ocrResults && ocrResults.line_items && ocrResults.line_items.length > 0) {
+            extractedReceiptData = ocrResults;
+            displayOCRResults(ocrResults);
+        } else {
+            throw new Error('No items found on receipt');
+        }
+        
+    } catch (error) {
+        console.error('OCR processing error:', error);
+        showNotification('Failed to process receipt: ' + error.message, 'error');
+        
+        // Return to captured image view
+        document.getElementById('processingIndicator').style.display = 'none';
+        document.getElementById('capturedImage').style.display = 'block';
+    }
+}
+
+// Mock OCR processing for demo (replace with real Veryfi API call)
+async function mockOCRProcessing(imageData) {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Mock response with typical Home Depot items
+    return {
+        vendor: {
+            name: "The Home Depot",
+            address: "123 Main St, Midland, TX 79701"
+        },
+        date: new Date().toISOString().split('T')[0],
+        total: 127.45,
+        tax: 9.68,
+        line_items: [
+            {
+                description: "2x4x8 Pressure Treated Lumber",
+                sku: "HD123456",
+                quantity: 6,
+                unit_price: 8.97,
+                total: 53.82
+            },
+            {
+                description: "Quikrete Concrete Mix 80lb",
+                sku: "HD789012", 
+                quantity: 4,
+                unit_price: 4.48,
+                total: 17.92
+            },
+            {
+                description: "Deck Screws 2.5\" Box",
+                sku: "HD345678",
+                quantity: 2,
+                unit_price: 12.97,
+                total: 25.94
+            }
+        ]
+    };
+}
+
+// Real Veryfi OCR API call (requires API keys)
+async function callVeryfiAPI(imageData) {
+    const apiConfig = CONFIG.RECEIPT_SCANNER.OCR_API;
+    
+    if (!apiConfig.API_KEY || apiConfig.API_KEY === 'your_veryfi_api_key_here') {
+        throw new Error('Veryfi API key not configured');
+    }
+    
+    try {
+        // Convert base64 to blob
+        const response = await fetch(imageData);
+        const blob = await response.blob();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('file', blob, 'receipt.jpg');
+        
+        // Call Veryfi API
+        const apiResponse = await fetch(apiConfig.BASE_URL, {
+            method: 'POST',
+            headers: {
+                'CLIENT-ID': apiConfig.CLIENT_ID,
+                'AUTHORIZATION': `apikey ${apiConfig.USERNAME}:${apiConfig.API_KEY}`
+            },
+            body: formData
+        });
+        
+        if (!apiResponse.ok) {
+            throw new Error(`Veryfi API error: ${apiResponse.status}`);
+        }
+        
+        return await apiResponse.json();
+        
+    } catch (error) {
+        console.error('Veryfi API call failed:', error);
+        throw error;
+    }
+}
+
+// Display OCR results
+function displayOCRResults(ocrData) {
+    document.getElementById('processingIndicator').style.display = 'none';
+    document.getElementById('ocrResults').style.display = 'block';
+    
+    const extractedItemsDiv = document.getElementById('extractedItems');
+    extractedItemsDiv.innerHTML = '';
+    
+    // Show store and date info
+    const storeInfo = document.createElement('div');
+    storeInfo.className = 'store-info';
+    storeInfo.innerHTML = `
+        <h4>📍 ${ocrData.vendor?.name || 'Unknown Store'}</h4>
+        <p>📅 ${ocrData.date || 'Unknown Date'}</p>
+        <p>💰 Total: $${ocrData.total?.toFixed(2) || '0.00'} (Tax: $${ocrData.tax?.toFixed(2) || '0.00'})</p>
+    `;
+    extractedItemsDiv.appendChild(storeInfo);
+    
+    // Display each line item
+    if (ocrData.line_items && ocrData.line_items.length > 0) {
+        ocrData.line_items.forEach((item, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'extracted-item';
+            itemDiv.innerHTML = `
+                <div class="item-info">
+                    <div class="item-name">${item.description || 'Unknown Item'}</div>
+                    <div class="item-details">
+                        SKU: ${item.sku || 'N/A'} | Qty: ${item.quantity || 1} | Unit: $${(item.unit_price || 0).toFixed(2)}
+                    </div>
+                </div>
+                <div class="item-price">$${(item.total || 0).toFixed(2)}</div>
+            `;
+            extractedItemsDiv.appendChild(itemDiv);
+        });
+    }
+    
+    showNotification(`Extracted ${ocrData.line_items?.length || 0} items from receipt`, 'success');
+}
+
+// Add extracted items to inventory
+function addExtractedItems() {
+    if (!extractedReceiptData || !extractedReceiptData.line_items) {
+        showNotification('No extracted data to add', 'error');
+        return;
+    }
+    
+    let itemsAdded = 0;
+    const targetSection = 'siteprep'; // Default section for scanned items
+    
+    extractedReceiptData.line_items.forEach(item => {
+        const newItem = {
+            name: item.description || 'Scanned Item',
+            actualPrice: item.total || 0,
+            quantity: item.quantity || 1,
+            usage: 'consumable',
+            location: 'local',
+            link: '',
+            status: 'purchased',
+            notes: `${item.description || 'Unknown product'} // Scanned from receipt${item.sku ? ` (SKU: ${item.sku})` : ''}`
+        };
+        
+        // Add to target section
+        if (!inventoryData[targetSection]) {
+            inventoryData[targetSection] = [];
+        }
+        inventoryData[targetSection].push(newItem);
+        itemsAdded++;
+    });
+    
+    // Update UI and save
+    renderAccordionSections();
+    updateSummary();
+    forceSave();
+    
+    showNotification(`Added ${itemsAdded} items to ${targetSection} inventory`, 'success');
+    closeReceiptScanner();
+}
+
+// Reset scanner for new receipt
+function resetScanner() {
+    resetScannerState();
+    initializeCamera();
+}
