@@ -2106,59 +2106,161 @@ async function callVeryfiAPI(imageData) {
     }
     
     try {
-        // Convert base64 to blob
+        // Validate image data format
+        if (!imageData || !imageData.startsWith('data:image/')) {
+            throw new Error('Invalid image data format');
+        }
+        
+        // Convert base64 to blob with proper error handling
         const base64Response = await fetch(imageData);
+        if (!base64Response.ok) {
+            throw new Error('Failed to process image data');
+        }
+        
         const blob = await base64Response.blob();
+        
+        // Validate blob size (Veryfi has file size limits)
+        const maxSize = 10 * 1024 * 1024; // 10MB limit
+        if (blob.size > maxSize) {
+            throw new Error('Image file too large. Please use a smaller image.');
+        }
+        
+        if (blob.size === 0) {
+            throw new Error('Image file is empty');
+        }
         
         // Create form data
         const formData = new FormData();
         formData.append('file', blob, 'receipt.jpg');
         
-        // Add optional parameters for better accuracy
-        if (apiConfig.AUTO_ROTATE) formData.append('auto_rotate', 'true');
-        if (apiConfig.BOOST_MODE) formData.append('boost_mode', 'true');
-        if (apiConfig.CATEGORIES) formData.append('categories', apiConfig.CATEGORIES.join(','));
+        // Add enhanced processing parameters
+        if (apiConfig.AUTO_ROTATE) {
+            formData.append('auto_rotate', 'true');
+        }
+        if (apiConfig.BOOST_MODE) {
+            formData.append('boost_mode', 'true');
+        }
+        if (apiConfig.CATEGORIES && Array.isArray(apiConfig.CATEGORIES)) {
+            formData.append('categories', apiConfig.CATEGORIES.join(','));
+        }
         
-        // Call Veryfi API with proper authentication
+        // Add additional processing options for better accuracy
+        formData.append('auto_delete', apiConfig.AUTO_DELETE ? 'true' : 'false');
+        formData.append('external_id', `basin-pool-${Date.now()}`);
+        
+        // Generate proper authentication signature
+        const timestamp = Math.floor(Date.now() / 1000).toString();
+        
+        // Call Veryfi API with enhanced authentication and timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), apiConfig.TIMEOUT || 30000);
+        
         const apiResponse = await fetch(apiConfig.BASE_URL, {
             method: 'POST',
             headers: {
                 'CLIENT-ID': apiConfig.CLIENT_ID,
                 'AUTHORIZATION': `apikey ${apiConfig.USERNAME}:${apiConfig.API_KEY}`,
-                'X-Veryfi-Request-Timestamp': Math.floor(Date.now() / 1000).toString(),
-                'Accept': 'application/json'
+                'X-Veryfi-Request-Timestamp': timestamp,
+                'Accept': 'application/json',
+                'User-Agent': 'Basin-Pool-Inventory/1.0'
             },
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
+        
+        // Enhanced error handling
         if (!apiResponse.ok) {
-            const errorText = await apiResponse.text();
-            throw new Error(`Veryfi API error ${apiResponse.status}: ${errorText}`);
+            const contentType = apiResponse.headers.get('content-type');
+            let errorMessage;
+            
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await apiResponse.json();
+                errorMessage = errorData.error || errorData.message || `HTTP ${apiResponse.status}`;
+            } else {
+                errorMessage = await apiResponse.text();
+            }
+            
+            // Handle specific error cases
+            switch (apiResponse.status) {
+                case 401:
+                    throw new Error('Authentication failed. Please check API credentials.');
+                case 402:
+                    throw new Error('Insufficient credits. Please check your Veryfi account.');
+                case 413:
+                    throw new Error('Image file too large. Please use a smaller image.');
+                case 429:
+                    throw new Error('API rate limit exceeded. Please try again later.');
+                default:
+                    throw new Error(`API error (${apiResponse.status}): ${errorMessage}`);
+            }
         }
         
         const veryfiData = await apiResponse.json();
         
-        // Convert Veryfi format to our internal format
-        return {
+        // Validate API response structure
+        if (!veryfiData || typeof veryfiData !== 'object') {
+            throw new Error('Invalid API response format');
+        }
+        
+        // Enhanced data conversion with validation
+        const processedData = {
             vendor: {
-                name: veryfiData.vendor?.name || 'Unknown Store',
-                address: veryfiData.vendor?.address || ''
+                name: (veryfiData.vendor?.name || 'Unknown Store').trim(),
+                address: (veryfiData.vendor?.address || '').trim()
             },
             date: veryfiData.date || new Date().toISOString().split('T')[0],
-            total: veryfiData.total || 0,
-            tax: veryfiData.tax || 0,
-            line_items: (veryfiData.line_items || []).map(item => ({
-                description: item.description || item.name || 'Unknown Item',
-                sku: item.sku || item.upc || null,
-                quantity: item.quantity || 1,
-                unit_price: item.unit_price || (item.total / (item.quantity || 1)),
-                total: item.total || 0
-            }))
+            total: parseFloat(veryfiData.total) || 0,
+            tax: parseFloat(veryfiData.tax) || 0,
+            subtotal: parseFloat(veryfiData.subtotal) || 0,
+            line_items: []
         };
+        
+        // Process line items with enhanced validation
+        if (veryfiData.line_items && Array.isArray(veryfiData.line_items)) {
+            processedData.line_items = veryfiData.line_items
+                .filter(item => item && (item.description || item.name)) // Filter out invalid items
+                .map(item => {
+                    const quantity = Math.max(1, parseInt(item.quantity) || 1);
+                    const total = parseFloat(item.total) || 0;
+                    const unitPrice = parseFloat(item.unit_price) || (total / quantity);
+                    
+                    return {
+                        description: (item.description || item.name || 'Unknown Item').trim(),
+                        sku: (item.sku || item.upc || '').trim() || null,
+                        quantity: quantity,
+                        unit_price: Math.round(unitPrice * 100) / 100, // Round to 2 decimals
+                        total: Math.round(total * 100) / 100,
+                        category: (item.category || '').trim() || null
+                    };
+                })
+                .filter(item => item.total > 0); // Only include items with valid totals
+        }
+        
+        // Validate that we got useful data
+        if (processedData.line_items.length === 0 && processedData.total === 0) {
+            throw new Error('No valid items or total found on receipt');
+        }
+        
+        console.log('Veryfi OCR processing successful:', {
+            vendor: processedData.vendor.name,
+            items: processedData.line_items.length,
+            total: processedData.total
+        });
+        
+        return processedData;
         
     } catch (error) {
         console.error('Veryfi API call failed:', error);
-        throw error;
+        
+        // Handle timeout errors specifically
+        if (error.name === 'AbortError') {
+            throw new Error('Request timed out. Please try again with a clearer image.');
+        }
+        
+        // Re-throw with enhanced error context
+        throw new Error(`OCR processing failed: ${error.message}`);
     }
 }
 
