@@ -1,0 +1,110 @@
+{
+  "name": "GHL → ClickUp Client Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-client-onboarding",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "ghl-webhook",
+      "name": "GHL Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "clientName",
+              "value": "={{ $json.contact?.name || $json.body?.full_name || $json.name || $json.client_name || 'New Client' }}"
+            },
+            {
+              "name": "clientEmail", 
+              "value": "={{ $json.contact?.email || $json.body?.email || $json.email || 'test@example.com' }}"
+            },
+            {
+              "name": "clientPhone",
+              "value": "={{ $json.contact?.phone || $json.body?.phone || $json.phone || '' }}"
+            },
+            {
+              "name": "subAccountId",
+              "value": "={{ $json.locationId || $json.body?.locationId || $json.sub_account_id || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "extract-client-data",
+      "name": "Extract Client Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "list",
+        "operation": "create",
+        "team": "90140073497",
+        "space": "90140073497", 
+        "folderless": true,
+        "name": "={{ $json.clientName }} - GHL Sub-Account Setup",
+        "content": "Complete GoHighLevel sub-account setup following the chronological checklist. Sub-Account ID: {{ $json.subAccountId }}"
+      },
+      "id": "create-project-list",
+      "name": "Create Project List", 
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const clientData = $input.first().json;\n\nconst tasks = [\n  {\n    name: \"1. Integrations\",\n    content: `**INTEGRATIONS SETUP**\\n\\n• Google Business Profile\\n• Facebook Ads\\n• Google Ads\\n• QuickBooks\\n• Payment Process\\n• 3rd Party Apps\\n\\nClient: ${clientData.clientName}\\nSub-Account: ${clientData.subAccountId}`\n  },\n  {\n    name: \"2. Website\",\n    content: `**WEBSITE SETUP**\\n\\n• Landing Page\\n• Standard Terms and Conditions\\n• Standard Privacy Policy\\n• Domain Setup\\n\\nResource: How to use the Domain Connect feature\\n\\nClient: ${clientData.clientName}`\n  },\n  {\n    name: \"3. Phone System\",\n    content: `**PHONE SYSTEM & A2P REGISTRATION**\\n\\n• A2P Registration\\n• Need EIN: COLLECT FROM CLIENT\\n• Need Support Email: COLLECT FROM CLIENT\\n\\nResource: A2P 10DLC Brand Approval Best Practices\\n\\nClient: ${clientData.clientName}`\n  },\n  {\n    name: \"4. Pipelines\", \n    content: `**PIPELINE SETUP**\\n\\n⚠️ PRESENT EXACT PIPELINES AND SEE WHAT DIFFERENCES THE CLIENT LIKES\\n\\nMake sure to include all numbers for chronological order\\n\\nClient: ${clientData.clientName}`\n  },\n  {\n    name: \"5. Custom Field Folders\",\n    content: `**CUSTOM FIELD FOLDERS**\\n\\n• New Project Questionnaire (Intake)\\n• Qualification Questionnaire\\n• On-Site Consultation Questionnaire\\n• Design Questionnaire\\n• Pre-CW Questionnaire\\n• Post-CW Questionnaire\\n\\nClient: ${clientData.clientName}`\n  }\n];\n\nreturn tasks.map(task => ({\n  json: {\n    ...task,\n    clientData\n  }\n}));"
+      },
+      "id": "prepare-all-tasks",
+      "name": "Prepare All Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "task",
+        "operation": "create", 
+        "team": "90140073497",
+        "space": "90140073497",
+        "list": "={{ $('Create Project List').item.json.id }}",
+        "name": "={{ $json.name }}",
+        "content": "={{ $json.content }}",
+        "status": "to do",
+        "assignees": ["88411788"]
+      },
+      "id": "create-task",
+      "name": "Create Task",
+      "type": "n8n-nodes-base.clickUp", 
+      "typeVersion": 1,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [[{"node": "Extract Client Data", "type": "main", "index": 0}]]
+    },
+    "Extract Client Data": {
+      "main": [[{"node": "Create Project List", "type": "main", "index": 0}]]
+    },
+    "Create Project List": {
+      "main": [[{"node": "Prepare All Tasks", "type": "main", "index": 0}]]
+    },
+    "Prepare All Tasks": {
+      "main": [[{"node": "Create Task", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

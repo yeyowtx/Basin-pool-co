@@ -1,0 +1,51 @@
+{
+  "test_scenario_1": {
+    "description": "Complete client data with EIN and support email",
+    "webhook_url": "https://yeyo.app.n8n.cloud/webhook/ghl-client-onboarding",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "contact": {
+        "name": "John Smith Construction",
+        "email": "john@smithconstruction.com",
+        "phone": "+1-555-123-4567"
+      },
+      "locationId": "loc_abc123456",
+      "ein": "12-3456789",
+      "support_email": "support@smithconstruction.com",
+      "project_type": "premium",
+      "tags": ["premium", "construction"]
+    }
+  },
+  "test_scenario_2": {
+    "description": "Client data with missing EIN (should show in task 3)",
+    "webhook_url": "https://yeyo.app.n8n.cloud/webhook/ghl-client-onboarding",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "name": "ABC Landscaping LLC",
+      "email": "info@abclandscaping.com",
+      "phone": "(555) 987-6543",
+      "sub_account_id": "sub_xyz789",
+      "business_email": "support@abclandscaping.com"
+    }
+  },
+  "test_scenario_3": {
+    "description": "Minimal client data (standard format)",
+    "webhook_url": "https://yeyo.app.n8n.cloud/webhook/ghl-client-onboarding",
+    "method": "POST", 
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "client_name": "XYZ Pool Services",
+      "email": "contact@xyzpools.com",
+      "phone": "555-444-3333",
+      "locationId": "loc_pool123"
+    }
+  }
+}

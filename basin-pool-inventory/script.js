@@ -769,55 +769,78 @@ function renderSection(section, items, tableId) {
         }
         
         const row = document.createElement('tr');
+        row.classList.add('collapsed'); // Start collapsed on mobile
         row.innerHTML = `
-            <td data-label="Item">
-                <input type="text" class="item-name-input" data-section="${section}" data-index="${index}" data-field="name" 
-                       value="${item.name}" placeholder="Item name..." style="font-weight: bold; border: 1px solid #e1e8ed; padding: 6px; border-radius: 4px; width: 100%; background: #fafbfc;">
-            </td>
-            <td data-label="Price">
-                <input type="number" class="price-input" data-section="${section}" data-index="${index}" data-field="actualPrice" 
-                       value="${item.actualPrice || ''}" placeholder="$" step="0.01">
-            </td>
-            <td data-label="Qty">
-                <input type="number" class="qty-input" data-section="${section}" data-index="${index}" data-field="quantity" 
-                       value="${item.quantity}" min="0">
-            </td>
-            <td data-label="Usage">
-                <select class="usage-select" data-section="${section}" data-index="${index}" data-field="usage" style="padding: 6px; border: 1px solid #e1e8ed; border-radius: 4px; font-size: 0.85em;">
-                    <option value="one-time" ${item.usage === 'one-time' ? 'selected' : ''}>One-Time</option>
-                    <option value="per-job" ${item.usage === 'per-job' ? 'selected' : ''}>Per Job</option>
-                    <option value="reusable" ${item.usage === 'reusable' ? 'selected' : ''}>Reusable</option>
-                    <option value="consumable" ${item.usage === 'consumable' ? 'selected' : ''}>Consumable</option>
-                </select>
-            </td>
-            <td data-label="Location">
-                <select class="location-select" data-section="${section}" data-index="${index}" data-field="location">
-                    <option value="online" ${item.location === 'online' ? 'selected' : ''}>Online</option>
-                    <option value="local" ${item.location === 'local' ? 'selected' : ''}>Local Midland TX</option>
-                    <option value="both" ${item.location === 'both' ? 'selected' : ''}>Both</option>
-                </select>
-                <span class="location-badge ${item.location}">
-                    ${item.location === 'online' ? 'Online' : item.location === 'local' ? 'Local TX' : 'Both'}
-                </span>
-            </td>
-            <td data-label="Supplier Link">
-                <input type="url" class="link-input" data-section="${section}" data-index="${index}" data-field="link" 
-                       value="${item.link}" placeholder="Supplier link...">
-            </td>
-            <td data-label="Status">
-                <span class="status ${item.status}" data-section="${section}" data-index="${index}">${CONFIG.STATUS_TYPES[item.status]?.label || item.status}</span>
-                ${item.status === 'pending' || item.status === 'ordered' ? 
-                    `<button class="quick-purchase-btn" onclick="openQuickPurchase('${section}', ${index})" title="Quick Purchase (${section}[${index}]: ${item.name})">💳</button>` : 
-                    ''}
-                ${item.receiptPhoto ? 
-                    `<button class="view-receipt-btn" onclick="viewReceipt('${section}', ${index})" title="View Receipt">📷</button>` : 
-                    ''}
-            </td>
-            <td data-label="Notes">
-                <input type="text" class="notes-input" data-section="${section}" data-index="${index}" data-field="notes" 
-                       value="${item.notes}" placeholder="Notes...">
-                <button class="delete-item-btn" onclick="deleteItem('${section}', ${index})" title="Delete item">🗑️</button>
-            </td>
+            <!-- Mobile Item Header (Always Visible) -->
+            <div class="mobile-item-header" onclick="toggleMobileItem(this)">
+                <div class="mobile-item-title">
+                    <input type="text" class="item-name-input mobile-item-name" data-section="${section}" data-index="${index}" data-field="name" 
+                           value="${item.name}" placeholder="Item name..." onclick="event.stopPropagation()">
+                    <span class="mobile-toggle-icon">▼</span>
+                </div>
+                <div class="mobile-item-summary">
+                    <span class="status ${item.status}" data-section="${section}" data-index="${index}">${CONFIG.STATUS_TYPES[item.status]?.label || item.status}</span>
+                    <span class="mobile-price">$${(item.actualPrice || 0).toFixed(2)}</span>
+                </div>
+            </div>
+            
+            <!-- Mobile Item Details (Collapsible) -->
+            <div class="mobile-item-details">
+                <td data-label="Item" style="display:none;">
+                    <input type="text" class="item-name-input" data-section="${section}" data-index="${index}" data-field="name" 
+                           value="${item.name}" placeholder="Item name..." style="font-weight: bold; border: 1px solid #e1e8ed; padding: 6px; border-radius: 4px; width: 100%; background: #fafbfc;">
+                </td>
+                <div class="mobile-field-group">
+                    <div class="mobile-field">
+                        <label>Price:</label>
+                        <input type="number" class="price-input" data-section="${section}" data-index="${index}" data-field="actualPrice" 
+                               value="${item.actualPrice || ''}" placeholder="$" step="0.01">
+                    </div>
+                    <div class="mobile-field">
+                        <label>Qty:</label>
+                        <input type="number" class="qty-input" data-section="${section}" data-index="${index}" data-field="quantity" 
+                               value="${item.quantity}" min="0">
+                    </div>
+                </div>
+                <div class="mobile-field-group">
+                    <div class="mobile-field">
+                        <label>Usage:</label>
+                        <select class="usage-select" data-section="${section}" data-index="${index}" data-field="usage">
+                            <option value="one-time" ${item.usage === 'one-time' ? 'selected' : ''}>One-Time</option>
+                            <option value="per-job" ${item.usage === 'per-job' ? 'selected' : ''}>Per Job</option>
+                            <option value="reusable" ${item.usage === 'reusable' ? 'selected' : ''}>Reusable</option>
+                            <option value="consumable" ${item.usage === 'consumable' ? 'selected' : ''}>Consumable</option>
+                        </select>
+                    </div>
+                    <div class="mobile-field">
+                        <label>Location:</label>
+                        <select class="location-select" data-section="${section}" data-index="${index}" data-field="location">
+                            <option value="online" ${item.location === 'online' ? 'selected' : ''}>Online</option>
+                            <option value="local" ${item.location === 'local' ? 'selected' : ''}>Local Midland TX</option>
+                            <option value="both" ${item.location === 'both' ? 'selected' : ''}>Both</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mobile-field">
+                    <label>Supplier Link:</label>
+                    <input type="url" class="link-input" data-section="${section}" data-index="${index}" data-field="link" 
+                           value="${item.link}" placeholder="Supplier link...">
+                </div>
+                <div class="mobile-field">
+                    <label>Notes:</label>
+                    <input type="text" class="notes-input" data-section="${section}" data-index="${index}" data-field="notes" 
+                           value="${item.notes}" placeholder="Notes...">
+                </div>
+                <div class="mobile-actions">
+                    ${item.status === 'pending' || item.status === 'ordered' ? 
+                        `<button class="quick-purchase-btn" onclick="openQuickPurchase('${section}', ${index})" title="Quick Purchase">💳 Purchase</button>` : 
+                        ''}
+                    ${item.receiptPhoto ? 
+                        `<button class="view-receipt-btn" onclick="viewReceipt('${section}', ${index})" title="View Receipt">📷 Receipt</button>` : 
+                        ''}
+                    <button class="delete-item-btn" onclick="deleteItem('${section}', ${index})" title="Delete item">🗑️ Delete</button>
+                </div>
+            </div>
         `;
         tbody.appendChild(row);
     });
@@ -1572,6 +1595,21 @@ function deleteItem(section, index) {
         scheduleAutoSave();
         
         showNotification(`"${itemName}" deleted`, 'success');
+    }
+}
+
+// Toggle mobile item details
+function toggleMobileItem(headerElement) {
+    const row = headerElement.closest('tr');
+    const isCollapsed = row.classList.contains('collapsed');
+    const toggleIcon = headerElement.querySelector('.mobile-toggle-icon');
+    
+    if (isCollapsed) {
+        row.classList.remove('collapsed');
+        toggleIcon.textContent = '▲';
+    } else {
+        row.classList.add('collapsed');
+        toggleIcon.textContent = '▼';
     }
 }
 

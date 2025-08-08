@@ -1156,6 +1156,159 @@ body {
         font-size: 16px;
     }
     
+    /* Hide table headers on mobile */
+    .item-table thead {
+        display: none;
+    }
+    
+    /* Convert table rows to collapsible cards */
+    .item-table tbody tr {
+        display: block;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    /* Item header (always visible) */
+    .item-table tbody tr::before {
+        content: '';
+        display: block;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    /* Mobile item card layout */
+    .item-table tbody tr {
+        position: relative;
+    }
+    
+    .item-table tbody tr.collapsed .mobile-item-details {
+        display: none;
+    }
+    
+    .item-table tbody tr:not(.collapsed) .mobile-item-details {
+        display: block;
+    }
+    
+    /* Mobile item header styles */
+    .mobile-item-header {
+        background: #f8f9fa;
+        padding: 16px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        display: block;
+    }
+    
+    .mobile-item-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .mobile-item-name {
+        flex: 1;
+        margin-right: 12px;
+        font-size: 17px !important;
+        font-weight: 600 !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 4px 0 !important;
+    }
+    
+    .mobile-toggle-icon {
+        color: #667eea;
+        font-weight: bold;
+        font-size: 14px;
+        min-width: 20px;
+        text-align: center;
+    }
+    
+    .mobile-item-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    
+    .mobile-price {
+        font-weight: 600;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+    
+    /* Mobile item details styles */
+    .mobile-item-details {
+        padding: 16px;
+        background: white;
+    }
+    
+    .mobile-field-group {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .mobile-field {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .mobile-field label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 6px;
+    }
+    
+    .mobile-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+    
+    .mobile-actions button {
+        flex: 1;
+        min-width: auto;
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+    }
+    
+    .quick-purchase-btn {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .view-receipt-btn {
+        background: #2196F3;
+        color: white;
+    }
+    
+    .delete-item-btn {
+        background: #f44336;
+        color: white;
+    }
+    
+    /* Hide desktop table structure on mobile */
+    .item-table tbody tr td {
+        display: none;
+    }
+    
+    .item-table tbody tr .mobile-item-header,
+    .item-table tbody tr .mobile-item-details {
+        display: block;
+    }
+    
     /* iOS Safari optimized status badges for shopping */
     .status {
         padding: 12px 16px;
