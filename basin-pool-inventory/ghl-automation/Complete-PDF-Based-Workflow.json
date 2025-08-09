@@ -1,0 +1,200 @@
+{
+  "name": "GHL → ClickUp Simple Onboarding copy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-onboarding",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "id": "af7c59a4-5350-4863-81ec-3272c4422660",
+      "name": "GHL Webhook",
+      "webhookId": "b269f69a-479d-4f6a-9778-20c087a3f1eb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client_name",
+              "name": "clientName",
+              "value": "={{ $json.body.first_name }} {{ $json.body.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "company_name",
+              "name": "companyName",
+              "value": "={{ $json.body.company_name }}",
+              "type": "string"
+            },
+            {
+              "id": "location_id",
+              "name": "locationId",
+              "value": "={{ $json.body.location.id }}",
+              "type": "string"
+            },
+            {
+              "id": "first_name",
+              "name": "firstName",
+              "value": "={{ $json.body.first_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "354cf627-2535-4c75-8d50-247092a61da7",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "901400176579",
+        "name": "{{ $json.firstName }} | {{ $json.companyName }}",
+        "additionalFields": {
+          "content": "Complete GoHighLevel sub-account onboarding\\n\\nClient: {{ $json.clientName }}\\nCompany: {{ $json.companyName }}\\nLocation ID: {{ $json.locationId }}\\n\\n**When in doubt, map it out.**\\nIf you go in the order of this process, you will have the fewest amount of interruptions (if any).",
+          "status": "backlog"
+        }
+      },
+      "id": "5be46f74-ba77-44d4-9939-fc8040182183",
+      "name": "Create Main Task",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [600, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst mainTaskId = $('Create Main Task').item.json.id;\n\n// Complete structure with all subtasks and their detailed sub-subtasks\nconst completeStructure = [\n  {\n    name: \"1. Integrations\",\n    priority: 2,\n    assignees: [44353525, 44371660],\n    time_estimate: 7200000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Google business profile\", assignees: [44371660], priority: 2 },\n      { name: \"Facebook ads\", assignees: [44353525], priority: 3 },\n      { name: \"Google ads\", assignees: [44353525], priority: 3 },\n      { name: \"Quickbooks\", assignees: [44353525], priority: 3 },\n      { name: \"Payment Process\", assignees: [44353525, 44371660], priority: 2 },\n      { name: \"3rd party apps\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"2. Website\",\n    priority: 1,\n    assignees: [44353525, 44371660],\n    time_estimate: 1209600000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Landing page\", assignees: [44353525], priority: 1 },\n      { name: \"Standard terms and conditions\", assignees: [44353525], priority: 3 },\n      { name: \"Standard privacy policy\", assignees: [44353525], priority: 3 },\n      { name: \"Domain (link: How to use the Domain Connect feature)\", assignees: [44371660], priority: 2 }\n    ]\n  },\n  {\n    name: \"3. Phone system\",\n    priority: 1,\n    assignees: [44371660],\n    time_estimate: 259200000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"A2P registration (link: A2P 10DLC Brand Approval Best Practices)\", assignees: [44371660], priority: 1 },\n      { name: \"Need EIN\", assignees: [44371660], priority: 1 },\n      { name: \"Need support email\", assignees: [44371660], priority: 1 }\n    ]\n  },\n  {\n    name: \"4. Pipelines\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 86400000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"PRESENT EXACT PIPELINES AND SEE WHAT DIFFERENCES THE CLIENT LIKES\", assignees: [44353525], priority: 2, content: \"Make sure that you include all of the numbers to ensure that everyone understands the chronological order of operations.\" }\n    ]\n  },\n  {\n    name: \"5. Custom field folders\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 3600000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"New Project Questionnaire (Intake)\", assignees: [44353525], priority: 3 },\n      { name: \"Qualification Questionnaire\", assignees: [44353525], priority: 3 },\n      { name: \"On-Site Consultation Questionnaire\", assignees: [44353525], priority: 3 },\n      { name: \"Design Questionnaire\", assignees: [44353525], priority: 3 },\n      { name: \"Pre-CW Questionnaire\", assignees: [44353525], priority: 3 },\n      { name: \"Post-CW Questionnaire\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"6. Custom value folders\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 1800000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Calendar Links\", assignees: [44353525], priority: 3 },\n      { name: \"Form/Survey Links\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"7. Forms/Surveys\",\n    priority: 2,\n    assignees: [44353525],\n    time_estimate: 7200000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Calendar forms\", assignees: [44353525], priority: 3 },\n      { name: \"Qualification forms\", assignees: [44353525], priority: 2, content: \"**this is based on the client's qualification process**\" },\n      { name: \"On-Site Consultation\", assignees: [44353525], priority: 3, content: \"1st Appointment Form\" },\n      { name: \"Shakedown/Project Prep Meeting\", assignees: [44353525], priority: 3 },\n      { name: \"Pre-Construction Walkthrough\", assignees: [44353525], priority: 3 },\n      { name: \"Post-Construction Walkthrough\", assignees: [44353525], priority: 3 },\n      { name: \"Project Photoshoot Checklist\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"8. Custom values + Trigger Links\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 3600000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Save surveys as custom values\", assignees: [44353525], priority: 3 },\n      { name: \"Save custom values as trigger links with UTM parameters\", assignees: [44353525], priority: 3, content: \"?contact_id={{contact.id}}\" },\n      { name: \"Example: {{ custom_values.landscaping_job_outcome_survey }}?contact_id={{contact.id}}\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"9. Add Users\",\n    priority: 1,\n    assignees: [44353525, 44371660],\n    time_estimate: 3600000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Add owner\", assignees: [44353525], priority: 1 },\n      { name: \"Add all users to sub-account before creating calendars\", assignees: [44353525], priority: 1 },\n      { name: \"COLLECT ALL CONTACTS + PHONE + EMAIL\", assignees: [44371660], priority: 1 }\n    ]\n  },\n  {\n    name: \"10. Calendars\",\n    priority: 2,\n    assignees: [44353525],\n    time_estimate: 7200000,\n    parent: mainTaskId,\n    content: \"I set these up as service calendars. First start with creating your calendar groups. Then add your calendars. Make sure each calendar has a different color to allow for visual recognition.\",\n    subItems: [\n      { name: \"Calendar Groups\", assignees: [44353525], priority: 2, content: \"Create groups first\" },\n      { name: \"Consultation Calendar Group\", assignees: [44353525], priority: 2 },\n      { name: \"Construction Calendars Group\", assignees: [44353525], priority: 2 },\n      { name: \"Calendars\", assignees: [44353525], priority: 2, content: \"Individual calendars with specific colors\" },\n      { name: \"On-Site Consultation Calendar (Light Blue)\", assignees: [44353525], priority: 3 },\n      { name: \"On-Site Project Presentation (Dark Green)\", assignees: [44353525], priority: 3 },\n      { name: \"Pre-Construction Walkthrough (Dark Red)\", assignees: [44353525], priority: 3 },\n      { name: \"Post-Construction Walkthrough (Purple)\", assignees: [44353525], priority: 3 },\n      { name: \"Project Photoshoot (Dark Blue)\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"11. Estimate & Invoice Settings\",\n    priority: 2,\n    assignees: [44353525, 44371660],\n    time_estimate: 86400000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Setup Stripe account if needed\", assignees: [44371660], priority: 2 },\n      { name: \"Connect payment processor\", assignees: [44371660], priority: 2 },\n      { name: \"Turn auto invoice on here\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"12. Automations + Tag setup\",\n    priority: 2,\n    assignees: [44353525],\n    time_estimate: 259200000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Sales\", assignees: [44353525], priority: 2 },\n      { name: \"Job management\", assignees: [44353525], priority: 3 },\n      { name: \"Project stacking\", assignees: [44353525], priority: 3 },\n      { name: \"Review management\", assignees: [44353525], priority: 3 },\n      { name: \"Schedule your Review Post in Social Planner\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"13. Dashboards\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 7200000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Sales Dashboard\", assignees: [44353525], priority: 3, content: \"6-row layout as specified\" },\n      { name: \"Top Row = Opportunity Status, Value, Conversion Rate\", assignees: [44353525], priority: 3 },\n      { name: \"Second Row = Sales Funnel\", assignees: [44353525], priority: 3 },\n      { name: \"Third Row = Lead Source Report\", assignees: [44353525], priority: 3 },\n      { name: \"Fourth Row = GBP\", assignees: [44353525], priority: 3 },\n      { name: \"Fifth Row = Facebook + PPC reporting\", assignees: [44353525], priority: 3 },\n      { name: \"Sixth Row = Sales Efficiency\", assignees: [44353525], priority: 3 },\n      { name: \"How to Edit a dashboard : HighLevel Support Portal\", assignees: [44353525], priority: 3 },\n      { name: \"Edit widgets on the dashboard : HighLevel Support Portal\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"14. Custom Reports\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 3600000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"How to create and schedule reports : HighLevel Support Portal\", assignees: [44353525], priority: 3 }\n    ]\n  },\n  {\n    name: \"15. Domain Setup\",\n    priority: 3,\n    assignees: [44353525, 44371660],\n    time_estimate: 3600000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"Connect existing domain: How to use the Domain Connect feature\", assignees: [44371660], priority: 3 },\n      { name: \"Buy new domain: How to Purchase Domain Step by Step\", assignees: [44371660], priority: 3 }\n    ]\n  },\n  {\n    name: \"16. Email system\",\n    priority: 2,\n    assignees: [44353525, 44371660],\n    time_estimate: 7200000,\n    parent: mainTaskId,\n    subItems: [\n      { name: \"G Suite Setup\", assignees: [44353525], priority: 2 },\n      { name: \"Dedicated sub domain setup\", assignees: [44353525], priority: 2, content: \"link: How to Set Up a Dedicated Sending Domain (LC Email)\" }\n    ]\n  }\n];\n\n// Return complete structure for processing\nreturn [{ json: { structure: completeStructure } }];"
+      },
+      "id": "e0468c47-b028-4707-b49a-d411dc51c334",
+      "name": "Prepare Complete Structure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Step 1: Create all main subtasks first\nconst structure = $input.first().json.structure;\nconst mainSubtasks = structure.map(item => ({\n  type: 'main-subtask',\n  name: item.name,\n  priority: item.priority,\n  assignees: item.assignees,\n  time_estimate: item.time_estimate,\n  parent: item.parent,\n  content: item.content || '',\n  subItems: item.subItems\n}));\n\nreturn mainSubtasks.map(task => ({ json: task }));"
+      },
+      "id": "prepare-main-subtasks",
+      "name": "Prepare Main Subtasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "901400176579",
+        "name": "={{ $json.name }}",
+        "additionalFields": {
+          "status": "backlog",
+          "assignees": "={{ $json.assignees }}",
+          "priority": "={{ $json.priority }}",
+          "time_estimate": "={{ $json.time_estimate }}",
+          "parent": "={{ $json.parent }}",
+          "content": "={{ $json.content }}"
+        }
+      },
+      "id": "create-main-subtasks",
+      "name": "Create Main Subtasks",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Step 2: Create all sub-subtasks using the created main subtask IDs\nconst mainSubtaskResults = $('Create Main Subtasks').all();\nconst originalStructure = $('Prepare Main Subtasks').all();\n\nconst allSubSubtasks = [];\n\nfor (let i = 0; i < mainSubtaskResults.length; i++) {\n  const mainSubtaskId = mainSubtaskResults[i].json.id;\n  const originalData = originalStructure[i].json;\n  \n  if (originalData.subItems && originalData.subItems.length > 0) {\n    originalData.subItems.forEach(subItem => {\n      allSubSubtasks.push({\n        name: subItem.name,\n        assignees: subItem.assignees,\n        priority: subItem.priority,\n        parent: mainSubtaskId,\n        content: subItem.content || ''\n      });\n    });\n  }\n}\n\nreturn allSubSubtasks.map(task => ({ json: task }));"
+      },
+      "id": "prepare-sub-subtasks",
+      "name": "Prepare Sub-subtasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "901400176579",
+        "name": "={{ $json.name }}",
+        "additionalFields": {
+          "status": "backlog",
+          "assignees": "={{ $json.assignees }}",
+          "priority": "={{ $json.priority }}",
+          "parent": "={{ $json.parent }}",
+          "content": "={{ $json.content }}"
+        }
+      },
+      "id": "create-sub-subtasks",
+      "name": "Create Sub-subtasks",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [[{"node": "Extract Data", "type": "main", "index": 0}]]
+    },
+    "Extract Data": {
+      "main": [[{"node": "Create Main Task", "type": "main", "index": 0}]]
+    },
+    "Create Main Task": {
+      "main": [[{"node": "Prepare Complete Structure", "type": "main", "index": 0}]]
+    },
+    "Prepare Complete Structure": {
+      "main": [[{"node": "Prepare Main Subtasks", "type": "main", "index": 0}]]
+    },
+    "Prepare Main Subtasks": {
+      "main": [[{"node": "Create Main Subtasks", "type": "main", "index": 0}]]
+    },
+    "Create Main Subtasks": {
+      "main": [[{"node": "Prepare Sub-subtasks", "type": "main", "index": 0}]]
+    },
+    "Prepare Sub-subtasks": {
+      "main": [[{"node": "Create Sub-subtasks", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

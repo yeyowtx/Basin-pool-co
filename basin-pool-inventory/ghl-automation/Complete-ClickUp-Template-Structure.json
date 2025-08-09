@@ -1,0 +1,491 @@
+{
+  "mainTask": {
+    "name": "{{clientName}} | {{companyName}}",
+    "status": "backlog",
+    "list": "901400176579",
+    "assignees": [],
+    "priority": null,
+    "description": "Complete GoHighLevel sub-account onboarding following the 16-step process"
+  },
+  "subtasks": [
+    {
+      "name": "1. Integrations",
+      "priority": "high",
+      "assignees": [44353525, 44371660],
+      "time_estimate": 7200000,
+      "description": "Set up all required integrations for the client",
+      "subtasks": [
+        {
+          "name": "Google Business Profile Integration",
+          "assignees": [44371660],
+          "priority": "high"
+        },
+        {
+          "name": "Facebook Ads Integration",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Google Ads Integration", 
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "QuickBooks Integration",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Payment Process Setup",
+          "assignees": [44353525, 44371660],
+          "priority": "high"
+        },
+        {
+          "name": "3rd Party Apps Integration",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "2. Website Setup",
+      "priority": "urgent",
+      "assignees": [44353525, 44371660],
+      "time_estimate": 1209600000,
+      "description": "Build website foundation with all required pages",
+      "subtasks": [
+        {
+          "name": "Landing Page Creation",
+          "assignees": [44353525],
+          "priority": "urgent"
+        },
+        {
+          "name": "Standard Terms and Conditions",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Standard Privacy Policy",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Domain Setup (Domain Connect feature)",
+          "assignees": [44371660],
+          "priority": "high"
+        }
+      ]
+    },
+    {
+      "name": "3. Phone System - A2P Registration",
+      "priority": "urgent",
+      "assignees": [44371660],
+      "time_estimate": 259200000,
+      "description": "CRITICAL: A2P registration with required documentation",
+      "subtasks": [
+        {
+          "name": "Collect EIN from Client",
+          "assignees": [44371660],
+          "priority": "urgent"
+        },
+        {
+          "name": "Collect Support Email from Client",
+          "assignees": [44371660],
+          "priority": "urgent"
+        },
+        {
+          "name": "Submit A2P 10DLC Brand Approval",
+          "assignees": [44371660],
+          "priority": "urgent"
+        }
+      ]
+    },
+    {
+      "name": "4. Pipelines Setup",
+      "priority": "normal",
+      "assignees": [44353525],
+      "time_estimate": 86400000,
+      "description": "PRESENT EXACT PIPELINES TO CLIENT - get feedback on differences",
+      "subtasks": [
+        {
+          "name": "Sales Pipeline Configuration",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Master Plan Pipeline",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Active Job Pipeline",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Change Order Pipeline",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Review Pipeline",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Referral Pipeline",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "5. Custom Field Folders",
+      "priority": "normal",
+      "assignees": [44353525],
+      "time_estimate": 3600000,
+      "description": "Create all questionnaire custom field folders",
+      "subtasks": [
+        {
+          "name": "New Project Questionnaire (Intake)",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Qualification Questionnaire", 
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "On-Site Consultation Questionnaire",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Design Questionnaire",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Pre-CW Questionnaire",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Post-CW Questionnaire",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "6. Custom Value Folders",
+      "priority": "normal",
+      "assignees": [44353525],
+      "time_estimate": 1800000,
+      "description": "Organize custom values for easy access",
+      "subtasks": [
+        {
+          "name": "Calendar Links Folder",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Form/Survey Links Folder",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "7. Forms/Surveys Creation",
+      "priority": "high",
+      "assignees": [44353525],
+      "time_estimate": 7200000,
+      "description": "Create all forms based on client's specific processes",
+      "subtasks": [
+        {
+          "name": "Calendar Forms",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Qualification Forms (client-specific process)",
+          "assignees": [44353525],
+          "priority": "high"
+        },
+        {
+          "name": "On-Site Consultation Form",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Shakedown/Project Prep Meeting Form",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Pre-Construction Walkthrough Form",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Post-Construction Walkthrough Form",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Project Photoshoot Checklist",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "8. Custom Values + Trigger Links",
+      "priority": "normal",
+      "assignees": [44353525],
+      "time_estimate": 3600000,
+      "description": "Save surveys as custom values with trigger links",
+      "subtasks": [
+        {
+          "name": "Save Surveys as Custom Values",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Add Trigger Links with UTM Parameters",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Test Trigger Link Format: ?contact_id={{contact.id}}",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "9. Add Users to Sub-Account",
+      "priority": "urgent",
+      "assignees": [44353525, 44371660],
+      "time_estimate": 3600000,
+      "description": "CRITICAL: Must complete BEFORE creating calendars",
+      "subtasks": [
+        {
+          "name": "Add Owner to Sub-Account",
+          "assignees": [44353525],
+          "priority": "urgent"
+        },
+        {
+          "name": "Add All Users Before Creating Calendars",
+          "assignees": [44353525],
+          "priority": "urgent"
+        },
+        {
+          "name": "Collect All Contacts + Phone + Email",
+          "assignees": [44371660],
+          "priority": "urgent"
+        }
+      ]
+    },
+    {
+      "name": "10. Calendar Setup (Service Calendars)",
+      "priority": "high",
+      "assignees": [44353525],
+      "time_estimate": 7200000,
+      "description": "Create calendar groups first, then calendars with specific colors",
+      "subtasks": [
+        {
+          "name": "Create Consultation Calendar Group",
+          "assignees": [44353525],
+          "priority": "high"
+        },
+        {
+          "name": "Create Construction Calendars Group",
+          "assignees": [44353525],
+          "priority": "high"
+        },
+        {
+          "name": "On-Site Consultation Calendar (Light Blue)",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "On-Site Project Presentation (Dark Green)",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Pre-Construction Walkthrough (Dark Red)",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Post-Construction Walkthrough (Purple)",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Project Photoshoot (Dark Blue)",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "11. Estimate & Invoice Settings",
+      "priority": "high",
+      "assignees": [44353525, 44371660],
+      "time_estimate": 86400000,
+      "description": "Payment processing configuration",
+      "subtasks": [
+        {
+          "name": "Setup Stripe Account if Needed",
+          "assignees": [44371660],
+          "priority": "high"
+        },
+        {
+          "name": "Connect Payment Processor",
+          "assignees": [44371660],
+          "priority": "high"
+        },
+        {
+          "name": "Turn Auto Invoice On",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "12. Automations + Tag Setup",
+      "priority": "high",
+      "assignees": [44353525],
+      "time_estimate": 259200000,
+      "description": "Build all automation workflows",
+      "subtasks": [
+        {
+          "name": "Sales Automations",
+          "assignees": [44353525],
+          "priority": "high"
+        },
+        {
+          "name": "Job Management Automations",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Project Stacking Automations",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Review Management Automations",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Schedule Review Post in Social Planner",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "13. Sales Dashboard Setup",
+      "priority": "normal",
+      "assignees": [44353525],
+      "time_estimate": 7200000,
+      "description": "Create 6-row sales dashboard with specific layout",
+      "subtasks": [
+        {
+          "name": "Row 1: Opportunity Status, Value, Conversion Rate",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Row 2: Sales Funnel",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Row 3: Lead Source Report",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Row 4: GBP Dashboard",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Row 5: Facebook + PPC Reporting",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Row 6: Sales Efficiency",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "14. Custom Reports",
+      "priority": "normal",
+      "assignees": [44353525],
+      "time_estimate": 3600000,
+      "description": "Create and schedule custom reports",
+      "subtasks": [
+        {
+          "name": "Create Custom Reports",
+          "assignees": [44353525],
+          "priority": "normal"
+        },
+        {
+          "name": "Schedule Report Delivery",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "15. Domain Setup",
+      "priority": "normal",
+      "assignees": [44353525, 44371660],
+      "time_estimate": 3600000,
+      "description": "Connect existing domain or purchase new one",
+      "subtasks": [
+        {
+          "name": "Connect Client Domain",
+          "assignees": [44371660],
+          "priority": "normal"
+        },
+        {
+          "name": "Setup sub-domain for email",
+          "assignees": [44353525],
+          "priority": "normal"
+        }
+      ]
+    },
+    {
+      "name": "16. Email System Setup",
+      "priority": "high",
+      "assignees": [44353525, 44371660],
+      "time_estimate": 7200000,
+      "description": "Configure email infrastructure",
+      "subtasks": [
+        {
+          "name": "G Suite Setup",
+          "assignees": [44353525],
+          "priority": "high"
+        },
+        {
+          "name": "Dedicated Subdomain Setup",
+          "assignees": [44353525],
+          "priority": "high"
+        }
+      ]
+    }
+  ]
+}

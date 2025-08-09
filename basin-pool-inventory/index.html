@@ -38,7 +38,6 @@
     <div class="main-content">
         <div class="page-header">
             <div class="action-controls">
-                <button class="action-btn scan-btn" onclick="openReceiptScanner()">📷 Scan</button>
                 <button class="action-btn" onclick="exportData()">💾 Backup</button>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
                 <button class="action-btn" onclick="document.getElementById('importFile').click()">📂 Restore</button>
@@ -495,69 +494,6 @@
         </div>
     </div>
 
-    <!-- Receipt Scanner Modal -->
-    <div id="receiptScannerModal" class="modal" style="display: none;">
-        <div class="modal-content scanner-modal">
-            <div class="modal-header">
-                <h2>📷 Scan Receipt</h2>
-                <button class="close-btn" onclick="closeReceiptScanner()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="scanner-container">
-                    <div id="cameraPreview" class="camera-preview">
-                        <video id="cameraVideo" autoplay playsinline></video>
-                        <div class="camera-overlay">
-                            <div class="scan-frame"></div>
-                            <div class="scan-instructions">
-                                📄 Position ENTIRE receipt in frame<br>
-                                📏 For long receipts, ensure top & bottom are visible<br>
-                                💡 Hold steady for best OCR results
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="scanner-controls">
-                        <button id="captureBtn" class="btn btn-primary" onclick="captureReceipt()">
-                            📷 Capture Receipt
-                        </button>
-                        <button class="btn btn-secondary" onclick="toggleCamera()">
-                            🔄 Switch Camera
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="capturedImage" class="captured-image" style="display: none;">
-                    <img id="receiptImage" src="" alt="Captured Receipt">
-                    <div class="image-controls">
-                        <button class="btn btn-primary" onclick="processReceipt()">
-                            🔍 Process Receipt
-                        </button>
-                        <button class="btn btn-secondary" onclick="retakePhoto()">
-                            📷 Retake
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="processingIndicator" class="processing-indicator" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Processing receipt with OCR...</p>
-                </div>
-                
-                <div id="ocrResults" class="ocr-results" style="display: none;">
-                    <h3>📋 Extracted Items</h3>
-                    <div id="extractedItems"></div>
-                    <div class="results-actions">
-                        <button class="btn btn-primary" onclick="addExtractedItems()">
-                            ✅ Add to Inventory
-                        </button>
-                        <button class="btn btn-secondary" onclick="resetScanner()">
-                            🔄 Scan Another
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <script src="config.js"></script>
     <script src="script.js"></script>

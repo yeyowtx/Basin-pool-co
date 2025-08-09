@@ -1,0 +1,140 @@
+{
+  "name": "GHL → ClickUp Simple Onboarding copy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-onboarding",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "id": "af7c59a4-5350-4863-81ec-3272c4422660",
+      "name": "GHL Webhook",
+      "webhookId": "b269f69a-479d-4f6a-9778-20c087a3f1eb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client_name",
+              "name": "clientName",
+              "value": "={{ $json.body.first_name }} {{ $json.body.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "company_name",
+              "name": "companyName",
+              "value": "={{ $json.body.company_name }}",
+              "type": "string"
+            },
+            {
+              "id": "location_id",
+              "name": "locationId",
+              "value": "={{ $json.body.location.id }}",
+              "type": "string"
+            },
+            {
+              "id": "first_name",
+              "name": "firstName",
+              "value": "={{ $json.body.first_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "354cf627-2535-4c75-8d50-247092a61da7",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "901400176579",
+        "name": "={{ $json.firstName }} | {{ $json.companyName }}",
+        "additionalFields": {
+          "content": "Complete GoHighLevel sub-account onboarding\\n\\nClient: {{ $json.clientName }}\\nCompany: {{ $json.companyName }}\\nLocation ID: {{ $json.locationId }}\\n\\n**When in doubt, map it out.**\\nIf you go in the order of this process, you will have the fewest amount of interruptions (if any).",
+          "status": "backlog"
+        }
+      },
+      "id": "5be46f74-ba77-44d4-9939-fc8040182183",
+      "name": "Create Main Task",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [600, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst mainTaskId = $('Create Main Task').item.json.id;\n\nconsole.log('Main Task ID:', mainTaskId);\nconsole.log('Data received:', data);\n\n// Create 16 main subtasks with proper parent relationship\nconst mainSubtasks = [\n  {\n    name: \"1. Integrations\",\n    priority: 2,\n    assignees: [44353525, 44371660],\n    time_estimate: 7200000,\n    parent: mainTaskId\n  },\n  {\n    name: \"2. Website\",\n    priority: 1,\n    assignees: [44353525, 44371660],\n    time_estimate: 1209600000,\n    parent: mainTaskId\n  },\n  {\n    name: \"3. Phone system\",\n    priority: 1,\n    assignees: [44371660],\n    time_estimate: 259200000,\n    parent: mainTaskId\n  },\n  {\n    name: \"4. Pipelines\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 86400000,\n    parent: mainTaskId\n  },\n  {\n    name: \"5. Custom field folders\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 3600000,\n    parent: mainTaskId\n  },\n  {\n    name: \"6. Custom value folders\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 1800000,\n    parent: mainTaskId\n  },\n  {\n    name: \"7. Forms/Surveys\",\n    priority: 2,\n    assignees: [44353525],\n    time_estimate: 7200000,\n    parent: mainTaskId\n  },\n  {\n    name: \"8. Custom values + Trigger Links\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 3600000,\n    parent: mainTaskId\n  },\n  {\n    name: \"9. Add Users\",\n    priority: 1,\n    assignees: [44353525, 44371660],\n    time_estimate: 3600000,\n    parent: mainTaskId\n  },\n  {\n    name: \"10. Calendars\",\n    priority: 2,\n    assignees: [44353525],\n    time_estimate: 7200000,\n    parent: mainTaskId\n  },\n  {\n    name: \"11. Estimate & Invoice Settings\",\n    priority: 2,\n    assignees: [44353525, 44371660],\n    time_estimate: 86400000,\n    parent: mainTaskId\n  },\n  {\n    name: \"12. Automations + Tag setup\",\n    priority: 2,\n    assignees: [44353525],\n    time_estimate: 259200000,\n    parent: mainTaskId\n  },\n  {\n    name: \"13. Dashboards\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 7200000,\n    parent: mainTaskId\n  },\n  {\n    name: \"14. Custom Reports\",\n    priority: 3,\n    assignees: [44353525],\n    time_estimate: 3600000,\n    parent: mainTaskId\n  },\n  {\n    name: \"15. Domain Setup\",\n    priority: 3,\n    assignees: [44353525, 44371660],\n    time_estimate: 3600000,\n    parent: mainTaskId\n  },\n  {\n    name: \"16. Email system\",\n    priority: 2,\n    assignees: [44353525, 44371660],\n    time_estimate: 7200000,\n    parent: mainTaskId\n  }\n];\n\nconsole.log('Created subtasks with parent:', mainSubtasks[0].parent);\n\nreturn mainSubtasks.map(task => ({ json: task }));"
+      },
+      "id": "e0468c47-b028-4707-b49a-d411dc51c334",
+      "name": "Prepare 16 Subtasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "task",
+        "operation": "create",
+        "team": "9014034476",
+        "space": "90140073497",
+        "folderless": true,
+        "list": "901400176579",
+        "name": "={{ $json.name }}",
+        "additionalFields": {
+          "status": "backlog",
+          "assignees": "={{ $json.assignees }}",
+          "priority": "={{ $json.priority }}",
+          "time_estimate": "={{ $json.time_estimate }}",
+          "parent": "={{ $json.parent }}"
+        }
+      },
+      "id": "create-subtasks",
+      "name": "Create 16 Subtasks",
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "UMkwi1iF37160V8l",
+          "name": "ClickUp account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GHL Webhook": {
+      "main": [[{"node": "Extract Data", "type": "main", "index": 0}]]
+    },
+    "Extract Data": {
+      "main": [[{"node": "Create Main Task", "type": "main", "index": 0}]]
+    },
+    "Create Main Task": {
+      "main": [[{"node": "Prepare 16 Subtasks", "type": "main", "index": 0}]]
+    },
+    "Prepare 16 Subtasks": {
+      "main": [[{"node": "Create 16 Subtasks", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
