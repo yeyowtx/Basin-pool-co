@@ -26,10 +26,11 @@ let dataRef = null;
 let presenceRef = null;
 let connectionStatus = 'connecting';
 
-// Auto-save timer
+// Auto-save timer with iOS optimization
 let autoSaveTimer = null;
 let cloudSyncTimer = null;
 let lastUpdateTimestamp = 0;
+let isSyncing = false; // Prevent sync spam
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -1224,7 +1225,15 @@ async function syncToCloud() {
         showNotification('Cloud sync is not configured', 'error');
         return;
     }
-
+    
+    // Prevent sync spam on iOS
+    if (isSyncing) {
+        showNotification('Sync already in progress...', 'info');
+        return;
+    }
+    
+    isSyncing = true;
+    
     try {
         showNotification('Syncing to cloud...', 'info');
         
@@ -1238,6 +1247,11 @@ async function syncToCloud() {
     } catch (error) {
         console.error('Cloud sync failed:', error);
         showNotification('Cloud sync failed: ' + error.message, 'error');
+    } finally {
+        // Reset sync flag after delay to prevent rapid retries
+        setTimeout(() => {
+            isSyncing = false;
+        }, 2000);
     }
 }
 
@@ -1637,15 +1651,34 @@ function toggleMobileItem(headerElement) {
 }
 
 // Notification system
+// Enhanced save indicator with iOS anti-flashing
+let saveIndicatorTimeout = null;
+let isShowingSaveIndicator = false;
+
 function showSaveIndicator(message = '✓ Auto-saved') {
     const indicator = document.getElementById('saveIndicator');
-    if (indicator) {
-        indicator.textContent = message;
-        indicator.classList.add('show');
-        setTimeout(() => {
-            indicator.classList.remove('show');
-        }, CONFIG.NOTIFICATIONS.SAVE_DURATION);
+    if (!indicator) return;
+    
+    // Prevent rapid flashing on iOS
+    if (isShowingSaveIndicator) {
+        clearTimeout(saveIndicatorTimeout);
     }
+    
+    isShowingSaveIndicator = true;
+    indicator.textContent = message;
+    indicator.style.opacity = '1';
+    indicator.style.transform = 'translateX(0)';
+    
+    // Use longer duration to prevent flashing
+    const duration = Math.max(CONFIG.NOTIFICATIONS?.SAVE_DURATION || 2000, 1500);
+    
+    saveIndicatorTimeout = setTimeout(() => {
+        indicator.style.opacity = '0';
+        indicator.style.transform = 'translateX(100px)';
+        setTimeout(() => {
+            isShowingSaveIndicator = false;
+        }, 300); // Wait for transition to complete
+    }, duration);
 }
 
 function showNotification(message, type = 'info') {
@@ -2008,13 +2041,22 @@ function resetScannerState() {
     extractedReceiptData = null;
 }
 
-// Initialize camera access
+// Initialize camera access - optimized for long receipt scanning
 async function initializeCamera() {
     try {
+        // Enhanced constraints for long receipt scanning
         const constraints = {
             video: {
                 ...CONFIG.RECEIPT_SCANNER.CAMERA.VIDEO_CONSTRAINTS,
-                facingMode: currentCamera
+                facingMode: currentCamera,
+                // Optimized settings for receipt scanning
+                width: { ideal: 1920, max: 2560 },
+                height: { ideal: 1080, max: 1440 },
+                frameRate: { ideal: 30 },
+                // Enhanced focus and exposure for document scanning
+                focusMode: 'continuous',
+                exposureMode: 'continuous',
+                whiteBalanceMode: 'continuous'
             }
         };
         
@@ -2022,8 +2064,20 @@ async function initializeCamera() {
         const video = document.getElementById('cameraVideo');
         video.srcObject = cameraStream;
         
-        console.log('Camera initialized successfully');
-        showNotification('Camera ready - position receipt in frame', 'success');
+        // Wait for video to load and apply scanning optimizations
+        video.addEventListener('loadedmetadata', () => {
+            // Apply enhanced settings for receipt scanning
+            video.style.filter = 'brightness(1.1) contrast(1.15) saturate(0.9)';
+            console.log('Camera optimized for receipt scanning:', video.videoWidth, 'x', video.videoHeight);
+        });
+        
+        console.log('Camera initialized successfully for long receipt scanning');
+        showNotification('📄 Camera ready - align entire receipt within frame', 'success');
+        
+        // Auto-focus after a short delay for better initial focus
+        setTimeout(() => {
+            showNotification('📍 Hold steady - auto-focusing on receipt...', 'info');
+        }, 2000);
         
     } catch (error) {
         console.error('Camera access error:', error);
@@ -2041,44 +2095,52 @@ async function toggleCamera() {
     await initializeCamera();
 }
 
-// Enhanced receipt capture with image processing for better OCR
+// Enhanced receipt capture with image processing for better OCR - Optimized for long receipts
 function captureReceipt() {
     const video = document.getElementById('cameraVideo');
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     
     // Wait for auto-focus if configured
-    const autoFocusDelay = CONFIG.RECEIPT_SCANNER.CAMERA.RECEIPT_CAPTURE?.AUTO_FOCUS_DELAY || 0;
+    const autoFocusDelay = CONFIG.RECEIPT_SCANNER.CAMERA.RECEIPT_CAPTURE?.AUTO_FOCUS_DELAY || 1000;
     if (autoFocusDelay > 0) {
-        showNotification('📷 Focusing...', 'info');
+        showNotification('📷 Focusing for best quality...', 'info');
         setTimeout(() => performCapture(), autoFocusDelay);
     } else {
         performCapture();
     }
     
     function performCapture() {
-        // Set canvas dimensions to match video with high resolution
-        const maxWidth = 2048; // High res for better OCR
+        // Enhanced resolution for long receipts - prioritize height for long receipts
+        const maxWidth = 1600; // Balanced for file size and OCR quality
+        const maxHeight = 3200; // Higher resolution for long receipts
         const aspectRatio = video.videoHeight / video.videoWidth;
         
-        canvas.width = Math.min(video.videoWidth, maxWidth);
-        canvas.height = canvas.width * aspectRatio;
+        // Calculate optimal dimensions for long receipts
+        let targetWidth = Math.min(video.videoWidth, maxWidth);
+        let targetHeight = targetWidth * aspectRatio;
         
-        // Enable image smoothing for better quality
+        // If receipt is very long, prioritize height resolution
+        if (targetHeight > maxHeight) {
+            targetHeight = maxHeight;
+            targetWidth = targetHeight / aspectRatio;
+        }
+        
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        
+        // Enable highest quality image smoothing for OCR
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = 'high';
         
-        // Draw current frame to canvas
+        // Draw current frame to canvas with enhanced scaling
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // Apply image enhancements for better OCR
-        const receiptConfig = CONFIG.RECEIPT_SCANNER.CAMERA.RECEIPT_CAPTURE;
-        if (receiptConfig?.BRIGHTNESS_ADJUSTMENT || receiptConfig?.CONTRAST_ENHANCEMENT) {
-            enhanceImageForOCR(context, canvas.width, canvas.height, receiptConfig);
-        }
+        // Apply image enhancements specifically for receipt OCR
+        enhanceImageForReceiptOCR(context, canvas.width, canvas.height);
         
-        // Convert to base64 with high quality for OCR
-        const quality = CONFIG.RECEIPT_SCANNER.CAMERA.PHOTO_QUALITY || 0.92;
+        // Convert to base64 with optimized quality for OCR (higher than usual)
+        const quality = CONFIG.RECEIPT_SCANNER.CAMERA.PHOTO_QUALITY || 0.95;
         capturedImageData = canvas.toDataURL('image/jpeg', quality);
         
         // Show captured image
@@ -2092,47 +2154,84 @@ function captureReceipt() {
             cameraStream = null;
         }
         
-        showNotification('📄 Receipt captured! Ready to process.', 'success');
+        showNotification('📄 Long receipt captured! Processing with enhanced OCR...', 'success');
     }
 }
 
-// Image enhancement function for better OCR results
-function enhanceImageForOCR(context, width, height, config) {
-    if (!config.CONTRAST_ENHANCEMENT && !config.BRIGHTNESS_ADJUSTMENT) {
-        return; // No enhancements needed
-    }
-    
+// Enhanced image processing specifically for receipt OCR - optimized for long receipts
+function enhanceImageForReceiptOCR(context, width, height) {
     try {
         const imageData = context.getImageData(0, 0, width, height);
         const data = imageData.data;
         
-        const brightness = config.BRIGHTNESS_ADJUSTMENT || 0;
-        const contrast = config.CONTRAST_ENHANCEMENT ? 1.2 : 1; // 20% contrast boost
+        // Receipt-specific enhancements for better text recognition
+        const brightness = 15; // Slight brightness boost for thermal receipts
+        const contrast = 1.3; // Higher contrast for better text separation
+        const sharpening = true; // Enable text sharpening
         
-        // Apply brightness and contrast adjustments
+        // Apply brightness and contrast adjustments optimized for receipts
         for (let i = 0; i < data.length; i += 4) {
             // Red, Green, Blue channels (skip Alpha)
             for (let j = 0; j < 3; j++) {
                 let pixel = data[i + j];
                 
-                // Apply contrast
+                // Apply contrast enhancement for text clarity
                 pixel = ((pixel - 128) * contrast) + 128;
                 
-                // Apply brightness
-                pixel = pixel + (brightness * 255);
+                // Apply brightness adjustment for faded receipts
+                pixel = pixel + brightness;
                 
                 // Clamp to valid range
                 data[i + j] = Math.max(0, Math.min(255, pixel));
             }
         }
         
+        // Apply additional text sharpening for better OCR
+        if (sharpening) {
+            applySharpeningFilter(data, width, height);
+        }
+        
         // Put the enhanced image data back
         context.putImageData(imageData, 0, 0);
         
-        console.log('Applied OCR image enhancements:', { brightness, contrast });
+        console.log('Applied receipt OCR enhancements:', { brightness, contrast, sharpening });
     } catch (error) {
         console.warn('Failed to enhance image for OCR:', error);
         // Continue without enhancement
+    }
+}
+
+// Sharpening filter to improve text clarity for OCR
+function applySharpeningFilter(data, width, height) {
+    try {
+        // Simple sharpening kernel for text enhancement
+        const kernel = [
+            0, -1, 0,
+            -1, 5, -1,
+            0, -1, 0
+        ];
+        
+        const tempData = new Uint8ClampedArray(data);
+        
+        // Apply sharpening filter (simplified for performance)
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                for (let c = 0; c < 3; c++) { // RGB channels
+                    let sum = 0;
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const idx = ((y + ky) * width + (x + kx)) * 4 + c;
+                            const kernelIdx = (ky + 1) * 3 + (kx + 1);
+                            sum += tempData[idx] * kernel[kernelIdx];
+                        }
+                    }
+                    const idx = (y * width + x) * 4 + c;
+                    data[idx] = Math.max(0, Math.min(255, sum));
+                }
+            }
+        }
+    } catch (error) {
+        console.warn('Sharpening filter failed:', error);
     }
 }
 
@@ -2183,41 +2282,105 @@ async function processReceipt() {
     }
 }
 
-// Mock OCR processing for demo (replace with real Veryfi API call)
+// Enhanced mock OCR processing for demo with realistic Home Depot long receipt
 async function mockOCRProcessing(imageData) {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate realistic API processing time for long receipts
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Mock response with typical Home Depot items
+    // Enhanced mock response with typical long Home Depot receipt for basin pool project
     return {
         vendor: {
-            name: "The Home Depot",
-            address: "123 Main St, Midland, TX 79701"
+            name: "The Home Depot #3421",
+            address: "4610 N Midland Dr, Midland, TX 79707"
         },
         date: new Date().toISOString().split('T')[0],
-        total: 127.45,
-        tax: 9.68,
+        total: 847.32,
+        tax: 64.23,
+        subtotal: 783.09,
         line_items: [
             {
-                description: "2x4x8 Pressure Treated Lumber",
-                sku: "HD123456",
+                description: "2\" PVC PIPE SCH40 10FT",
+                sku: "8850247", 
+                quantity: 8,
+                unit_price: 12.47,
+                total: 99.76
+            },
+            {
+                description: "1.5\" PVC PIPE SCH40 10FT",
+                sku: "8850234",
                 quantity: 6,
                 unit_price: 8.97,
                 total: 53.82
             },
             {
-                description: "Quikrete Concrete Mix 80lb",
-                sku: "HD789012", 
-                quantity: 4,
-                unit_price: 4.48,
-                total: 17.92
+                description: "PVC 2\" ELBOW 90DEG",
+                sku: "8851047",
+                quantity: 12,
+                unit_price: 3.28,
+                total: 39.36
             },
             {
-                description: "Deck Screws 2.5\" Box",
-                sku: "HD345678",
+                description: "PVC 2\" TEE FITTING",
+                sku: "8851055",
+                quantity: 8,
+                unit_price: 4.67,
+                total: 37.36
+            },
+            {
+                description: "BALL VALVE 2\" PVC",
+                sku: "8852134",
+                quantity: 4,
+                unit_price: 24.97,
+                total: 99.88
+            },
+            {
+                description: "PVC CEMENT 16OZ BLUE",
+                sku: "8853467",
                 quantity: 2,
+                unit_price: 8.47,
+                total: 16.94
+            },
+            {
+                description: "PVC PRIMER 16OZ PURPLE",
+                sku: "8853468",
+                quantity: 2,
+                unit_price: 7.97,
+                total: 15.94
+            },
+            {
+                description: "QUIKRETE CONCRETE 80LB",
+                sku: "1101",
+                quantity: 15,
+                unit_price: 4.48,
+                total: 67.20
+            },
+            {
+                description: "REBAR #4 20FT GRADE 60",
+                sku: "49364",
+                quantity: 10,
                 unit_price: 12.97,
-                total: 25.94
+                total: 129.70
+            },
+            {
+                description: "12AWG THHN WIRE 500FT",
+                sku: "63947521",
+                quantity: 1,
+                unit_price: 147.89,
+                total: 147.89
+            },
+            {
+                description: "GFCI BREAKER 20AMP",
+                sku: "304792",
+                quantity: 2,
+                unit_price: 43.97,
+                total: 87.94
+            },
+            {
+                description: "PVC CONDUIT 3/4\" 10FT",
+                sku: "8854721",
+                quantity: 6,
+                unit_price: 5.47,
+                total: 32.82
             }
         ]
     };
