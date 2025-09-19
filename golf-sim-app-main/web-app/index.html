@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Sim Plus - Mobile Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #1F7A37, #248A3D, #33B359);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .container { max-width: 400px; }
+        .logo { font-size: 4rem; margin-bottom: 1rem; }
+        h1 { font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem; }
+        .cta { 
+            background: white; 
+            color: #248A3D; 
+            padding: 1rem 2rem; 
+            border: none; 
+            border-radius: 1rem; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            width: 100%;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+        .stats { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 1rem; 
+            margin-bottom: 2rem;
+        }
+        .stat { text-align: center; }
+        .stat-num { font-size: 1.5rem; font-weight: bold; }
+        .stat-label { font-size: 0.8rem; opacity: 0.8; }
+        .footer { font-size: 0.9rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">⛳</div>
+        <h1>GOLF SIM PLUS</h1>
+        <p class="subtitle">Premium Golf Simulation</p>
+        
+        <button class="cta" onclick="alert('Mobile test successful! 🎉')">
+            START YOUR SESSION
+        </button>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num">4.9★</div>
+                <div class="stat-label">Rating</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">8s</div>
+                <div class="stat-label">Booking</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">10x</div>
+                <div class="stat-label">Faster</div>
+            </div>
+        </div>
+        
+        <p class="footer">
+            Mobile test page - If you can see this, the connection works!
+        </p>
+    </div>
+</body>
+</html>
