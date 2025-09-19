@@ -17,7 +17,9 @@
     "test:headed": "playwright test --headed",
     "test:report": "playwright show-report",
     "playwright:install": "playwright install",
-    "analyze": "npm run build && npx @next/bundle-analyzer"
+    "analyze": "npm run build && npx @next/bundle-analyzer",
+    "deploy": "npx vercel --prod --yes",
+    "deploy:preview": "npx vercel --yes"
   },
   "dependencies": {
     "react": "19.1.0",

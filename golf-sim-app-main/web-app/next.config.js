@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true,
-  },
+  // Vercel handles optimization automatically - no manual config needed
   
   // Allow cross-origin requests for mobile testing
   async headers() {
@@ -32,9 +28,9 @@ const nextConfig = {
   // Allow development origins for mobile testing
   allowedDevOrigins: ['*'],
   
-  // Ensure development server binds to all interfaces
+  // Vercel optimizes automatically
   experimental: {
-    // Remove deprecated turbopack config
+    // Vercel handles all optimization
   },
 };
 
