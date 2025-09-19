@@ -1,0 +1,1058 @@
+//
+//  CleanContentView.swift
+//  GolfSimApp
+//
+//  Clean working version that actually compiles
+//
+
+import SwiftUI
+import Foundation
+
+// Remove duplicate PaymentManager - we'll use the enhanced one from Managers/PaymentManager.swift
+
+struct CleanContentView: View {
+    @StateObject private var bookingManager = BookingManager()
+    @StateObject private var tabManager = TabManager()
+    @StateObject private var paymentManager = PaymentManager()
+    
+    var body: some View {
+        TabView {
+            // Customer booking
+            CleanBookingView()
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("Book")
+                }
+                .environmentObject(bookingManager)
+            
+            // Universal Tab
+            CleanUniversalTabView()
+                .tabItem {
+                    Image(systemName: "creditcard")
+                    Text("Tab")
+                }
+                .environmentObject(tabManager)
+                .environmentObject(paymentManager)
+            
+            // Activity tracking
+            CleanActivityView()
+                .tabItem {
+                    Image(systemName: "clock")
+                    Text("Activity")
+                }
+                .environmentObject(bookingManager)
+            
+            // Business Dashboard - THE GAME CHANGER
+            SimpleBusinessView()
+                .tabItem {
+                    Image(systemName: "building.2")
+                    Text("Business")
+                }
+            
+            // Hardware Control - INDUSTRY FIRST
+            SimpleHardwareView()
+                .tabItem {
+                    Image(systemName: "gear.badge")
+                    Text("Hardware")
+                }
+            
+            // Profile
+            CleanProfileView()
+                .tabItem {
+                    Image(systemName: "person")
+                    Text("Profile")
+                }
+                .environmentObject(paymentManager)
+        }
+        .accentColor(.blue)
+    }
+}
+
+// MARK: - Professional Booking View (Evergreen Golf Club Design)
+
+struct CleanBookingView: View {
+    @EnvironmentObject private var bookingManager: BookingManager
+    @State private var selectedBay: CleanBay?
+    @State private var selectedFilter: BayFilter?
+    @State private var showingBookingModal = false
+    @State private var showingBookingConfirmation = false
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header with greeting
+                    headerSection
+                    
+                    // Hero section
+                    heroSection
+                    
+                    // Quick action button
+                    quickActionSection
+                    
+                    // Status overview cards
+                    statusOverviewSection
+                    
+                    // Bay selection grid
+                    baySelectionSection
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 120) // Space for bottom nav
+            }
+            .background(Color(.systemBackground))
+            .navigationBarHidden(true)
+        }
+        .alert("Booking Confirmed!", isPresented: $showingBookingConfirmation) {
+            Button("View Tab") {
+                // Switch to tab view
+            }
+            Button("OK") { }
+        } message: {
+            if let bay = selectedBay {
+                Text("Bay \(bay.name) reserved!\nAdded to your tab: $\(bay.hourlyRate)/hr")
+            }
+        }
+    }
+    
+    // MARK: - Header Section
+    private var headerSection: some View {
+        HStack {
+            // Avatar with Evergreen logo
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [evergreenSecondary, evergreenAccent],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 60, height: 60)
+                
+                // Evergreen tree icon
+                Image(systemName: "tree.fill")
+                    .foregroundColor(.white)
+                    .font(.title2)
+                
+                // Online indicator
+                Circle()
+                    .fill(evergreenPrimary)
+                    .frame(width: 12, height: 12)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white, lineWidth: 2)
+                    )
+                    .offset(x: 20, y: 20)
+                    .scaleEffect(1.0)
+                    .animation(.easeInOut(duration: 2).repeatForever(), value: true)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Good \(currentTimeGreeting())")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
+                Text("Guest!")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+            }
+            
+            Spacer()
+            
+            // Menu button placeholder
+            Button(action: {}) {
+                Image(systemName: "ellipsis")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+                    .frame(width: 40, height: 40)
+                    .background(Color.clear)
+            }
+        }
+        .padding(.top, 8)
+    }
+    
+    // MARK: - Hero Section
+    private var heroSection: some View {
+        ZStack {
+            // Background with gradient
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            evergreenSecondary.opacity(0.9),
+                            evergreenAccent.opacity(0.7)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(height: 173)
+            
+            // Live indicator
+            VStack {
+                HStack {
+                    Spacer()
+                    
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(evergreenPrimary)
+                            .frame(width: 6, height: 6)
+                            .scaleEffect(1.0)
+                            .animation(.easeInOut(duration: 2).repeatForever(), value: true)
+                        
+                        Text("LIVE")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(evergreenPrimary)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(evergreenPrimary.opacity(0.15))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(evergreenPrimary, lineWidth: 1)
+                    )
+                    .cornerRadius(12)
+                }
+                Spacer()
+            }
+            .padding(16)
+            
+            // Hero text
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.4))
+                .frame(width: 200, height: 50)
+                .overlay(
+                    Text("Private Bay Rental")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                )
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        }
+    }
+    
+    // MARK: - Quick Action Section
+    private var quickActionSection: some View {
+        HStack(spacing: 16) {
+            // Quick Book button
+            Button(action: quickBookAction) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(evergreenPrimary)
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "bolt.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Text("Quick Book")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.06), radius: 7.5, x: 0, y: 2)
+            }
+            .buttonStyle(ScaleButtonStyle())
+            
+            // Placeholder for future feature
+            Button(action: {}) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "clock")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                    }
+                    
+                    Text("Coming Soon")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.06), radius: 7.5, x: 0, y: 2)
+            }
+            .disabled(true)
+        }
+    }
+    
+    // MARK: - Status Overview Section
+    private var statusOverviewSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Bay Status")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            LazyVGrid(columns: [
+                GridItem(.flexible(), spacing: 12),
+                GridItem(.flexible(), spacing: 12)
+            ], spacing: 12) {
+                
+                // Available Bays Card
+                StatusCard(
+                    icon: "checkmark",
+                    label: "Available",
+                    value: "\(bookingManager.availableBays.filter { $0.isAvailable }.count) Bays",
+                    backgroundColor: evergreenLight,
+                    isInteractive: true
+                ) {
+                    selectedFilter = .available
+                }
+                
+                // Your Bays Card
+                StatusCard(
+                    icon: "star.fill",
+                    label: "Yours",
+                    value: "None",
+                    backgroundColor: evergreenLight,
+                    isInteractive: false
+                ) {}
+                
+                // Rate Card
+                StatusCard(
+                    icon: "dollarsign.circle.fill",
+                    label: "Rate",
+                    value: "$55/hr",
+                    backgroundColor: Color(red: 0.97, green: 0.88, blue: 0.75), // #F8E0BE
+                    isInteractive: false
+                ) {}
+                
+                // Member Status Card
+                StatusCard(
+                    icon: "crown.fill",
+                    label: "Guest",
+                    value: "Standard",
+                    backgroundColor: Color(red: 1.0, green: 0.92, blue: 0.90), // #FFEBE5
+                    isInteractive: false
+                ) {}
+            }
+        }
+    }
+    
+    // MARK: - Bay Selection Section
+    private var baySelectionSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Choose Bay")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            LazyVGrid(columns: [
+                GridItem(.flexible(), spacing: 12),
+                GridItem(.flexible(), spacing: 12),
+                GridItem(.flexible(), spacing: 12)
+            ], spacing: 12) {
+                ForEach(filteredBays()) { bay in
+                    ProfessionalBayCard(bay: bay) {
+                        if bay.isAvailable {
+                            selectedBay = bay
+                            showingBookingConfirmation = true
+                            bookingManager.addBooking()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func currentTimeGreeting() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "morning"
+        case 12..<17: return "afternoon"
+        default: return "evening"
+        }
+    }
+    
+    private func filteredBays() -> [CleanBay] {
+        let allBays = bookingManager.availableBays
+        guard let filter = selectedFilter else { return allBays }
+        
+        switch filter {
+        case .available:
+            return allBays.filter { $0.isAvailable }
+        case .yours:
+            return [] // No user bays for now
+        }
+    }
+    
+    private func quickBookAction() {
+        let availableBays = bookingManager.availableBays.filter { $0.isAvailable }
+        guard let firstBay = availableBays.first else { return }
+        
+        selectedBay = firstBay
+        showingBookingConfirmation = true
+        bookingManager.addBooking()
+    }
+}
+
+// MARK: - Evergreen Golf Club Colors
+private let evergreenPrimary = Color(red: 0.14, green: 0.54, blue: 0.24) // #248A3D
+private let evergreenSecondary = Color(red: 0.18, green: 0.31, blue: 0.09) // #2d5016
+private let evergreenLight = Color(red: 0.90, green: 0.97, blue: 0.91) // #E5F8E9
+private let evergreenAccent = Color(red: 0.22, green: 0.42, blue: 0.11) // #3a6b1c
+
+enum BayFilter {
+    case available
+    case yours
+}
+
+struct BayCard: View {
+    let bay: CleanBay
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 8) {
+                HStack {
+                    Circle()
+                        .fill(bay.isAvailable ? .green : .red)
+                        .frame(width: 8, height: 8)
+                    
+                    Text(bay.type)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                    
+                    Spacer()
+                }
+                
+                Text(bay.name)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text("$\(bay.hourlyRate)/hr")
+                    .font(.subheadline)
+                    .foregroundColor(.blue)
+                
+                Text("Capacity: \(bay.capacity)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Clean Universal Tab View
+
+struct CleanUniversalTabView: View {
+    @EnvironmentObject private var tabManager: TabManager
+    @EnvironmentObject private var paymentManager: PaymentManager
+    @State private var showingCheckout = false
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Tab Header
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Universal Tab")
+                            .font(.title)
+                            .fontWeight(.bold)
+                        
+                        Text("Total: $\(tabManager.totalAmount, specifier: "%.2f")")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                    }
+                    
+                    Spacer()
+                    
+                    Button("Checkout") {
+                        showingCheckout = true
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .disabled(tabManager.items.isEmpty)
+                }
+                .padding()
+                .background(Color.gray.opacity(0.05))
+                
+                // Menu Categories
+                ScrollView {
+                    LazyVStack(spacing: 20) {
+                        MenuSection(title: "Food", items: tabManager.foodItems, onItemSelected: tabManager.addItem)
+                        MenuSection(title: "Beverages", items: tabManager.beverageItems, onItemSelected: tabManager.addItem)
+                        MenuSection(title: "Golf Equipment", items: tabManager.equipmentItems, onItemSelected: tabManager.addItem)
+                    }
+                    .padding()
+                }
+                
+                // Current Tab Items
+                if !tabManager.items.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Current Tab")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        ForEach(tabManager.items) { item in
+                            TabItemRow(item: item, onRemove: { tabManager.removeItem(item) })
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.05))
+                }
+            }
+            .navigationTitle("Universal Tab")
+            .navigationBarHidden(true)
+        }
+        .sheet(isPresented: $showingCheckout) {
+            CheckoutView(total: tabManager.totalAmount, onComplete: {
+                tabManager.clearTab()
+                showingCheckout = false
+            })
+            .environmentObject(paymentManager)
+        }
+    }
+}
+
+struct MenuSection: View {
+    let title: String
+    let items: [MenuItem]
+    let onItemSelected: (MenuItem) -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            Text(title)
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 10) {
+                ForEach(items) { item in
+                    MenuItemCard(item: item, onTap: { onItemSelected(item) })
+                }
+            }
+        }
+    }
+}
+
+struct MenuItemCard: View {
+    let item: MenuItem
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 8) {
+                Text(item.name)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+                
+                Text("$\(item.price, specifier: "%.2f")")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(8)
+            .shadow(color: .gray.opacity(0.2), radius: 2)
+        }
+    }
+}
+
+struct TabItemRow: View {
+    let item: TabItem
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack {
+            Text(item.menuItem.name)
+                .font(.subheadline)
+            
+            Spacer()
+            
+            Text("$\(item.menuItem.price, specifier: "%.2f")")
+                .font(.subheadline)
+                .fontWeight(.medium)
+            
+            Button(action: onRemove) {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct CheckoutView: View {
+    let total: Double
+    let onComplete: () -> Void
+    @EnvironmentObject private var paymentManager: PaymentManager
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                Text("Checkout")
+                    .font(.title)
+                    .fontWeight(.bold)
+                
+                Text("Total: $\(total, specifier: "%.2f")")
+                    .font(.title2)
+                    .foregroundColor(.blue)
+                
+                Button("Pay with Default Method") {
+                    // Simulate payment
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        onComplete()
+                    }
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.green)
+                .cornerRadius(12)
+                
+                Spacer()
+            }
+            .padding()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Clean Activity View
+
+struct CleanActivityView: View {
+    @EnvironmentObject private var bookingManager: BookingManager
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Today's Stats
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("Today's Activity")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
+                            StatCard(title: "Bookings", value: "\(bookingManager.todayBookings)", icon: "calendar", color: .blue)
+                            StatCard(title: "Revenue", value: "$\(Int(bookingManager.todayRevenue))", icon: "dollarsign.circle", color: .green)
+                            StatCard(title: "Active Bays", value: "\(bookingManager.activeBays)", icon: "checkmark.circle", color: .orange)
+                            StatCard(title: "Players", value: "\(bookingManager.totalPlayers)", icon: "person.2", color: .purple)
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(12)
+                    
+                    // Recent Bookings
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("Recent Activity")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        ForEach(bookingManager.recentBookings) { booking in
+                            RecentBookingRow(booking: booking)
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(12)
+                }
+                .padding()
+            }
+            .navigationTitle("Activity")
+        }
+    }
+}
+
+struct StatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(8)
+        .shadow(color: .gray.opacity(0.2), radius: 2)
+    }
+}
+
+struct RecentBookingRow: View {
+    let booking: RecentBooking
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(booking.bayName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                
+                Text(booking.time)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("$\(booking.amount, specifier: "%.0f")")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.green)
+                
+                Text("\(booking.players) players")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color.white)
+        .cornerRadius(8)
+    }
+}
+
+// MARK: - Clean Profile View
+
+struct CleanProfileView: View {
+    @EnvironmentObject private var paymentManager: PaymentManager
+    @State private var userName = "John Doe"
+    @State private var userEmail = "john.doe@email.com"
+    @State private var membershipType = "Premium"
+    
+    var body: some View {
+        NavigationView {
+            List {
+                // User Profile Section
+                Section {
+                    HStack {
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.blue)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(userName)
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            
+                            Text(userEmail)
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            
+                            Text("\(membershipType) Member")
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.blue.opacity(0.1))
+                                .foregroundColor(.blue)
+                                .cornerRadius(8)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                }
+                
+                // Account Section
+                Section("Account") {
+                    NavigationLink(destination: Text("Payment Methods")) {
+                        Label("Payment Methods", systemImage: "creditcard")
+                    }
+                    
+                    NavigationLink(destination: Text("Membership")) {
+                        Label("Membership", systemImage: "star.circle")
+                    }
+                    
+                    NavigationLink(destination: Text("Booking History")) {
+                        Label("Booking History", systemImage: "clock.arrow.circlepath")
+                    }
+                }
+                
+                // Settings Section
+                Section("Settings") {
+                    NavigationLink(destination: Text("App Settings")) {
+                        Label("App Settings", systemImage: "gear")
+                    }
+                    
+                    NavigationLink(destination: Text("Privacy Policy")) {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                    }
+                }
+            }
+            .navigationTitle("Profile")
+        }
+    }
+}
+
+// MARK: - Data Models
+
+class CleanBookingManager: ObservableObject {
+    @Published var availableBays: [CleanBay] = []
+    @Published var todayBookings = 47
+    @Published var todayRevenue = 2847.0
+    @Published var activeBays = 4
+    @Published var totalPlayers = 156
+    @Published var recentBookings: [RecentBooking] = []
+    
+    init() {
+        setupMockData()
+    }
+    
+    private func setupMockData() {
+        availableBays = [
+            CleanBay(id: 1, name: "TrackMan Premium 1", type: "TrackMan", isAvailable: true, capacity: 6, hourlyRate: 65),
+            CleanBay(id: 2, name: "TrackMan Premium 2", type: "TrackMan", isAvailable: false, capacity: 6, hourlyRate: 65),
+            CleanBay(id: 3, name: "Uneekor Elite 1", type: "Uneekor", isAvailable: true, capacity: 4, hourlyRate: 55),
+            CleanBay(id: 4, name: "Uneekor Elite 2", type: "Uneekor", isAvailable: true, capacity: 4, hourlyRate: 55),
+            CleanBay(id: 5, name: "Standard Sim 1", type: "Standard", isAvailable: true, capacity: 4, hourlyRate: 45),
+            CleanBay(id: 6, name: "Standard Sim 2", type: "Standard", isAvailable: false, capacity: 4, hourlyRate: 45)
+        ]
+        
+        recentBookings = [
+            RecentBooking(id: UUID(), bayName: "TrackMan Premium 1", time: "2:00 PM", amount: 65, players: 4),
+            RecentBooking(id: UUID(), bayName: "Uneekor Elite 1", time: "3:00 PM", amount: 55, players: 2),
+            RecentBooking(id: UUID(), bayName: "Standard Sim 1", time: "4:00 PM", amount: 45, players: 3),
+            RecentBooking(id: UUID(), bayName: "TrackMan Premium 2", time: "5:00 PM", amount: 65, players: 6)
+        ]
+    }
+    
+    func addBooking() {
+        todayBookings += 1
+        todayRevenue += 55
+        activeBays = min(6, activeBays + 1)
+        totalPlayers += 2
+    }
+}
+
+class CleanTabManager: ObservableObject {
+    @Published var items: [TabItem] = []
+    @Published var totalAmount: Double = 0
+    
+    let foodItems = [
+        MenuItem(id: UUID(), name: "Classic Burger", price: 16.99, category: "Food"),
+        MenuItem(id: UUID(), name: "Chicken Wings", price: 12.99, category: "Food"),
+        MenuItem(id: UUID(), name: "Caesar Salad", price: 10.99, category: "Food"),
+        MenuItem(id: UUID(), name: "Fish & Chips", price: 18.99, category: "Food")
+    ]
+    
+    let beverageItems = [
+        MenuItem(id: UUID(), name: "Draft Beer", price: 6.99, category: "Beverage"),
+        MenuItem(id: UUID(), name: "Craft Cocktail", price: 12.99, category: "Beverage"),
+        MenuItem(id: UUID(), name: "Soft Drink", price: 3.99, category: "Beverage"),
+        MenuItem(id: UUID(), name: "Coffee", price: 4.99, category: "Beverage")
+    ]
+    
+    let equipmentItems = [
+        MenuItem(id: UUID(), name: "Premium Clubs", price: 25.00, category: "Equipment"),
+        MenuItem(id: UUID(), name: "Golf Balls (Sleeve)", price: 8.99, category: "Equipment"),
+        MenuItem(id: UUID(), name: "Glove", price: 15.99, category: "Equipment"),
+        MenuItem(id: UUID(), name: "Tees", price: 2.99, category: "Equipment")
+    ]
+    
+    func addItem(_ menuItem: MenuItem) {
+        let tabItem = TabItem(id: UUID(), menuItem: menuItem, quantity: 1)
+        items.append(tabItem)
+        calculateTotal()
+    }
+    
+    func removeItem(_ tabItem: TabItem) {
+        items.removeAll { $0.id == tabItem.id }
+        calculateTotal()
+    }
+    
+    func clearTab() {
+        items.removeAll()
+        totalAmount = 0
+    }
+    
+    private func calculateTotal() {
+        totalAmount = items.reduce(0) { $0 + $1.menuItem.price }
+    }
+}
+
+struct CleanBay: Identifiable {
+    let id: Int
+    let name: String
+    let type: String
+    let isAvailable: Bool
+    let capacity: Int
+    let hourlyRate: Int
+}
+
+struct MenuItem: Identifiable {
+    let id: UUID
+    let name: String
+    let price: Double
+    let category: String
+}
+
+
+struct RecentBooking: Identifiable {
+    let id: UUID
+    let bayName: String
+    let time: String
+    let amount: Double
+    let players: Int
+}
+
+// MARK: - Professional Design Supporting Views
+
+struct StatusCard: View {
+    let icon: String
+    let label: String
+    let value: String
+    let backgroundColor: Color
+    let isInteractive: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundColor(.white)
+                        .font(.system(size: 12))
+                        .frame(width: 24, height: 24)
+                        .background(Color.primary)
+                        .cornerRadius(8)
+                    
+                    Spacer()
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(label.uppercased())
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    
+                    Text(value)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                }
+                
+                Spacer()
+            }
+            .padding(18)
+            .frame(minHeight: 100)
+            .background(backgroundColor)
+            .cornerRadius(16)
+        }
+        .modifier(ConditionalButtonStyle(isInteractive: isInteractive))
+        .disabled(!isInteractive)
+    }
+}
+
+struct ProfessionalBayCard: View {
+    let bay: CleanBay
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                // Space for star indicator 
+                Spacer()
+                    .frame(height: 12)
+                
+                // Bay number
+                Text("\(bay.id)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                // Status
+                Text(bay.isAvailable ? "AVAILABLE" : "OCCUPIED")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(bay.isAvailable ? evergreenPrimary : .secondary)
+                
+                // Detail text
+                Text(bay.isAvailable ? "$\(bay.hourlyRate)/hr" : "Until 4:00")
+                    .font(.caption2)
+                    .foregroundColor(bay.isAvailable ? evergreenPrimary : .secondary)
+                    .fontWeight(bay.isAvailable ? .semibold : .regular)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 100)
+            .background(bay.isAvailable ? evergreenLight : Color(.systemGray6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(bay.isAvailable ? evergreenPrimary : Color(.systemGray4), lineWidth: 2)
+            )
+            .cornerRadius(16)
+        }
+        .modifier(ConditionalButtonStyle(isInteractive: bay.isAvailable))
+        .disabled(!bay.isAvailable)
+    }
+}
+
+// Custom button style for scale effect
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+struct ConditionalButtonStyle: ViewModifier {
+    let isInteractive: Bool
+    
+    func body(content: Content) -> some View {
+        if isInteractive {
+            content.buttonStyle(ScaleButtonStyle())
+        } else {
+            content.buttonStyle(PlainButtonStyle())
+        }
+    }
+}
+
+#Preview {
+    CleanContentView()
+}
