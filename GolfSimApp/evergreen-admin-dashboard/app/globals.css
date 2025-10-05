@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 142 76% 36%; /* Evergreen Primary #248A3D */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 76% 36%; /* Evergreen Primary for focus rings */
+    --radius: 0.5rem;
+    
+    /* Evergreen Golf Club Brand Colors */
+    --evergreen-primary: 142 76% 20%; /* #1B4332 - Dark forest green */
+    --evergreen-secondary: 142 76% 36%; /* #248A3D - Medium green */
+    --evergreen-light: 142 76% 52%; /* #52B788 - Light accent green */
+    --evergreen-accent: 25 85% 27%; /* #8B4513 - Brown accent */
+    
+    /* Status Colors */
+    --status-available: 142 71% 45%;
+    --status-occupied: 0 84% 60%;
+    --status-maintenance: 45 93% 47%;
+    --status-reserved: 221 83% 53%;
+    --status-cleaning: 263 70% 50%;
+    
+    /* TopGolf Integration Colors */
+    --topgolf-blue: 221 83% 53%;
+    --topgolf-orange: 25 95% 53%;
+    --topgolf-success: 142 71% 45%;
+    --topgolf-warning: 45 93% 47%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 76% 45%; /* Lighter evergreen for dark mode */
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142 76% 45%;
+    
+    /* Evergreen colors adjusted for dark mode */
+    --evergreen-primary: 142 76% 45%;
+    --evergreen-secondary: 142 76% 52%;
+    --evergreen-light: 142 76% 65%;
+    --evergreen-accent: 25 85% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Evergreen-specific component styles */
+  .evergreen-gradient {
+    background: linear-gradient(135deg, hsl(var(--evergreen-primary)), hsl(var(--evergreen-secondary)));
+  }
+  
+  .evergreen-card {
+    @apply bg-card border border-border rounded-lg shadow-evergreen;
+  }
+  
+  .status-indicator {
+    @apply w-3 h-3 rounded-full;
+  }
+  
+  .status-available {
+    @apply bg-status-available;
+  }
+  
+  .status-occupied {
+    @apply bg-status-occupied;
+  }
+  
+  .status-maintenance {
+    @apply bg-status-maintenance;
+  }
+  
+  .status-reserved {
+    @apply bg-status-reserved;
+  }
+  
+  .status-cleaning {
+    @apply bg-status-cleaning;
+  }
+  
+  /* Real-time animations */
+  .pulse-available {
+    @apply animate-pulse-green;
+  }
+  
+  .pulse-occupied {
+    @apply animate-pulse-orange;
+  }
+  
+  /* Data table styles */
+  .data-table {
+    @apply w-full border-collapse;
+  }
+  
+  .data-table th {
+    @apply border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground;
+  }
+  
+  .data-table td {
+    @apply border-b border-border px-4 py-3 text-sm;
+  }
+  
+  .data-table tr:hover {
+    @apply bg-muted/50;
+  }
+  
+  /* Form styles */
+  .form-field {
+    @apply space-y-2;
+  }
+  
+  .form-label {
+    @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+  }
+  
+  .form-input {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  /* Chart styles */
+  .recharts-wrapper {
+    @apply text-sm;
+  }
+  
+  .recharts-cartesian-axis-tick-value {
+    @apply fill-muted-foreground;
+  }
+  
+  .recharts-cartesian-grid-horizontal line,
+  .recharts-cartesian-grid-vertical line {
+    @apply stroke-border;
+  }
+  
+  /* Loading states */
+  .loading-shimmer {
+    @apply animate-pulse bg-muted rounded;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-muted border-t-primary;
+  }
+  
+  /* Mobile-first responsive utilities */
+  .mobile-nav {
+    @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t border-border;
+  }
+  
+  .desktop-sidebar {
+    @apply hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0;
+  }
+  
+  .main-content {
+    @apply flex-1 lg:pl-64;
+  }
+  
+  /* Animation utilities */
+  .fade-in {
+    @apply animate-fade-in;
+  }
+  
+  .slide-in {
+    @apply animate-slide-in;
+  }
+  
+  .bounce-in {
+    @apply animate-bounce-in;
+  }
+}
+
+@layer utilities {
+  /* Custom utility classes */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  
+  /* Evergreen brand utilities */
+  .text-evergreen-primary {
+    color: hsl(var(--evergreen-primary));
+  }
+  
+  .text-evergreen-secondary {
+    color: hsl(var(--evergreen-secondary));
+  }
+  
+  .bg-evergreen-primary {
+    background-color: hsl(var(--evergreen-primary));
+  }
+  
+  .bg-evergreen-secondary {
+    background-color: hsl(var(--evergreen-secondary));
+  }
+  
+  .border-evergreen-primary {
+    border-color: hsl(var(--evergreen-primary));
+  }
+  
+  /* Status utilities */
+  .bg-status-available {
+    background-color: hsl(var(--status-available));
+  }
+  
+  .bg-status-occupied {
+    background-color: hsl(var(--status-occupied));
+  }
+  
+  .bg-status-maintenance {
+    background-color: hsl(var(--status-maintenance));
+  }
+  
+  .bg-status-reserved {
+    background-color: hsl(var(--status-reserved));
+  }
+  
+  .bg-status-cleaning {
+    background-color: hsl(var(--status-cleaning));
+  }
+}

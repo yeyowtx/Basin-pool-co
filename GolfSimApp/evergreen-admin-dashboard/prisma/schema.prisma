@@ -1,0 +1,914 @@
+// Evergreen Golf Club Admin Dashboard - Database Schema
+// Mirrors iOS app data models with GHL integration points
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== CORE FACILITY MANAGEMENT =====
+
+model Facility {
+  id                String @id @default(cuid())
+  facilityCode      String @unique // "tacoma", "redmond"
+  name              String
+  displayName       String
+  address           String
+  phone             String?
+  email             String?
+  timezone          String @default("America/Los_Angeles")
+  
+  // Resource Management
+  totalSimulators   Int
+  totalResources    Int
+  
+  // Business Hours
+  businessHours     Json // BusinessHours object
+  
+  // Integration IDs
+  ghlLocationId     String? // GoHighLevel Location ID
+  squareLocationId  String? // Square Location ID
+  
+  // Relations
+  members           Member[]
+  bookings          Booking[]
+  resources         Resource[]
+  services          Service[]
+  staff             Staff[]
+  bayStatuses       BayStatus[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("facilities")
+}
+
+model Resource {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  resourceCode      String // "TAC-SIM-01", "RED-SIM-01"
+  name              String
+  type              ResourceType
+  status            ResourceStatus @default(AVAILABLE)
+  
+  // Specifications
+  isSimulator       Boolean @default(false)
+  simulatorBrand    String?
+  hasProjector      Boolean @default(false)
+  maxPlayers        Int @default(6)
+  
+  // Maintenance
+  lastMaintenance   DateTime?
+  nextMaintenance   DateTime?
+  maintenanceNotes  String?
+  
+  // Relations
+  bookings          Booking[]
+  bayStatuses       BayStatus[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([facilityId, resourceCode])
+  @@map("resources")
+}
+
+enum ResourceType {
+  SIMULATOR
+  CONFERENCE_ROOM
+  PRIVATE_BAY
+  LESSON_AREA
+  PUTTING_GREEN
+}
+
+enum ResourceStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  OUT_OF_ORDER
+  CLEANING
+  RESERVED
+}
+
+// ===== REAL-TIME BAY STATUS =====
+
+model BayStatus {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  resourceId        String
+  resource          Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  
+  status            ResourceStatus
+  occupancyStart    DateTime?
+  occupancyEnd      DateTime?
+  currentBookingId  String?
+  currentBooking    Booking? @relation(fields: [currentBookingId], references: [id])
+  
+  // Live Data
+  playerCount       Int @default(0)
+  sessionMinutes    Int @default(0)
+  lastActivity      DateTime?
+  
+  // Cleaning & Maintenance
+  needsCleaning     Boolean @default(false)
+  cleaningStarted   DateTime?
+  maintenanceAlert  Boolean @default(false)
+  
+  lastUpdated       DateTime @default(now())
+  
+  @@unique([facilityId, resourceId])
+  @@map("bay_statuses")
+}
+
+// ===== MEMBERSHIP SYSTEM =====
+
+model Member {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  // Core Member Info
+  memberNumber      String @unique
+  firstName         String
+  lastName          String
+  email             String @unique
+  phone             String
+  dateOfBirth       DateTime?
+  
+  // Membership Details
+  tier              MembershipTier
+  status            MembershipStatus @default(ACTIVE)
+  joinDate          DateTime @default(now())
+  renewalDate       DateTime?
+  
+  // Billing
+  monthlyFee        Decimal
+  annualFee         Decimal?
+  nextPaymentDate   DateTime?
+  lastPaymentDate   DateTime?
+  
+  // Access & Benefits
+  facilityAccess    Json // Array of facility codes
+  instructorDiscount Decimal @default(0)
+  advanceBookingDays Int @default(0)
+  priorityBooking   Boolean @default(false)
+  guestPassesPerMonth Int @default(0)
+  ghinMembership    Boolean @default(false)
+  
+  // Family Add-ons
+  familyMembers     FamilyMember[]
+  
+  // Payment Method
+  paymentMethods    PaymentMethod[]
+  
+  // Usage Tracking
+  totalSessions     Int @default(0)
+  totalSpent        Decimal @default(0)
+  loyaltyPoints     Int @default(0)
+  
+  // Integration IDs
+  ghlContactId      String? // GoHighLevel Contact ID
+  squareCustomerId  String? // Square Customer ID
+  
+  // Relations
+  bookings          Booking[]
+  tabs              Tab[]
+  shopOrders        ShopOrder[]
+  monthlyUsage      MonthlyUsage[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("members")
+}
+
+enum MembershipTier {
+  GUEST
+  CASCADE   // $199 annual / $299 monthly
+  PIKE      // $299 annual / $399 monthly  
+  RAINIER   // $399 annual / $499 monthly
+  JUNIOR    // $149 annual / $249 monthly
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  EXPIRED
+  CANCELLED
+}
+
+model FamilyMember {
+  id              String @id @default(cuid())
+  memberId        String
+  member          Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  firstName       String
+  lastName        String
+  relationship    String
+  dateOfBirth     DateTime?
+  monthlyFee      Decimal @default(99) // $99 family add-on
+  
+  addedDate       DateTime @default(now())
+  
+  @@map("family_members")
+}
+
+model PaymentMethod {
+  id              String @id @default(cuid())
+  memberId        String
+  member          Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  type            PaymentType
+  lastFourDigits  String
+  expirationMonth Int
+  expirationYear  Int
+  cardBrand       String?
+  isDefault       Boolean @default(false)
+  
+  // Square Integration
+  squareCardId    String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("payment_methods")
+}
+
+enum PaymentType {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_ACCOUNT
+}
+
+model MonthlyUsage {
+  id              String @id @default(cuid())
+  memberId        String
+  member          Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  month           DateTime // First day of month
+  sessions        Int @default(0)
+  totalHours      Decimal @default(0)
+  totalSpent      Decimal @default(0)
+  totalSavings    Decimal @default(0)
+  
+  @@unique([memberId, month])
+  @@map("monthly_usage")
+}
+
+// ===== BOOKING SYSTEM =====
+
+model Booking {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  bookingNumber     String @unique
+  
+  // Customer Info
+  memberId          String?
+  member            Member? @relation(fields: [memberId], references: [id])
+  customerFirstName String
+  customerLastName  String
+  customerEmail     String
+  customerPhone     String
+  
+  // Service & Resource
+  serviceId         String
+  service           Service @relation(fields: [serviceId], references: [id])
+  resourceId        String?
+  resource          Resource? @relation(fields: [resourceId], references: [id])
+  
+  // Instructor
+  instructorId      String?
+  instructor        Staff? @relation("InstructorBookings", fields: [instructorId], references: [id])
+  
+  // Scheduling
+  bookingDate       DateTime
+  startTime         DateTime
+  endTime           DateTime
+  duration          Int // minutes
+  bufferEndTime     DateTime // includes 15-minute cleanup buffer
+  
+  // Party Details
+  participants      Json // Array of BookingParticipant objects
+  totalParticipants Int
+  specialRequests   String?
+  internalNotes     String?
+  
+  // Status & Priority
+  status            BookingStatus @default(PENDING)
+  priority          BookingPriority @default(NORMAL)
+  type              BookingType @default(STANDARD)
+  
+  // Pricing
+  basePrice         Decimal
+  memberDiscount    Decimal @default(0)
+  promoDiscount     Decimal @default(0)
+  taxes             Decimal @default(0)
+  fees              Decimal @default(0)
+  totalAmount       Decimal
+  
+  // Payment
+  depositRequired   Boolean @default(false)
+  depositAmount     Decimal?
+  depositPaid       Decimal?
+  paymentStatus     PaymentStatus @default(PENDING)
+  
+  // Communication
+  confirmationSent  Boolean @default(false)
+  remindersSent     Json // Array of ReminderLog objects
+  
+  // Administrative
+  createdBy         String
+  createdByUser     User @relation("BookingsCreated", fields: [createdBy], references: [id])
+  lastModifiedBy    String
+  lastModifiedByUser User @relation("BookingsModified", fields: [lastModifiedBy], references: [id])
+  
+  // Cancellation
+  cancelledAt       DateTime?
+  cancellationReason String?
+  refundAmount      Decimal?
+  
+  // Check-in/out
+  checkedInAt       DateTime?
+  checkedInBy       String?
+  completedAt       DateTime?
+  
+  // Relations
+  bayStatuses       BayStatus[]
+  transactions      Transaction[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  REFUNDED
+  WAITLISTED
+}
+
+enum BookingPriority {
+  LOW
+  NORMAL
+  HIGH
+  VIP
+}
+
+enum BookingType {
+  STANDARD
+  LESSON
+  ASSESSMENT
+  EVENT
+  TOURNAMENT
+  CORPORATE
+  BIRTHDAY
+  BACHELOR
+  MEMBERS_ONLY
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+// ===== SERVICE CONFIGURATION =====
+
+model Service {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  serviceCode       String
+  name              String
+  displayName       String
+  description       String
+  category          ServiceCategory @default(SIMULATOR_RENTAL)
+  type              ServiceType @default(SIMULATOR_RENTAL)
+  
+  // Duration & Pricing
+  durationMinutes   Int
+  basePrice         Decimal
+  memberDiscount    Decimal @default(0.15) // 15% default
+  membershipTierPricing Json // Tier-specific pricing
+  
+  // Availability
+  isActive          Boolean @default(true)
+  daysOfWeek        Json // Array of weekday numbers
+  timeSlots         Json // Array of TimeSlotRule objects
+  blackoutDates     Json // Array of dates
+  advanceBookingDays Int @default(30)
+  bufferMinutes     Int @default(15)
+  
+  // Requirements
+  requiresMembership Boolean @default(false)
+  minimumMembershipTier MembershipTier?
+  requiresCardOnFile Boolean @default(true)
+  requiresWaiver    Boolean @default(false)
+  minParticipants   Int @default(1)
+  maxParticipants   Int @default(6)
+  requiresInstructor Boolean @default(false)
+  
+  // Relations
+  bookings          Booking[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([facilityId, serviceCode])
+  @@map("services")
+}
+
+enum ServiceCategory {
+  SIMULATOR_RENTAL
+  INSTRUCTION
+  ASSESSMENT
+  FACILITY_RENTAL
+  SPECIAL_PROGRAMS
+  MEMBERSHIP
+}
+
+enum ServiceType {
+  SIMULATOR_RENTAL
+  PRIVATE_LESSON
+  GROUP_LESSON
+  ASSESSMENT
+  FACILITY_TOUR
+  CONFERENCE_ROOM
+  PRIVATE_BAY_RENTAL
+  EVENT_RENTAL
+  SPECIAL_PROGRAM
+  MEMBERSHIP_UPGRADE
+}
+
+// ===== STAFF MANAGEMENT =====
+
+model Staff {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  // Personal Info
+  employeeId        String @unique
+  firstName         String
+  lastName          String
+  email             String @unique
+  phone             String
+  
+  // Employment
+  role              StaffRole
+  department        String?
+  isInstructor      Boolean @default(false)
+  hourlyRate        Decimal?
+  
+  // Schedule
+  availability      Json // Weekly availability schedule
+  isActive          Boolean @default(true)
+  
+  // Instructor Specific
+  certifications    Json? // Array of certification objects
+  specialties       Json? // Array of specialties
+  instructorRate    Decimal?
+  instructorDiscount Decimal?
+  
+  // Performance
+  rating            Decimal?
+  totalLessons      Int @default(0)
+  totalRevenue      Decimal @default(0)
+  
+  // Integration
+  ghlUserId         String?
+  
+  // Relations
+  bookingsAsInstructor Booking[] @relation("InstructorBookings")
+  createdBookings   Booking[] @relation("BookingsCreated")
+  modifiedBookings  Booking[] @relation("BookingsModified")
+  
+  hireDate          DateTime @default(now())
+  terminatedAt      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("staff")
+}
+
+enum StaffRole {
+  OWNER
+  MANAGER
+  ASSISTANT_MANAGER
+  INSTRUCTOR
+  FRONT_DESK
+  MAINTENANCE
+  ADMIN
+  PART_TIME
+}
+
+// ===== SHOP & POS INTEGRATION =====
+
+model ShopItem {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  sku               String @unique
+  name              String
+  description       String?
+  category          ShopCategory
+  
+  // Pricing
+  price             Decimal
+  originalPrice     Decimal?
+  memberPrice       Decimal?
+  cost              Decimal? // Cost basis
+  
+  // Inventory
+  stockQuantity     Int @default(0)
+  lowStockThreshold Int @default(5)
+  trackInventory    Boolean @default(true)
+  
+  // Product Details
+  brand             String?
+  size              String?
+  color             String?
+  weight            Decimal?
+  dimensions        String?
+  
+  // Status
+  isActive          Boolean @default(true)
+  isFeatured        Boolean @default(false)
+  isOnSale          Boolean @default(false)
+  
+  // Images & Media
+  images            Json // Array of image URLs
+  
+  // Square Integration
+  squareItemId      String?
+  squareCatalogVersion BigInt?
+  
+  // Relations
+  orderItems        ShopOrderItem[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("shop_items")
+}
+
+enum ShopCategory {
+  ALL
+  EQUIPMENT
+  APPAREL
+  ACCESSORIES
+  GIFT_CARDS
+  LESSONS
+  MEMBERSHIPS
+  FOOD_BEVERAGE
+}
+
+model ShopOrder {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  orderNumber       String @unique
+  
+  // Customer
+  memberId          String?
+  member            Member? @relation(fields: [memberId], references: [id])
+  customerEmail     String
+  customerName      String
+  
+  // Order Details
+  items             ShopOrderItem[]
+  subtotal          Decimal
+  memberDiscount    Decimal @default(0)
+  taxes             Decimal
+  total             Decimal
+  
+  // Payment
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentMethod     String?
+  transactionId     String?
+  
+  // Fulfillment
+  status            OrderStatus @default(PENDING)
+  fulfilledAt       DateTime?
+  fulfilledBy       String?
+  
+  // Square Integration
+  squareOrderId     String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("shop_orders")
+}
+
+model ShopOrderItem {
+  id                String @id @default(cuid())
+  orderId           String
+  order             ShopOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId            String
+  item              ShopItem @relation(fields: [itemId], references: [id])
+  
+  quantity          Int
+  unitPrice         Decimal
+  totalPrice        Decimal
+  
+  @@map("shop_order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}
+
+// ===== TAB MANAGEMENT =====
+
+model Tab {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  tabNumber         String @unique
+  
+  // Customer
+  memberId          String?
+  member            Member? @relation(fields: [memberId], references: [id])
+  customerName      String
+  
+  // Tab Details
+  status            TabStatus @default(OPEN)
+  balance           Decimal @default(0)
+  limit             Decimal @default(500) // $500 default limit
+  
+  // Timing
+  openedAt          DateTime @default(now())
+  closedAt          DateTime?
+  autoCloseAt       DateTime? // 24-hour auto-close
+  
+  // Relations
+  transactions      Transaction[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("tabs")
+}
+
+enum TabStatus {
+  OPEN
+  CLOSED
+  SUSPENDED
+  AUTO_CLOSED
+}
+
+// ===== TRANSACTION & PAYMENT TRACKING =====
+
+model Transaction {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  transactionId     String @unique
+  type              TransactionType
+  
+  // Amounts
+  amount            Decimal
+  tax               Decimal @default(0)
+  tip               Decimal @default(0)
+  total             Decimal
+  
+  // Payment
+  paymentMethod     String
+  paymentStatus     PaymentStatus @default(PENDING)
+  
+  // References
+  bookingId         String?
+  booking           Booking? @relation(fields: [bookingId], references: [id])
+  tabId             String?
+  tab               Tab? @relation(fields: [tabId], references: [id])
+  memberId          String?
+  
+  // Square Integration
+  squarePaymentId   String?
+  squareOrderId     String?
+  
+  // Refund Info
+  refundedAmount    Decimal @default(0)
+  refundedAt        DateTime?
+  refundReason      String?
+  
+  processedAt       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  
+  @@map("transactions")
+}
+
+enum TransactionType {
+  BOOKING_PAYMENT
+  SHOP_PURCHASE
+  TAB_CHARGE
+  MEMBERSHIP_FEE
+  LESSON_PAYMENT
+  REFUND
+  ADJUSTMENT
+}
+
+// ===== USER MANAGEMENT =====
+
+model User {
+  id                String @id @default(cuid())
+  email             String @unique
+  firstName         String
+  lastName          String
+  
+  // Authentication
+  hashedPassword    String?
+  emailVerified     DateTime?
+  
+  // Role & Permissions
+  role              UserRole @default(STAFF)
+  permissions       Json // Array of permissions
+  
+  // Facility Access
+  facilityAccess    Json // Array of facility codes user can access
+  
+  // Status
+  isActive          Boolean @default(true)
+  lastLoginAt       DateTime?
+  
+  // Integration
+  ghlUserId         String?
+  
+  // Relations
+  createdBookings   Booking[] @relation("BookingsCreated")
+  modifiedBookings  Booking[] @relation("BookingsModified")
+  accounts          Account[]
+  sessions          Session[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  OWNER
+  MANAGER
+  STAFF
+  INSTRUCTOR
+  READONLY
+}
+
+// NextAuth.js Models
+model Account {
+  id                String @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ===== GOHIGHLEVEL INTEGRATION =====
+
+model GHLSync {
+  id                String @id @default(cuid())
+  
+  // Sync Details
+  entityType        String // "member", "booking", "transaction"
+  entityId          String // Local entity ID
+  ghlEntityId       String // GHL entity ID
+  ghlEntityType     String // "contact", "opportunity", etc.
+  
+  // Sync Status
+  syncStatus        SyncStatus @default(PENDING)
+  lastSyncAt        DateTime?
+  syncError         String?
+  retryCount        Int @default(0)
+  
+  // Data
+  syncData          Json // Data sent to GHL
+  ghlResponse       Json? // Response from GHL
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([entityType, entityId])
+  @@map("ghl_sync")
+}
+
+enum SyncStatus {
+  PENDING
+  SYNCING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+// ===== ANALYTICS & REPORTING =====
+
+model DailyStats {
+  id                String @id @default(cuid())
+  facilityId        String
+  facility          Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  date              DateTime @db.Date
+  
+  // Booking Stats
+  totalBookings     Int @default(0)
+  completedBookings Int @default(0)
+  cancelledBookings Int @default(0)
+  noShowBookings    Int @default(0)
+  
+  // Revenue Stats
+  totalRevenue      Decimal @default(0)
+  bookingRevenue    Decimal @default(0)
+  shopRevenue       Decimal @default(0)
+  membershipRevenue Decimal @default(0)
+  
+  // Utilization Stats
+  averageUtilization Decimal @default(0)
+  peakHourUtilization Decimal @default(0)
+  totalHoursBooked  Decimal @default(0)
+  
+  // Member Stats
+  newMembers        Int @default(0)
+  memberBookings    Int @default(0)
+  guestBookings     Int @default(0)
+  
+  createdAt         DateTime @default(now())
+  
+  @@unique([facilityId, date])
+  @@map("daily_stats")
+}
+
+// Add this to existing Facility model relations
+model Facility {
+  // ... existing fields ...
+  shopItems         ShopItem[]
+  shopOrders        ShopOrder[]
+  tabs              Tab[]
+  transactions      Transaction[]
+  dailyStats        DailyStats[]
+  
+  // ... existing timestamps ...
+}
