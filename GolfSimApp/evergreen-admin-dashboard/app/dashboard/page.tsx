@@ -10,20 +10,20 @@ import {
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 w-full">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-evergreen-primary">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-evergreen-primary">
           Evergreen Golf Club Admin Dashboard
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-1">
           Welcome to your facility management dashboard - Beta Version
         </p>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" data-testid="overview-cards">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+        <Card className="w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Members
@@ -38,10 +38,10 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Today&apos;s Bookings
+              Today's Bookings
             </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Daily Revenue
@@ -68,7 +68,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Bay Utilization
@@ -85,8 +85,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Feature Cards */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3" data-testid="feature-cards">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
+        <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MonitorSpeaker className="h-5 w-5 text-evergreen-primary" />
@@ -114,7 +114,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-evergreen-primary" />
@@ -142,7 +142,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-full lg:col-span-2 xl:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-evergreen-primary" />
@@ -172,7 +172,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Beta Notice */}
-      <Card className="border-evergreen-primary">
+      <Card className="border-evergreen-primary w-full">
         <CardHeader>
           <CardTitle className="text-evergreen-primary">
             🚀 Beta Dashboard - September 2025 Launch
@@ -185,7 +185,7 @@ export default function DashboardPage() {
               the core features that will power your facility management.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm">
               <div>
                 <h4 className="font-semibold text-evergreen-primary mb-2">✅ Available Now</h4>
                 <ul className="space-y-1 text-muted-foreground">
