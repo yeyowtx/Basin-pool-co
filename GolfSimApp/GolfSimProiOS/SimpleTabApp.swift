@@ -1,4 +1,147 @@
 import SwiftUI
+import UIKit
+import Foundation
+
+
+
+
+// MARK: - Simulator Models
+enum SimulatorStatus {
+    case available
+    case booked(until: Date)
+    case maintenance
+    case limited
+    
+    var color: Color {
+        switch self {
+        case .available: return .green
+        case .booked: return .red
+        case .maintenance: return .gray
+        case .limited: return .orange
+        }
+    }
+    
+    var displayText: String {
+        switch self {
+        case .available: return "Available"
+        case .booked(let until):
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return "Until \(formatter.string(from: until))"
+        case .maintenance: return "Maintenance"
+        case .limited: return "Limited"
+        }
+    }
+    
+    var isBooked: Bool {
+        switch self {
+        case .booked: return true
+        default: return false
+        }
+    }
+}
+
+struct Simulator: Identifiable {
+    let id = UUID()
+    let name: String
+    let shortName: String
+    let status: SimulatorStatus
+    let memberPrice: Double
+    let guestPrice: Double
+    let features: [String]
+    
+    var isBookable: Bool {
+        switch status {
+        case .available, .limited: return true
+        case .booked, .maintenance: return false
+        }
+    }
+    
+    static func mockSimulators() -> [Simulator] {
+        var simulators: [Simulator] = []
+        
+        // Tacoma Facility - 13 Simulators (Bays 1-13)
+        let tacomaSimulators = [
+            ("Woods", true), ("Irons", false), ("Driver", true), ("Wedges", false), ("Putter", false),
+            ("Fairway", true), ("Rough", false), ("Bunker", false), ("Green", true), ("Tee", false),
+            ("Approach", false), ("Chip", false), ("Pro", true)
+        ]
+        
+        for (index, (name, isPremium)) in tacomaSimulators.enumerated() {
+            let bayNumber = index + 1
+            let status = generateRandomStatus()
+            let features = generateTacomaFeatures(isPremium: isPremium)
+            let (memberPrice, guestPrice) = generateTacomaPricing(isPremium: isPremium)
+            
+            simulators.append(Simulator(
+                name: "\(name) - Bay \(bayNumber) (Tacoma)",
+                shortName: "\(name) #\(bayNumber)",
+                status: status,
+                memberPrice: memberPrice,
+                guestPrice: guestPrice,
+                features: features
+            ))
+        }
+        
+        // Redmond Facility - 8 Simulators (Premium location)
+        let redmondSimulators = ["Palmer", "Nicklaus", "Tiger", "Rory", "Spieth", "Koepka", "DJ", "Rahm"]
+        
+        for (index, name) in redmondSimulators.enumerated() {
+            let bayNumber = index + 1
+            let status = generateRandomStatus()
+            let features = generateRedmondFeatures() // All premium
+            let (memberPrice, guestPrice) = generateRedmondPricing()
+            
+            simulators.append(Simulator(
+                name: "\(name) Suite - Bay \(bayNumber) (Redmond)",
+                shortName: "\(name) #\(bayNumber)",
+                status: status,
+                memberPrice: memberPrice,
+                guestPrice: guestPrice,
+                features: features
+            ))
+        }
+        
+        return simulators
+    }
+    
+    private static func generateRandomStatus() -> SimulatorStatus {
+        let random = Int.random(in: 1...10)
+        switch random {
+        case 1...6: return .available
+        case 7...8: return .booked(until: Calendar.current.date(byAdding: .hour, value: Int.random(in: 1...3), to: Date()) ?? Date())
+        case 9: return .limited
+        case 10: return .maintenance
+        default: return .available
+        }
+    }
+    
+    private static func generateTacomaFeatures(isPremium: Bool) -> [String] {
+        var features = ["TrackMan"]
+        if isPremium {
+            features.append(contentsOf: ["Premium", "HD Display", "Climate Control"])
+        } else {
+            features.append("Standard")
+        }
+        return features
+    }
+    
+    private static func generateRedmondFeatures() -> [String] {
+        return ["TrackMan", "Premium", "HD Display", "Climate Control", "Surround Sound", "Comfort Seating"]
+    }
+    
+    private static func generateTacomaPricing(isPremium: Bool) -> (Double, Double) {
+        if isPremium {
+            return (34, 40) // Premium: $34 member, $40 guest
+        } else {
+            return (26, 31) // Standard: $26 member, $31 guest  
+        }
+    }
+    
+    private static func generateRedmondPricing() -> (Double, Double) {
+        return (42, 50) // Redmond premium: $42 member, $50 guest
+    }
+}
 
 @main  
 struct SimpleGolfSimApp: App {
@@ -77,17 +220,213 @@ struct ContentView: View {
     }
 }
 
+// MARK: - USchedule Service Types
+enum ServiceCategory: String, CaseIterable, Identifiable {
+    case simulator = "simulator"
+    case lessons = "lessons" 
+    case junior = "junior"
+    case elite = "elite"
+    case tours = "tours"
+    case conference = "conference"
+    
+    var id: String { rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .simulator: return "Simulator Sessions"
+        case .lessons: return "Private Instruction"
+        case .junior: return "Junior Programs"
+        case .elite: return "Elite Training"
+        case .tours: return "Facility Tours"
+        case .conference: return "Conference Rooms"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .simulator: return "tv.and.hifispeaker"
+        case .lessons: return "person.fill.checkmark"
+        case .junior: return "figure.and.child.holdinghands"
+        case .elite: return "star.fill"
+        case .tours: return "building.2"
+        case .conference: return "person.3.fill"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .simulator: return "Golf simulation and practice sessions"
+        case .lessons: return "One-on-one professional instruction"
+        case .junior: return "Youth programs and group lessons"
+        case .elite: return "Advanced player development"
+        case .tours: return "Guided facility demonstrations"
+        case .conference: return "Private meeting spaces"
+        }
+    }
+}
+
+struct UScheduleService: Identifiable {
+    let id = UUID()
+    let name: String
+    let category: ServiceCategory
+    let duration: Int // minutes
+    let memberPrice: Double
+    let guestPrice: Double
+    let maxPlayers: Int
+    let requiresInstructor: Bool
+    let description: String
+    
+    var memberSavings: Double {
+        guestPrice - memberPrice
+    }
+}
+
+extension UScheduleService {
+    static func allServices() -> [UScheduleService] {
+        [
+            // Simulator Services
+            UScheduleService(
+                name: "Cascade Simulator",
+                category: .simulator,
+                duration: 60,
+                memberPrice: 30.60,
+                guestPrice: 36.00,
+                maxPlayers: 6,
+                requiresInstructor: false,
+                description: "Entry-level simulator with basic analytics"
+            ),
+            UScheduleService(
+                name: "Pike Simulator", 
+                category: .simulator,
+                duration: 60,
+                memberPrice: 40.80,
+                guestPrice: 48.00,
+                maxPlayers: 6,
+                requiresInstructor: false,
+                description: "Mid-tier simulator with advanced TrackMan data"
+            ),
+            UScheduleService(
+                name: "Rainier Simulator",
+                category: .simulator,
+                duration: 60,
+                memberPrice: 51.00,
+                guestPrice: 60.00,
+                maxPlayers: 6,
+                requiresInstructor: false,
+                description: "Premium simulator with full analytics suite"
+            ),
+            
+            // Private Instruction
+            UScheduleService(
+                name: "Private Lesson - 30 Minutes",
+                category: .lessons,
+                duration: 30,
+                memberPrice: 63.75,
+                guestPrice: 75.00,
+                maxPlayers: 1,
+                requiresInstructor: true,
+                description: "One-on-one instruction with PGA professional"
+            ),
+            UScheduleService(
+                name: "Private Lesson - 60 Minutes",
+                category: .lessons,
+                duration: 60,
+                memberPrice: 106.25,
+                guestPrice: 125.00,
+                maxPlayers: 1,
+                requiresInstructor: true,
+                description: "Extended private session with detailed analysis"
+            ),
+            UScheduleService(
+                name: "Skills Assessment",
+                category: .lessons,
+                duration: 30,
+                memberPrice: 55.25,
+                guestPrice: 65.00,
+                maxPlayers: 1,
+                requiresInstructor: true,
+                description: "Comprehensive evaluation with lesson plan"
+            ),
+            
+            // Junior Programs
+            UScheduleService(
+                name: "Junior Lesson - 30 Minutes",
+                category: .junior,
+                duration: 30,
+                memberPrice: 42.50,
+                guestPrice: 50.00,
+                maxPlayers: 1,
+                requiresInstructor: true,
+                description: "Age-appropriate instruction for players under 18"
+            ),
+            UScheduleService(
+                name: "Junior Group Lesson",
+                category: .junior,
+                duration: 45,
+                memberPrice: 29.75,
+                guestPrice: 35.00,
+                maxPlayers: 4,
+                requiresInstructor: true,
+                description: "Small group instruction for young golfers"
+            ),
+            
+            // Elite Programs
+            UScheduleService(
+                name: "Elite Performance Session",
+                category: .elite,
+                duration: 120,
+                memberPrice: 170.00,
+                guestPrice: 200.00,
+                maxPlayers: 1,
+                requiresInstructor: true,
+                description: "Advanced player development with analysis"
+            ),
+            
+            // Tours
+            UScheduleService(
+                name: "Facility Tour",
+                category: .tours,
+                duration: 30,
+                memberPrice: 0.00,
+                guestPrice: 0.00,
+                maxPlayers: 8,
+                requiresInstructor: false,
+                description: "Guided tour and equipment demonstration"
+            ),
+            
+            // Conference
+            UScheduleService(
+                name: "Conference Room Rental",
+                category: .conference,
+                duration: 120,
+                memberPrice: 63.75,
+                guestPrice: 75.00,
+                maxPlayers: 12,
+                requiresInstructor: false,
+                description: "Private meeting space rental"
+            )
+        ]
+    }
+}
+
 // MARK: - Book Tab
 struct BookTabView: View {
     @ObservedObject var sessionManager: CustomerSessionManager
-    @State private var selectedTimeSlot = "7:00 PM"
+    @State private var selectedSimulator: Simulator?
+    @State private var showingSimulatorBooking = false
+    @State private var simulators: [Simulator] = []
     
-    let timeSlots = ["7:00 PM", "7:15 PM", "7:30 PM", "7:45 PM", "8:00 PM"]
+    // Enhanced USchedule Service Selection
+    @State private var selectedServiceCategory: ServiceCategory = .simulator
+    @State private var selectedService: UScheduleService?
+    @State private var playerCount: Int = 1
+    @State private var showingServiceDetails = false
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
+                    
                     // Enhanced Bay Status Header for context awareness
                     BayStatusHeader(sessionManager: sessionManager, showDetails: true)
                         .padding(.horizontal)
@@ -115,8 +454,9 @@ struct BookTabView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Simplified Location Info
-                    VStack(alignment: .leading, spacing: 12) {
+                    // Enhanced Facility Info with Service Selection
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Facility Header
                         HStack {
                             Text("EVERGREEN GOLF CLUB")
                                 .font(.headline)
@@ -148,56 +488,158 @@ struct BookTabView: View {
                                 .background(Color.blue.opacity(0.1))
                                 .cornerRadius(8)
                         }
+                        
+                        // USchedule Service Category Selection
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("🎯 Choose Your Experience")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue)
+                            
+                            // Service Category Buttons in 2x3 Grid
+                            VStack(spacing: 6) {
+                                HStack(spacing: 8) {
+                                    // Simulator Sessions
+                                    Button(action: { selectedServiceCategory = .simulator }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "tv.and.hifispeaker")
+                                                .font(.caption2)
+                                            Text("Simulators")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(selectedServiceCategory == .simulator ? .white : .blue)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(selectedServiceCategory == .simulator ? Color.blue : Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // Private Instruction
+                                    Button(action: { selectedServiceCategory = .lessons }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "person.fill.checkmark")
+                                                .font(.caption2)
+                                            Text("Lessons")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(selectedServiceCategory == .lessons ? .white : .green)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(selectedServiceCategory == .lessons ? Color.green : Color.green.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // Junior Programs
+                                    Button(action: { selectedServiceCategory = .junior }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "figure.and.child.holdinghands")
+                                                .font(.caption2)
+                                            Text("Junior")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(selectedServiceCategory == .junior ? .white : .orange)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(selectedServiceCategory == .junior ? Color.orange : Color.orange.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                }
+                                
+                                HStack(spacing: 8) {
+                                    // Elite Training
+                                    Button(action: { selectedServiceCategory = .elite }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "star.fill")
+                                                .font(.caption2)
+                                            Text("Elite")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(selectedServiceCategory == .elite ? .white : .purple)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(selectedServiceCategory == .elite ? Color.purple : Color.purple.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // Facility Tours
+                                    Button(action: { selectedServiceCategory = .tours }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "building.2")
+                                                .font(.caption2)
+                                            Text("Tours")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(selectedServiceCategory == .tours ? .white : .teal)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(selectedServiceCategory == .tours ? Color.teal : Color.teal.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // Conference Rooms
+                                    Button(action: { selectedServiceCategory = .conference }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "person.3.fill")
+                                                .font(.caption2)
+                                            Text("Conference")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(selectedServiceCategory == .conference ? .white : .gray)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(selectedServiceCategory == .conference ? Color.gray : Color.gray.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                }
+                            }
+                        }
                     }
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(16)
                     .padding(.horizontal)
                     
-                    // Core Booking Section
-                    VStack(alignment: .leading, spacing: 16) {
+                    
+                    // Machine-Focused Simulator Grid
+                    VStack(spacing: 20) {
+                        // Availability summary
                         HStack {
-                            Text("BOOK YOUR TIME")
-                                .font(.headline)
-                                .fontWeight(.bold)
+                            Text("Choose Your Bay")
+                                .font(.system(size: 20, weight: .bold, design: .default))
                                 .foregroundColor(.primary)
                             
                             Spacer()
-                        }
-                        
-                        // Time Slots
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(timeSlots, id: \.self) { time in
-                                    Button(action: {
-                                        selectedTimeSlot = time
-                                    }) {
-                                        Text(time)
-                                            .font(.subheadline)
-                                            .fontWeight(.medium)
-                                            .foregroundColor(selectedTimeSlot == time ? .blue : .primary)
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(selectedTimeSlot == time ? Color.blue : Color.gray.opacity(0.3), lineWidth: 1)
-                                            )
-                                    }
-                                }
+                            
+                            HStack(spacing: 8) {
+                                Text("\(availableSimulatorCount) Open")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.green)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.green.opacity(0.1))
+                                    .cornerRadius(8)
                             }
-                            .padding(.horizontal)
                         }
                         
-                        // Primary Booking Button
-                        NavigationLink(destination: EvergreenExperienceView(bayNumber: 1)) {
-                            Text("BOOK A BAY")
-                                .font(.headline)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(.blue)
-                                .cornerRadius(28)
+                        // Wide Simulator Cards Stack
+                        LazyVStack(spacing: 16) {
+                            ForEach(simulators) { simulator in
+                                WideSimulatorCardView(
+                                    simulator: simulator,
+                                    userMembershipTier: userMembershipTier,
+                                    onTap: {
+                                        selectedSimulator = simulator
+                                        showingSimulatorBooking = true
+                                    }
+                                )
+                                .frame(height: 120)
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -206,6 +648,18 @@ struct BookTabView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                loadSimulators()
+            }
+            .sheet(isPresented: $showingSimulatorBooking) {
+                if let simulator = selectedSimulator {
+                    SimulatorBookingSheet(
+                        simulator: simulator,
+                        userMembershipTier: userMembershipTier,
+                        sessionManager: sessionManager
+                    )
+                }
+            }
         }
     }
     
@@ -214,7 +668,7 @@ struct BookTabView: View {
         if let session = sessionManager.currentSession {
             return session.customerName
         }
-        return "Guest" // Default name - in real app would get from user input
+        return "Guest User" // Default name - in real app would get from user input
     }
     
     // User status text
@@ -231,6 +685,550 @@ struct BookTabView: View {
             return .orange
         }
         return .blue
+    }
+    
+    // User membership tier
+    private var userMembershipTier: MembershipTier? {
+        sessionManager.currentSession?.membershipTier
+    }
+    
+    // Available simulator count
+    private var availableSimulatorCount: Int {
+        simulators.filter { $0.isBookable }.count
+    }
+    
+    // Load simulator data
+    private func loadSimulators() {
+        // In real app, this would fetch from API
+        simulators = Simulator.mockSimulators()
+    }
+}
+
+// MARK: - Simulator Card View
+struct SimulatorCardView: View {
+    let simulator: Simulator
+    let userMembershipTier: MembershipTier?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 12) {
+                // Header with status
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(simulator.shortName)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Text(simulator.status.displayText)
+                            .font(.caption)
+                            .foregroundColor(simulator.status.color)
+                    }
+                    
+                    Spacer()
+                    
+                    Circle()
+                        .fill(simulator.status.color)
+                        .frame(width: 12, height: 12)
+                }
+                
+                // Pricing
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        if let _ = userMembershipTier {
+                            Text("$\(Int(simulator.memberPrice))/hr")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                            
+                            Text("Member Rate")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        } else {
+                            Text("$\(Int(simulator.guestPrice))/hr")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            
+                            Text("Guest Rate")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if let _ = userMembershipTier {
+                        Text("MEMBER")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange)
+                            .cornerRadius(4)
+                    }
+                }
+                
+                // Features
+                HStack {
+                    ForEach(simulator.features.prefix(2), id: \.self) { feature in
+                        Text(feature)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(4)
+                    }
+                    
+                    Spacer()
+                    
+                    if simulator.isBookable {
+                        Text("Tap to book")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+            .padding()
+            .background(simulator.isBookable ? Color(.systemBackground) : Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(simulator.status.color.opacity(0.3), lineWidth: simulator.isBookable ? 2 : 1)
+            )
+            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .disabled(!simulator.isBookable)
+        .opacity(simulator.isBookable ? 1.0 : 0.7)
+    }
+}
+
+// MARK: - iOS Standard Simulator Card View
+struct WideSimulatorCardView: View {
+    let simulator: Simulator
+    let userMembershipTier: MembershipTier?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 16) {
+                // Top Section: Status & Bay Name
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(simulator.status.color)
+                        .frame(width: 16, height: 16)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(simplifiedBayName)
+                            .font(.system(size: 18, weight: .semibold, design: .default))
+                            .foregroundColor(.primary)
+                        
+                        Text(simplifiedStatus)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(simulator.status.color)
+                    }
+                    
+                    Spacer()
+                }
+                
+                // Bottom Section: Pricing & Action
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(simplifiedPricing)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.primary)
+                        
+                        if !simulator.isBookable && simulator.status.isBooked {
+                            Text(nextAvailableText)
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    actionButton
+                }
+            }
+            .padding(20)
+            .background(cardBackgroundColor)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(simulator.status.color.opacity(0.15), lineWidth: 2)
+            )
+            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .disabled(!simulator.isBookable && !isLimitedStatus())
+    }
+    
+    // MARK: - Computed Properties for Simplified Language
+    private var simplifiedBayName: String {
+        // Convert "Woods #1" to "Bay 1 - Woods"
+        let parts = simulator.shortName.split(separator: "#")
+        if parts.count == 2 {
+            let name = String(parts[0]).trimmingCharacters(in: .whitespaces)
+            let number = String(parts[1])
+            return "Bay \(number) - \(name)"
+        }
+        return simulator.shortName
+    }
+    
+    private var simplifiedStatus: String {
+        switch simulator.status {
+        case .available:
+            return "Open"
+        case .limited:
+            return "Almost Full"
+        case .booked(let until):
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return "Busy Until \(formatter.string(from: until))"
+        case .maintenance:
+            return "Closed for Setup"
+        }
+    }
+    
+    private var simplifiedPricing: String {
+        let price = userMembershipTier != nil ? Int(simulator.memberPrice) : Int(simulator.guestPrice)
+        return "$\(price)/hour"
+    }
+    
+    private var nextAvailableText: String {
+        if case .booked(let until) = simulator.status {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return "Next: \(formatter.string(from: until))"
+        }
+        return ""
+    }
+    
+    private var actionButton: some View {
+        Group {
+            if simulator.isBookable {
+                Text(getBookingButtonText())
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            } else {
+                Text(getUnavailableButtonText())
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.gray)
+                    .cornerRadius(12)
+            }
+        }
+        .frame(minWidth: 80, minHeight: 44) // iOS minimum touch target
+    }
+    
+    private var cardBackgroundColor: Color {
+        if simulator.isBookable {
+            return Color(.systemBackground)
+        } else {
+            return Color(.systemGray6)
+        }
+    }
+    
+    private func isLimitedStatus() -> Bool {
+        switch simulator.status {
+        case .limited:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    private func getBookingButtonText() -> String {
+        switch simulator.status {
+        case .limited:
+            return "Join"
+        default:
+            return "Book Now"
+        }
+    }
+    
+    private func getUnavailableButtonText() -> String {
+        switch simulator.status {
+        case .maintenance:
+            return "Closed"
+        default:
+            return "Wait List"
+        }
+    }
+}
+
+// MARK: - Simulator Booking Sheet
+struct SimulatorBookingSheet: View {
+    let simulator: Simulator
+    let userMembershipTier: MembershipTier?
+    @ObservedObject var sessionManager: CustomerSessionManager
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var selectedTimeSlot: Date?
+    @State private var duration: Int = 60 // minutes
+    @State private var playerCount: Int = 1
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Simulator details
+                    simulatorHeader
+                    
+                    // Time slot selection
+                    timeSlotSection
+                    
+                    // Duration and party size
+                    bookingOptions
+                    
+                    // Pricing breakdown
+                    pricingBreakdown
+                    
+                    // Book button
+                    bookButton
+                }
+                .padding()
+            }
+            .navigationTitle("Book \(simulator.shortName)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+    
+    private var simulatorHeader: some View {
+        VStack(spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(simulator.name)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    HStack(spacing: 8) {
+                        ForEach(Array(simulator.features.prefix(3)), id: \.self) { feature in
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle")
+                                    .font(.caption)
+                                Text(feature)
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(6)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    if let _ = userMembershipTier {
+                        Text("$\(Int(simulator.memberPrice))/hr")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+                        
+                        Text("Member Rate")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    } else {
+                        Text("$\(Int(simulator.guestPrice))/hr")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Text("Guest Rate")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+    
+    private var timeSlotSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Select Time")
+                .font(.headline)
+                .fontWeight(.bold)
+            
+            let timeSlots = generateTimeSlots()
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                ForEach(timeSlots, id: \.self) { timeSlot in
+                    Button(action: {
+                        selectedTimeSlot = timeSlot
+                    }) {
+                        Text(timeSlot, style: .time)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(selectedTimeSlot == timeSlot ? .white : .primary)
+                            .frame(height: 40)
+                            .frame(maxWidth: .infinity)
+                            .background(selectedTimeSlot == timeSlot ? Color.blue : Color(.systemGray6))
+                            .cornerRadius(8)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var bookingOptions: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("Duration")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Picker("Duration", selection: $duration) {
+                    Text("30 min").tag(30)
+                    Text("60 min").tag(60)
+                    Text("90 min").tag(90)
+                    Text("120 min").tag(120)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .frame(width: 200)
+            }
+            
+            HStack {
+                Text("Party Size")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                HStack(spacing: 16) {
+                    Button(action: { if playerCount > 1 { playerCount -= 1 } }) {
+                        Image(systemName: "minus.circle")
+                            .font(.title2)
+                            .foregroundColor(playerCount > 1 ? .blue : .gray)
+                    }
+                    .disabled(playerCount <= 1)
+                    
+                    Text("\(playerCount)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .frame(width: 30)
+                    
+                    Button(action: { if playerCount < 6 { playerCount += 1 } }) {
+                        Image(systemName: "plus.circle")
+                            .font(.title2)
+                            .foregroundColor(playerCount < 6 ? .blue : .gray)
+                    }
+                    .disabled(playerCount >= 6)
+                }
+            }
+        }
+    }
+    
+    private var pricingBreakdown: some View {
+        VStack(spacing: 12) {
+            Text("Pricing")
+                .font(.headline)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            VStack(spacing: 8) {
+                let hourlyRate = userMembershipTier != nil ? simulator.memberPrice : simulator.guestPrice
+                let subtotal = hourlyRate * Double(duration) / 60.0
+                let tax = subtotal * 0.10
+                let total = subtotal + tax
+                
+                HStack {
+                    Text("\(simulator.shortName) - \(duration) min")
+                    Spacer()
+                    Text("$\(subtotal, specifier: "%.2f")")
+                }
+                
+                if userMembershipTier != nil {
+                    let guestRate = simulator.guestPrice * Double(duration) / 60.0
+                    let savings = guestRate - subtotal
+                    
+                    HStack {
+                        Text("Member Savings")
+                        Spacer()
+                        Text("-$\(savings, specifier: "%.2f")")
+                            .foregroundColor(.green)
+                    }
+                }
+                
+                HStack {
+                    Text("Tax (10%)")
+                    Spacer()
+                    Text("$\(tax, specifier: "%.2f")")
+                }
+                
+                Divider()
+                
+                HStack {
+                    Text("Total")
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text("$\(total, specifier: "%.2f")")
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+    
+    private var bookButton: some View {
+        Button(action: {
+            // Handle booking
+            dismiss()
+        }) {
+            Text("BOOK \(simulator.shortName.uppercased())")
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(selectedTimeSlot != nil ? Color.blue : Color.gray)
+                .cornerRadius(28)
+        }
+        .disabled(selectedTimeSlot == nil)
+    }
+    
+    // Generate available time slots
+    private func generateTimeSlots() -> [Date] {
+        let calendar = Calendar.current
+        var slots: [Date] = []
+        
+        // Generate slots from current time + 1 hour to 10 PM
+        let startHour = max(Calendar.current.component(.hour, from: Date()) + 1, 9)
+        let endHour = 22
+        
+        for hour in startHour...endHour {
+            for minute in [0, 30] {
+                if let slotTime = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) {
+                    if slotTime > Date() {
+                        slots.append(slotTime)
+                    }
+                }
+            }
+        }
+        
+        return slots
     }
 }
 
@@ -395,20 +1393,18 @@ struct ShopTabView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
-                    // Session Context Header - Global awareness
-                    BayStatusHeader(sessionManager: sessionManager, showDetails: false)
+                VStack(spacing: 16) {
+                    // Compact Shop Header (moved to top)
+                    compactShopHeader
+                    
+                    // Live Bay Status Card - Prominent bay tracking
+                    LiveBayCard(sessionManager: sessionManager)
                         .padding(.horizontal)
                     
-                    // Enhanced Header with Quick Actions
-                    shopHeaderSection
+                    // Prominent Split Bill Button
+                    splitBillSection
                     
-                    // Session-Aware Quick Actions
-                    if sessionManager.isSessionActive {
-                        sessionQuickActionsSection
-                    }
-                    
-                    // Enhanced Categories with Social Integration
+                    // Enhanced Categories (Simplified - No Games)
                     categoriesSection
                     
                     Spacer(minLength: 100)
@@ -427,122 +1423,131 @@ struct ShopTabView: View {
         }
     }
     
-    // MARK: - Header Section
-    private var shopHeaderSection: some View {
-        VStack(spacing: 16) {
-            HStack {
+    // MARK: - Clean Shop Header (One line, member widget)
+    private var compactShopHeader: some View {
+        VStack(spacing: 12) {
+            // Top row - Title and Cart
+            HStack(alignment: .center) {
+                // Single line title
+                Text("EVERGREEN SHOP")
+                    .font(.system(size: 20, weight: .black, design: .default))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                // Cart Button only
+                Button(action: { showCart = true }) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.blue)
+                            .frame(width: 44, height: 44)
+                        
+                        Image(systemName: "cart.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                        
+                        // Notification badge
+                        if cartCount > 0 {
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 20, height: 20)
+                                .overlay(
+                                    Text("\(cartCount)")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.white)
+                                )
+                                .offset(x: 15, y: -15)
+                        }
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            // Member Widget (separate row, widget style)
+            if membershipType == "member" {
+                HStack(spacing: 8) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.orange)
+                    
+                    Text("Cascade Member")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    Text("15% Off")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.orange)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                )
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+    }
+    
+    // MARK: - Prominent Split Bill Section
+    private var splitBillSection: some View {
+        Button(action: { showBillSplit = true }) {
+            HStack(spacing: 16) {
+                // Icon
+                Image(systemName: "person.2.fill")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(width: 50, height: 50)
+                    .background(Color.purple)
+                    .cornerRadius(12)
+                
+                // Content
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("EVERGREEN SHOP")
-                        .font(.title)
+                    Text("Split Bill")
+                        .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
-                    Text("Food • Gear • Services • Social")
+                    Text("Divide costs with your group")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 
                 Spacer()
                 
-                // Member Badge & Cart
-                HStack(spacing: 12) {
-                    // Member Status Badge
-                    HStack(spacing: 4) {
-                        Image(systemName: membershipType == "member" ? "crown.fill" : "person")
-                            .font(.system(size: 10))
-                        Text(membershipType == "member" ? "MEMBER" : "GUEST")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(membershipType == "member" ? Color.orange : Color.gray.opacity(0.2))
-                    .foregroundColor(membershipType == "member" ? .white : .primary)
-                    .cornerRadius(8)
+                // Split options indicator
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("4 Ways")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.purple)
                     
-                    // Enhanced Cart Button
-                    Button(action: { showCart = true }) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.blue)
-                                .frame(width: 44, height: 44)
-                            
-                            Image(systemName: "cart.fill")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                            
-                            if cartCount > 0 {
-                                Circle()
-                                    .fill(Color.red)
-                                    .frame(width: 18, height: 18)
-                                    .overlay(
-                                        Text("\(cartCount)")
-                                            .font(.system(size: 10, weight: .bold))
-                                            .foregroundColor(.white)
-                                    )
-                                    .offset(x: 15, y: -15)
-                            }
-                        }
-                    }
+                    Text("Even • Amount • % • Items")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
                 }
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.secondary)
             }
-            .padding(.horizontal, 20)
+            .padding(20)
+            .background(Color(.systemBackground))
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.purple.opacity(0.2), lineWidth: 2)
+            )
+            .shadow(color: .purple.opacity(0.1), radius: 4, x: 0, y: 2)
         }
-    }
-    
-    // MARK: - Session Quick Actions
-    private var sessionQuickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("QUICK ACTIONS")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    QuickActionCard(
-                        title: "Order F&B",
-                        icon: "fork.knife",
-                        color: .orange,
-                        description: "To your bay"
-                    ) {
-                        // Navigate to menu
-                    }
-                    
-                    QuickActionCard(
-                        title: "Split Bill",
-                        icon: "person.2.fill",
-                        color: .purple,
-                        description: "With group"
-                    ) {
-                        showBillSplit = true
-                    }
-                    
-                    QuickActionCard(
-                        title: "Extend Time",
-                        icon: "plus.circle",
-                        color: .blue,
-                        description: "Add 30 min"
-                    ) {
-                        sessionManager.extendSession(additionalTime: 1800)
-                    }
-                    
-                    QuickActionCard(
-                        title: "Order Gear",
-                        icon: "cart",
-                        color: .green,
-                        description: "Pro shop"
-                    ) {
-                        // Navigate to pro shop
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-        }
+        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal)
     }
     
     // MARK: - Enhanced Categories Section
@@ -582,20 +1587,6 @@ struct ShopTabView: View {
                     )
                 }
                 
-                // Games & Challenges
-                NavigationLink(destination: GamesView()) {
-                    EnhancedShopCategoryCard(
-                        title: "GAMES & CHALLENGES",
-                        subtitle: "Closest to Pin • Long Drive • Skills challenges",
-                        icon: "gamecontroller.fill",
-                        color: .blue,
-                        badge: "New",
-                        badgeColor: .blue
-                    )
-                }
-                
-                // Social & Group Features - Bill Splitting Integration
-                socialGroupSection
                 
                 // Instruction & Lessons
                 NavigationLink(destination: InstructionView(membershipType: membershipType)) {
@@ -613,49 +1604,6 @@ struct ShopTabView: View {
         }
     }
     
-    // MARK: - Social & Group Section with Bill Splitting
-    private var socialGroupSection: some View {
-        VStack(spacing: 8) {
-            Button(action: { showBillSplit = true }) {
-                EnhancedShopCategoryCard(
-                    title: "SOCIAL & GROUP",
-                    subtitle: "Bill splitting • Group bookings • Share orders • Social challenges",
-                    icon: "person.2.fill",
-                    color: .purple,
-                    badge: "Split Bill",
-                    badgeColor: .purple
-                )
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            // Sub-options for Social features
-            HStack(spacing: 12) {
-                SocialSubActionCard(
-                    title: "Split Current Bill",
-                    icon: "divide.circle",
-                    color: .purple
-                ) {
-                    showBillSplit = true
-                }
-                
-                SocialSubActionCard(
-                    title: "Group Booking",
-                    icon: "person.3.fill",
-                    color: .blue
-                ) {
-                    showGroupBooking = true
-                }
-                
-                SocialSubActionCard(
-                    title: "Share Order",
-                    icon: "square.and.arrow.up",
-                    color: .green
-                ) {
-                    // Share current cart
-                }
-            }
-        }
-    }
     
     private func mockCustomerTab() -> CustomerTab {
         return CustomerTab(
@@ -675,38 +1623,6 @@ struct ShopTabView: View {
 }
 // MARK: - Enhanced Shop UI Components
 
-// Quick Action Card for session-based actions
-struct QuickActionCard: View {
-    let title: String
-    let icon: String
-    let color: Color
-    let description: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(color)
-                    .frame(width: 40, height: 40)
-                    .background(color.opacity(0.15))
-                    .cornerRadius(12)
-                
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                
-                Text(description)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            .frame(width: 80)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 
 // Enhanced Category Card with badges
 struct EnhancedShopCategoryCard: View {
@@ -769,35 +1685,666 @@ struct EnhancedShopCategoryCard: View {
     }
 }
 
-// Social Sub-Action Card
-struct SocialSubActionCard: View {
-    let title: String
-    let icon: String
-    let color: Color
-    let action: () -> Void
+
+// MARK: - Live Bay Card Components
+
+// MARK: - Live Bay Card Component
+// MARK: - Interactive Live Bay Card (Primary Focus Component)
+struct LiveBayCard: View {
+    @ObservedObject var sessionManager: CustomerSessionManager
+    @State private var isPressed = false
+    @State private var pulseAnimation = false
     
     var body: some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(color)
-                    .frame(width: 32, height: 32)
-                    .background(color.opacity(0.1))
-                    .cornerRadius(8)
+        VStack(spacing: 0) {
+            if let session = sessionManager.currentSession {
+                // Interactive Active/Scheduled Session Card
+                InteractiveActiveBayCard(session: session, sessionManager: sessionManager)
+            } else {
+                // Interactive Available Bay Card with prominent booking CTA
+                InteractiveAvailableBayCard(sessionManager: sessionManager)
+            }
+        }
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.easeInOut(duration: 0.1), value: isPressed)
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    isPressed = false
+                }
+            }
+            handleBayCardTap()
+        }
+    }
+    
+    private func handleBayCardTap() {
+        if sessionManager.currentSession != nil {
+            // Navigate to active session details
+            print("🎯 Navigate to Session Details")
+        } else {
+            // Navigate to booking flow
+            print("🎯 Navigate to Booking Flow")
+        }
+    }
+}
+
+// MARK: - Interactive Active Bay Card (Enhanced Design)
+struct InteractiveActiveBayCard: View {
+    let session: CustomerSession
+    @ObservedObject var sessionManager: CustomerSessionManager
+    @State private var isQuickActionsExpanded = false
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Compact header
+            compactHeader
+            
+            // Session info
+            sessionInfoSection
+            
+            // Expandable quick actions
+            quickActionsWidget
+        }
+        .padding(16)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    session.statusColor.opacity(0.08),
+                    Color.clear
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(session.statusColor.opacity(0.3), lineWidth: 1)
+        )
+        .shadow(color: session.statusColor.opacity(0.15), radius: 4, x: 0, y: 2)
+    }
+    
+    private var compactHeader: some View {
+        HStack(spacing: 12) {
+            // Simple static icon
+            ZStack {
+                Circle()
+                    .fill(session.statusColor.opacity(0.15))
+                    .frame(width: 40, height: 40)
                 
-                Text(title)
+                Image(systemName: session.sessionType.systemImage)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(session.statusColor)
+            }
+            
+            // Bay info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(session.bayName)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text(session.location.name)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            // Simple status badge
+            compactStatusBadge
+        }
+    }
+    
+    private var compactStatusBadge: some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            // Status indicator
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(session.statusColor)
+                    .frame(width: 8, height: 8)
+                
+                Text(session.status.displayName.uppercased())
                     .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(session.statusColor)
+            }
+            
+            // Time info
+            if session.status == .active {
+                Text(sessionManager.sessionTimeRemainingText ?? "Active")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(session.statusColor)
+            } else if session.status == .scheduled {
+                Text(sessionManager.upcomingSessionTimeText ?? "Scheduled")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(session.statusColor)
+            }
+        }
+    }
+    
+    private var sessionInfoSection: some View {
+        HStack {
+            // Session details - compact
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock.fill")
+                        .font(.caption2)
+                        .foregroundColor(session.statusColor)
+                    
+                    Text(session.timeSlotText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                }
+                
+                HStack(spacing: 6) {
+                    Image(systemName: "person.fill")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    
+                    Text(session.sessionType.displayName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            // Compact member tier badge
+            if let tier = session.membershipTier {
+                HStack(spacing: 4) {
+                    Image(systemName: "crown.fill")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                    
+                    Text(tier.displayName)
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.orange)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(6)
+            }
+        }
+    }
+    
+    private var quickActionsWidget: some View {
+        VStack(spacing: 8) {
+            Divider()
+                .background(session.statusColor.opacity(0.2))
+            
+            // Clickable widget header
+            Button(action: {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    isQuickActionsExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "bolt.circle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(session.statusColor)
+                    
+                    Text("Quick Actions")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: isQuickActionsExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(session.statusColor)
+                        .rotationEffect(.degrees(isQuickActionsExpanded ? 0 : 0))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(session.statusColor.opacity(0.1))
+                .cornerRadius(10)
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // Expandable actions
+            if isQuickActionsExpanded {
+                expandedQuickActions
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+            }
+        }
+    }
+    
+    private var expandedQuickActions: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                ForEach(session.quickActionItems.prefix(3)) { action in
+                    Button(action: {
+                        handleQuickAction(action.action)
+                    }) {
+                        VStack(spacing: 4) {
+                            Image(systemName: action.icon)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(action.color)
+                            
+                            Text(action.title)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(action.color)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(action.color.opacity(0.1))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(action.color.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+        }
+        .padding(.top, 4)
+    }
+    
+    private func handleQuickAction(_ action: SessionActionType) {
+        switch action {
+        case .extendTime:
+            extendSessionTime()
+        case .orderFood:
+            openFoodOrdering()
+        case .getHelp:
+            requestHelp()
+        case .preOrder:
+            openPreOrdering()
+        case .viewDetails:
+            showBayDetails()
+        case .modify:
+            openBookingModification()
+        default:
+            print("🔧 Action not implemented: \(action)")
+        }
+    }
+    
+    // MARK: - Quick Action Implementations
+    
+    private func extendSessionTime() {
+        print("⏰ Extending session time...")
+        
+        // Add 30 minutes to current session
+        sessionManager.extendSession(additionalTime: 1800) // 30 minutes in seconds
+        
+        // Show success feedback
+        showActionFeedback("Extended session by 30 minutes", icon: "clock.badge.plus", color: .green)
+    }
+    
+    private func openFoodOrdering() {
+        print("🍔 Opening food ordering...")
+        
+        // Navigate to food & beverage menu
+        // In a real app, this would trigger navigation
+        showActionFeedback("Opening F&B Menu", icon: "fork.knife", color: .orange)
+    }
+    
+    private func requestHelp() {
+        print("🆘 Requesting help...")
+        
+        // Call staff assistance
+        // In a real app, this would send a notification to staff
+        showActionFeedback("Staff notified - Help on the way!", icon: "bell.badge", color: .blue)
+    }
+    
+    private func openPreOrdering() {
+        print("🛒 Opening pre-ordering...")
+        
+        // Navigate to pre-order menu for upcoming sessions
+        showActionFeedback("Opening Pre-Order Menu", icon: "cart.badge.plus", color: .purple)
+    }
+    
+    private func showBayDetails() {
+        print("ℹ️ Showing bay details...")
+        
+        // Show detailed bay information and amenities
+        showActionFeedback("Bay Details", icon: "info.circle", color: .cyan)
+    }
+    
+    private func openBookingModification() {
+        print("✏️ Opening booking modification...")
+        
+        // Navigate to booking modification screen
+        showActionFeedback("Opening Booking Options", icon: "pencil.circle", color: .indigo)
+    }
+    
+    private func showActionFeedback(_ message: String, icon: String, color: Color) {
+        // In a real app, this would show a toast notification or alert
+        print("✅ \(message)")
+        
+        // Haptic feedback for user confirmation
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.impactOccurred()
+        
+        // Auto-collapse quick actions after action is taken
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                isQuickActionsExpanded = false
+            }
+        }
+    }
+}
+
+// MARK: - Interactive Available Bay Card (Enhanced Design)
+struct InteractiveAvailableBayCard: View {
+    @ObservedObject var sessionManager: CustomerSessionManager
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Compact booking header
+            compactBookingHeader
+            
+            // Simple availability info
+            availabilityInfo
+        }
+        .padding(16)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.blue.opacity(0.08),
+                    Color.clear
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+        )
+        .shadow(color: Color.blue.opacity(0.15), radius: 4, x: 0, y: 2)
+    }
+    
+    private var compactBookingHeader: some View {
+        HStack(spacing: 12) {
+            // Simple icon
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                
+                Image(systemName: "figure.golf")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.blue)
+            }
+            
+            // Booking info
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Ready to Play?")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text("Book your perfect bay")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            // Availability badge
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(.green)
+                    .frame(width: 8, height: 8)
+                
+                Text("AVAILABLE")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
+            }
+        }
+    }
+    
+    private var availabilityInfo: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                let availableCount = sessionManager.getAvailableBays(for: .tacoma).count
+                Text("\(availableCount) bays ready")
+                    .font(.caption)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
+                
+                Text("No wait time")
+                    .font(.caption2)
+                    .foregroundColor(.green)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+            
+            Spacer()
+            
+            // Quick book button
+            Button(action: {
+                handleQuickBooking()
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar.badge.plus")
+                        .font(.system(size: 14, weight: .semibold))
+                    
+                    Text("Book Now")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.blue)
+                .cornerRadius(10)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
-        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func handleQuickBooking() {
+        print("📅 Quick booking initiated...")
+        
+        // In a real app, this would navigate to booking flow
+        // For now, provide feedback
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.impactOccurred()
+        
+        print("✅ Opening booking selection...")
+    }
+    
+}
+
+// MARK: - Legacy Active Bay Card (Deprecated - Use InteractiveActiveBayCard)
+struct ActiveBayCard: View {
+    let session: CustomerSession
+    @ObservedObject var sessionManager: CustomerSessionManager
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // Header with bay name and status
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(session.bayName)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text(session.location.name)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                // Status indicator
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(session.statusColor)
+                            .frame(width: 10, height: 10)
+                        
+                        Text(session.status.displayName.uppercased())
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(session.statusColor)
+                    }
+                    
+                    if session.status == .active {
+                        Text(sessionManager.sessionTimeRemainingText ?? "Active")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(session.statusColor)
+                    } else if session.status == .scheduled {
+                        Text(sessionManager.upcomingSessionTimeText ?? "Scheduled")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(session.statusColor)
+                    }
+                }
+            }
+            
+            // Session details
+            HStack {
+                // Session type and time
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(session.sessionType.displayName)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    Text(session.timeSlotText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                // Member tier if available
+                if let tier = session.membershipTier {
+                    HStack(spacing: 4) {
+                        Image(systemName: "crown.fill")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        
+                        Text(tier.displayName)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(6)
+                }
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(session.statusColor.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(session.statusColor.opacity(0.3), lineWidth: 2)
+                )
+        )
+    }
+}
+
+// MARK: - Available Bay Card
+struct AvailableBayCard: View {
+    @ObservedObject var sessionManager: CustomerSessionManager
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Ready to Book")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text("Select a bay to get started")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                // Available bays indicator
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(.blue)
+                            .frame(width: 10, height: 10)
+                        
+                        Text("AVAILABLE")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
+                    }
+                    
+                    let availableCount = sessionManager.getAvailableBays(for: .tacoma).count
+                    Text("\(availableCount) Bays Open")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                }
+            }
+            
+            // Quick booking info
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Next Available")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    Text("Now - No wait time")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
+                
+                Spacer()
+                
+                // Member pricing
+                HStack(spacing: 4) {
+                    Image(systemName: "dollarsign.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                    
+                    Text("$45/hr Member Rate")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.green)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(Color.green.opacity(0.1))
+                .cornerRadius(6)
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.blue.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 2)
+                )
+        )
     }
 }
 
@@ -912,74 +2459,6 @@ struct YourBaySection: View {
 }
 
 
-// MARK: - Active Bay Card (Currently Playing)
-struct ActiveBayCard: View {
-    let membershipType: String
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            // Current Bay Status
-            HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: 12, height: 12)
-                        
-                        Text("CURRENTLY PLAYING")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.green)
-                    }
-                    
-                    Text("BAY: Mickelson - Tacoma")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Text("42 minutes remaining")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("$45")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                    
-                    Text(membershipType == "member" ? "Member Rate" : "Guest Rate")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            // Quick Actions
-            HStack(spacing: 12) {
-                BayActionButton(title: "EXTEND TIME", icon: "plus.circle", color: .blue) {
-                    // Extend booking action
-                }
-                
-                BayActionButton(title: "ORDER F&B", icon: "fork.knife", color: .orange) {
-                    // Quick order action
-                }
-                
-                BayActionButton(title: "GET HELP", icon: "questionmark.circle", color: .gray) {
-                    // Support action
-                }
-            }
-        }
-        .padding(20)
-        .background(Color(.systemGray6))
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.green.opacity(0.3), lineWidth: 2)
-        )
-    }
-}
 
 // MARK: - Upcoming Bay Card (Future Booking)
 struct UpcomingBayCard: View {
@@ -2661,6 +4140,359 @@ struct BayStatusBadge: View {
             return sessionManager.upcomingSessionTimeText ?? "Upcoming"
         default:
             return "Available"
+        }
+    }
+}
+
+// MARK: - Enhanced USchedule Service Selection Interface
+struct ServiceSelectionView: View {
+    @Binding var selectedCategory: ServiceCategory
+    @Binding var selectedService: UScheduleService?
+    @Binding var playerCount: Int
+    let userMembershipTier: MembershipTier?
+    
+    @State private var showingAllServices = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Service Category Selection
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("Choose Your Service")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    if userMembershipTier != nil {
+                        Text("Member Pricing")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+                }
+                
+                // Service Category Cards
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
+                    ForEach(ServiceCategory.allCases) { category in
+                        ServiceCategoryCard(
+                            category: category,
+                            isSelected: selectedCategory == category,
+                            userMembershipTier: userMembershipTier
+                        ) {
+                            selectedCategory = category
+                            selectedService = nil // Reset service selection
+                        }
+                    }
+                }
+            }
+            
+            // Selected Service Details
+            if selectedCategory == .simulator {
+                SimulatorServiceSelection(
+                    selectedService: $selectedService,
+                    playerCount: $playerCount,
+                    userMembershipTier: userMembershipTier
+                )
+            } else {
+                OtherServicesSelection(
+                    category: selectedCategory,
+                    selectedService: $selectedService,
+                    playerCount: $playerCount,
+                    userMembershipTier: userMembershipTier
+                )
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(16)
+    }
+}
+
+struct ServiceCategoryCard: View {
+    let category: ServiceCategory
+    let isSelected: Bool
+    let userMembershipTier: MembershipTier?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 12) {
+                Image(systemName: category.icon)
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundColor(isSelected ? .white : .blue)
+                
+                VStack(spacing: 4) {
+                    Text(category.displayName)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(isSelected ? .white : .primary)
+                        .multilineTextAlignment(.center)
+                    
+                    Text(category.description)
+                        .font(.caption)
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+            }
+            .frame(height: 100)
+            .frame(maxWidth: .infinity)
+            .padding(12)
+            .background(isSelected ? Color.blue : Color(.systemBackground))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SimulatorServiceSelection: View {
+    @Binding var selectedService: UScheduleService?
+    @Binding var playerCount: Int
+    let userMembershipTier: MembershipTier?
+    
+    var simulatorServices: [UScheduleService] {
+        UScheduleService.allServices().filter { $0.category == .simulator }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Simulator Tier")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(spacing: 12) {
+                ForEach(simulatorServices) { service in
+                    SimulatorTierCard(
+                        service: service,
+                        isSelected: selectedService?.id == service.id,
+                        userMembershipTier: userMembershipTier
+                    ) {
+                        selectedService = service
+                    }
+                }
+            }
+            
+            // Player Count Selection
+            if selectedService != nil {
+                PlayerCountSelection(playerCount: $playerCount, maxPlayers: selectedService?.maxPlayers ?? 6)
+            }
+        }
+    }
+}
+
+struct SimulatorTierCard: View {
+    let service: UScheduleService
+    let isSelected: Bool
+    let userMembershipTier: MembershipTier?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(service.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isSelected ? .white : .primary)
+                    
+                    Text(service.description)
+                        .font(.caption)
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                        .lineLimit(2)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    if let userMembershipTier = userMembershipTier {
+                        Text("$\(Int(service.memberPrice))/hr")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(isSelected ? .white : .green)
+                        
+                        Text("Save $\(Int(service.memberSavings))")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(isSelected ? .white.opacity(0.8) : .green)
+                    } else {
+                        Text("$\(Int(service.guestPrice))/hr")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(isSelected ? .white : .primary)
+                        
+                        Text("Guest Rate")
+                            .font(.caption)
+                            .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                    }
+                }
+            }
+            .padding(16)
+            .background(isSelected ? Color.blue : Color(.systemBackground))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color(.systemGray4), lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct OtherServicesSelection: View {
+    let category: ServiceCategory
+    @Binding var selectedService: UScheduleService?
+    @Binding var playerCount: Int
+    let userMembershipTier: MembershipTier?
+    
+    var categoryServices: [UScheduleService] {
+        UScheduleService.allServices().filter { $0.category == category }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("\(category.displayName) Options")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            if categoryServices.isEmpty {
+                Text("Coming Soon")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 20)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(categoryServices) { service in
+                        ServiceOptionCard(
+                            service: service,
+                            isSelected: selectedService?.id == service.id,
+                            userMembershipTier: userMembershipTier
+                        ) {
+                            selectedService = service
+                        }
+                    }
+                }
+                
+                // Player Count Selection for non-simulator services
+                if let selected = selectedService, selected.maxPlayers > 1 {
+                    PlayerCountSelection(playerCount: $playerCount, maxPlayers: selected.maxPlayers)
+                }
+            }
+        }
+    }
+}
+
+struct ServiceOptionCard: View {
+    let service: UScheduleService
+    let isSelected: Bool
+    let userMembershipTier: MembershipTier?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(service.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isSelected ? .white : .primary)
+                    
+                    Text(service.description)
+                        .font(.caption)
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                        .lineLimit(2)
+                    
+                    HStack(spacing: 8) {
+                        Text("\(service.duration) min")
+                            .font(.caption2)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color(.systemGray5))
+                            .cornerRadius(4)
+                        
+                        if service.requiresInstructor {
+                            Text("Instructor")
+                                .font(.caption2)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(4)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    if let userMembershipTier = userMembershipTier {
+                        Text("$\(String(format: "%.0f", service.memberPrice))")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(isSelected ? .white : .green)
+                        
+                        if service.memberSavings > 0 {
+                            Text("Save $\(Int(service.memberSavings))")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(isSelected ? .white.opacity(0.8) : .green)
+                        }
+                    } else {
+                        Text("$\(String(format: "%.0f", service.guestPrice))")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(isSelected ? .white : .primary)
+                    }
+                }
+            }
+            .padding(16)
+            .background(isSelected ? Color.blue : Color(.systemBackground))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color(.systemGray4), lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct PlayerCountSelection: View {
+    @Binding var playerCount: Int
+    let maxPlayers: Int
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Number of Players")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            HStack(spacing: 12) {
+                ForEach(1...min(maxPlayers, 6), id: \.self) { count in
+                    Button(action: {
+                        playerCount = count
+                    }) {
+                        Text("\(count)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(playerCount == count ? .white : .primary)
+                            .frame(width: 44, height: 44)
+                            .background(playerCount == count ? Color.blue : Color(.systemBackground))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(playerCount == count ? Color.blue : Color(.systemGray4), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                
+                Spacer()
+            }
         }
     }
 }

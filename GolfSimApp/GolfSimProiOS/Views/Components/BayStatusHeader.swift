@@ -403,6 +403,7 @@ struct BayStatusBadge: View {
     }
 }
 
+
 #Preview {
     VStack(spacing: 20) {
         // Mock session manager for preview
