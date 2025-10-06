@@ -54,12 +54,9 @@ struct EnhancedBookingView: View {
                 
                 switch currentStep {
                 case .membershipCheck:
-                    MembershipCheckView(bookingManager: bookingManager, onContinue: {
+                    MembershipCheckView(bookingManager: bookingManager) {
                         currentStep = .playerSelection
-                    }, onBack: {
-                        // Handle back navigation - could go to previous screen or dismiss
-                        currentStep = .playerSelection // or implement proper back navigation
-                    })
+                    }
                 case .playerSelection:
                     PlayerSelectionView(bookingManager: bookingManager) {
                         currentStep = .dateTimeSelection
@@ -897,181 +894,178 @@ enum MembershipFlowStep {
 struct MembershipCheckView: View {
     @ObservedObject var bookingManager: BookingManager
     let onContinue: () -> Void
-    let onBack: () -> Void
     @State private var showMembershipFlow = false
-    @State private var logoScale: CGFloat = 0.8
-    @State private var logoOpacity: Double = 0.0
-    @State private var contentOffset: CGFloat = 30
     
     private let evergreenPrimary = Color(red: 36/255, green: 138/255, blue: 61/255)
-    private let evergreenSecondary = Color(red: 28/255, green: 115/255, blue: 48/255)
+    private let evergreenLight = Color(red: 76/255, green: 175/255, blue: 80/255)
     
     var body: some View {
-        ZStack {
-            // Background matching welcome screen
-            LinearGradient(
-                colors: [.white, evergreenPrimary.opacity(0.1)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+        VStack(spacing: 24) {
+            // Header with TopGolf-style imagery
+            VStack(spacing: 16) {
+                // Mock images - replace with actual assets
+                HStack(spacing: 8) {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 80, height: 120)
+                        .cornerRadius(8)
+                    
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 200, height: 120)
+                        .cornerRadius(8)
+                    
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 80, height: 120)
+                        .cornerRadius(8)
+                }
+                
+                Text("FRIENDS, FUN, AND\nMEMBER REWARDS.")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(evergreenPrimary)
+                    .multilineTextAlignment(.center)
+                
+                Text("Play, laugh, and unlock\nperks together.")
+                    .font(.system(size: 16))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 40)
             
-            VStack(spacing: 40) {
-                // Header with back button
-                HStack {
-                    Button(action: onBack) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .medium))
-                            Text("Back")
-                                .font(.system(size: 16, weight: .medium))
-                        }
-                        .foregroundColor(evergreenPrimary)
-                    }
-                    
-                    Spacer()
-                    
-                    Text("Membership")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(evergreenPrimary)
-                    
-                    Spacer()
-                    
-                    Text("Back")
-                        .foregroundColor(.clear)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                
-                Spacer()
-                
-                // Welcome content with animation
-                VStack(spacing: 32) {
-                    // Logo matching welcome screen
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [evergreenPrimary, evergreenSecondary],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 120, height: 120)
-                        
-                        Image(systemName: "person.badge.plus")
-                            .foregroundColor(.white)
-                            .font(.system(size: 50))
-                    }
-                    .scaleEffect(logoScale)
-                    .opacity(logoOpacity)
-                    
-                    // Membership text
-                    VStack(spacing: 12) {
-                        Text("Join Evergreen")
-                            .font(.system(size: 28, weight: .light))
-                            .foregroundColor(.gray)
-                        
-                        Text("Golf Club")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(evergreenPrimary)
-                            .multilineTextAlignment(.center)
-                        
-                        Text("Unlock premium benefits and exclusive access")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                    }
-                    .offset(y: contentOffset)
-                    .opacity(logoOpacity)
-                }
-                
-                Spacer()
-                
-                // Membership buttons
-                VStack(spacing: 16) {
-                    Button(action: {
-                        // Start new membership flow
-                        bookingManager.isExistingMember = false
-                        bookingManager.membershipStep = .ageVerification
-                        showMembershipFlow = true
-                    }) {
-                        HStack {
-                            Text("Become a Member")
-                                .font(.system(size: 18, weight: .semibold))
-                            
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
+            Spacer()
+            
+            // Membership buttons
+            VStack(spacing: 16) {
+                Button(action: {
+                    // Start new membership flow
+                    bookingManager.isExistingMember = false
+                    bookingManager.membershipStep = .ageVerification
+                    showMembershipFlow = true
+                }) {
+                    Text("BECOME A MEMBER")
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(
-                            LinearGradient(
-                                colors: [evergreenPrimary, evergreenSecondary],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(28)
-                        .shadow(color: evergreenPrimary.opacity(0.3), radius: 8, x: 0, y: 4)
-                    }
-                    
-                    Button(action: {
-                        // Start existing member flow
-                        bookingManager.isExistingMember = true
-                        bookingManager.membershipStep = .phoneEntry
-                        showMembershipFlow = true
-                    }) {
-                        Text("I'm Already a Member")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(evergreenPrimary)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(evergreenPrimary, lineWidth: 2)
-                            )
-                            .cornerRadius(25)
-                    }
-                    
-                    Button(action: {
-                        // Continue as guest
-                        onContinue()
-                    }) {
-                        Text("Continue as Guest")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.gray)
-                            .underline()
-                    }
-                    .padding(.top, 8)
+                        .frame(height: 50)
+                        .background(evergreenPrimary)
+                        .cornerRadius(25)
                 }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 50)
+                
+                Button(action: {
+                    // Start existing member flow
+                    bookingManager.isExistingMember = true
+                    bookingManager.membershipStep = .phoneEntry
+                    showMembershipFlow = true
+                }) {
+                    Text("I'M ALREADY A MEMBER")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(evergreenPrimary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 25)
+                                .stroke(evergreenPrimary, lineWidth: 2)
+                        )
+                }
+                
+                Button(action: {
+                    // Continue as guest
+                    onContinue()
+                }) {
+                    Text("CONTINUE AS GUEST")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                        .underline()
+                }
+                .padding(.top, 8)
             }
+            .padding(.horizontal, 20)
+            
+            // Bottom navigation simulation
+            HStack {
+                VStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 20))
+                        .foregroundColor(.gray)
+                    
+                    Text("VISITS")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 4) {
+                    ZStack {
+                        Image(systemName: "heart")
+                            .font(.system(size: 20))
+                            .foregroundColor(.gray)
+                        
+                        Circle()
+                            .fill(.red)
+                            .frame(width: 18, height: 18)
+                            .offset(x: 8, y: -8)
+                            .overlay(
+                                Text("18")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .offset(x: 8, y: -8)
+                            )
+                    }
+                    
+                    Text("OFFERS")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 4) {
+                    Image(systemName: "building.2")
+                        .font(.system(size: 20))
+                        .foregroundColor(.gray)
+                    
+                    Text("IN-VENUE")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 4) {
+                    Image(systemName: "location")
+                        .font(.system(size: 20))
+                        .foregroundColor(.gray)
+                    
+                    Text("LOCATIONS")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 4) {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(evergreenPrimary)
+                    
+                    Text("MEMBERSHIP")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(evergreenPrimary)
+                }
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 30)
         }
-        .onAppear {
-            startMembershipAnimation()
-        }
+        .background(Color(.systemGroupedBackground))
         .sheet(isPresented: $showMembershipFlow) {
             MembershipFlowView(bookingManager: bookingManager, onComplete: {
                 showMembershipFlow = false
                 onContinue()
             })
-        }
-    }
-    
-    private func startMembershipAnimation() {
-        // Animate logo entrance
-        withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
-            logoScale = 1.0
-            logoOpacity = 1.0
-        }
-        
-        // Animate content
-        withAnimation(.easeOut(duration: 0.6).delay(0.4)) {
-            contentOffset = 0
         }
     }
 }
@@ -1105,39 +1099,37 @@ struct MembershipFlowView: View {
 struct AgeVerificationView: View {
     @ObservedObject var bookingManager: BookingManager
     @State private var age: String = ""
-    @Environment(\.dismiss) private var dismiss
     
     private let evergreenPrimary = Color(red: 36/255, green: 138/255, blue: 61/255)
     
     var body: some View {
         VStack(spacing: 24) {
-            // Header with back button
-            HStack {
-                Button(action: {
-                    dismiss()
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .medium))
-                        Text("Back")
-                            .font(.system(size: 16, weight: .medium))
-                    }
-                    .foregroundColor(evergreenPrimary)
+            // Progress indicators
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(evergreenPrimary)
+                    .frame(width: 30, height: 30)
+                    .overlay(
+                        Text("1")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    )
+                
+                ForEach(2...4, id: \.self) { number in
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 30, height: 30)
+                        .overlay(
+                            Text("\(number)")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.gray)
+                        )
                 }
                 
                 Spacer()
-                
-                Text("Step 1 of 4")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.gray)
-                
-                Spacer()
-                
-                Text("Back")
-                    .foregroundColor(.clear)
             }
             .padding(.horizontal, 20)
-            .padding(.top, 10)
+            .padding(.top, 20)
             
             VStack(spacing: 16) {
                 Text("Before we get started, please tell us how old you are:")
@@ -1186,43 +1178,46 @@ struct AgeVerificationView: View {
 
 struct PhoneEntryView: View {
     @ObservedObject var bookingManager: BookingManager
-    @Environment(\.dismiss) private var dismiss
     
     private let evergreenPrimary = Color(red: 36/255, green: 138/255, blue: 61/255)
     
     var body: some View {
         VStack(spacing: 24) {
-            // Header with back button
-            HStack {
-                Button(action: {
-                    if bookingManager.isExistingMember {
-                        dismiss()
-                    } else {
-                        bookingManager.membershipStep = .ageVerification
-                    }
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .medium))
-                        Text("Back")
-                            .font(.system(size: 16, weight: .medium))
-                    }
-                    .foregroundColor(evergreenPrimary)
+            // Progress indicators
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 30, height: 30)
+                    .overlay(
+                        Text("1")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.gray)
+                    )
+                
+                Circle()
+                    .fill(evergreenPrimary)
+                    .frame(width: 30, height: 30)
+                    .overlay(
+                        Text("2")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    )
+                
+                ForEach(3...4, id: \.self) { number in
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 30, height: 30)
+                        .overlay(
+                            Text("\(number)")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.gray)
+                        )
                 }
                 
                 Spacer()
-                
-                Text(bookingManager.isExistingMember ? "Member Login" : "Step 2 of 4")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.gray)
-                
-                Spacer()
-                
-                Text("Back")
-                    .foregroundColor(.clear)
             }
             .padding(.horizontal, 20)
-            .padding(.top, 10)
+            .padding(.top, 20)
             
             VStack(spacing: 16) {
                 Text("What is your current mobile number?")
