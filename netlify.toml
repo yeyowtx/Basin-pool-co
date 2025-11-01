@@ -1,5 +1,5 @@
 [build]
-  publish = "."
+  publish = "roof-measurement-deploy"
 
 [[headers]]
   for = "/*"
