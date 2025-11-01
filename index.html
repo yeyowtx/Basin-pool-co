@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roof Measurement Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+        
+        .address-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .address-search input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .address-search button {
+            padding: 12px 24px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .measurement-type {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .measurement-type button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: white;
+            transition: all 0.2s;
+        }
+        
+        .measurement-type button:hover {
+            opacity: 0.9;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-buttons button {
+            padding: 10px 20px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .action-buttons button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #e5e5e5;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #3B82F6;
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-row.total {
+            font-weight: 600;
+            font-size: 16px;
+            padding-top: 12px;
+            margin-top: 8px;
+            border-top: 2px solid #d1d5db;
+        }
+        
+        .perimeter { border-left-color: #EF4444; }
+        .ridge { border-left-color: #3B82F6; }
+        .ground { border-left-color: #10B981; }
+        
+        .live-stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1000;
+        }
+        
+        .live-stats h4 {
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+        
+        .live-stats p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 600px;
+            background: #f9fafb;
+            border-radius: 8px;
+            color: #6b7280;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Roof Measurement Tool</h1>
+        
+        <!-- Address Search -->
+        <div class="address-search">
+            <input 
+                type="text" 
+                id="address-input" 
+                placeholder="Enter property address (e.g., 123 Main St, Dallas, TX)"
+            />
+            <button onclick="searchAddress()">🔍 Search</button>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <div class="measurement-type">
+                <button style="background: #EF4444;" onclick="setType('perimeter')">
+                    🔴 Perimeter
+                </button>
+                <button style="background: #3B82F6;" onclick="setType('ridge')">
+                    🔵 Ridge
+                </button>
+                <button style="background: #10B981;" onclick="setType('ground')">
+                    🟢 Ground
+                </button>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="start-btn" onclick="startMeasuring()">📏 Start Measuring</button>
+                <button id="undo-btn" onclick="undoPoint()" style="display:none;">↩️ Undo</button>
+                <button id="clear-btn" onclick="clearCurrent()" style="display:none;">🗑️ Clear</button>
+                <button id="save-btn" onclick="saveMeasurement()" style="display:none;">💾 Save Segment</button>
+            </div>
+        </div>
+        
+        <!-- Map -->
+        <div id="map" class="loading">Loading Google Maps...</div>
+        
+        <!-- Live Stats (shown when measuring) -->
+        <div id="live-stats" class="live-stats" style="display:none;">
+            <h4>Current Segment</h4>
+            <p>Type: <strong id="current-type">perimeter</strong></p>
+            <p>Points: <strong id="current-points">0</strong></p>
+            <p>Distance: <strong id="current-distance">0.0 ft</strong></p>
+        </div>
+        
+        <!-- Results Grid -->
+        <div class="stats-grid">
+            <!-- Distance Results -->
+            <div class="stat-card">
+                <h3>📊 Distance Results</h3>
+                <div id="distance-results">
+                    <p style="color: #9ca3af; text-align: center; padding: 20px;">
+                        No measurements yet. Click "Start Measuring" to begin.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Material Estimate -->
+            <div class="stat-card">
+                <h3>💡 Quick Material Estimate</h3>
+                <div id="material-results">
+                    <p style="color: #9ca3af; text-align: center; padding: 20px;">
+                        Start measuring to see material estimates.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Replace with your Google Maps API key
+        const API_KEY = 'YOUR_API_KEY_HERE';
+        
+        // State
+        let map = null;
+        let isMeasuring = false;
+        let currentType = 'perimeter';
+        let currentPoints = [];
+        let measurements = [];
+        let activePolyline = null;
+        let savedPolylines = [];
+        let savedMarkers = [];
+        let clickListener = null;
+        
+        // Colors
+        const COLORS = {
+            perimeter: '#EF4444',
+            ridge: '#3B82F6',
+            ground: '#10B981'
+        };
+        
+        // Load Google Maps
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+        
+        // Initialize map
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
+                zoom: 20,
+                mapTypeId: 'satellite',
+                tilt: 0
+            });
+        }
+        
+        // Set measurement type
+        function setType(type) {
+            currentType = type;
+            document.getElementById('current-type').textContent = type;
+        }
+        
+        // Start measuring
+        function startMeasuring() {
+            isMeasuring = true;
+            currentPoints = [];
+            updateUI();
+            
+            // Add click listener
+            clickListener = map.addListener('click', (event) => {
+                if (!isMeasuring) return;
+                
+                const newPoint = {
+                    lat: event.latLng.lat(),
+                    lng: event.latLng.lng()
+                };
+                
+                currentPoints.push(newPoint);
+                updateActivePolyline();
+                updateLiveStats();
+            });
+        }
+        
+        // Update active polyline
+        function updateActivePolyline() {
+            if (currentPoints.length === 0) {
+                if (activePolyline) {
+                    activePolyline.setMap(null);
+                    activePolyline = null;
+                }
+                return;
+            }
+            
+            if (currentPoints.length === 1) {
+                if (activePolyline) {
+                    activePolyline.setMap(null);
+                }
+                activePolyline = new google.maps.Polyline({
+                    path: currentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
+                    geodesic: true,
+                    strokeColor: COLORS[currentType],
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    map: map
+                });
+            } else {
+                if (activePolyline) {
+                    activePolyline.setPath(currentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)));
+                }
+            }
+        }
+        
+        // Calculate distance
+        function calculateDistance(points) {
+            if (points.length < 2) return 0;
+            
+            let total = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng(points[i].lat, points[i].lng),
+                    new google.maps.LatLng(points[i + 1].lat, points[i + 1].lng)
+                );
+                total += distance;
+            }
+            
+            return total * 3.28084; // Convert to feet
+        }
+        
+        // Save measurement
+        function saveMeasurement() {
+            if (currentPoints.length < 2) return;
+            
+            const measurement = {
+                type: currentType,
+                points: currentPoints,
+                distance: calculateDistance(currentPoints)
+            };
+            
+            measurements.push(measurement);
+            
+            if (activePolyline) {
+                activePolyline.setMap(null);
+                activePolyline = null;
+            }
+            
+            currentPoints = [];
+            isMeasuring = false;
+            
+            if (clickListener) {
+                google.maps.event.removeListener(clickListener);
+            }
+            
+            drawAllMeasurements();
+            updateResults();
+            updateUI();
+        }
+        
+        // Draw all saved measurements
+        function drawAllMeasurements() {
+            // Clear existing
+            savedPolylines.forEach(p => p.setMap(null));
+            savedMarkers.forEach(m => m.setMap(null));
+            savedPolylines = [];
+            savedMarkers = [];
+            
+            measurements.forEach(measurement => {
+                const color = COLORS[measurement.type];
+                
+                // Polyline
+                const polyline = new google.maps.Polyline({
+                    path: measurement.points.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
+                    geodesic: true,
+                    strokeColor: color,
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    map: map
+                });
+                savedPolylines.push(polyline);
+                
+                // Markers
+                measurement.points.forEach(point => {
+                    const marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(point.lat, point.lng),
+                        map: map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 2,
+                            fillColor: color,
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 1
+                        },
+                        clickable: false,
+                        optimized: false,
+                        zIndex: -100
+                    });
+                    savedMarkers.push(marker);
+                });
+            });
+        }
+        
+        // Undo point
+        function undoPoint() {
+            if (currentPoints.length > 0) {
+                currentPoints.pop();
+                updateActivePolyline();
+                updateLiveStats();
+            }
+        }
+        
+        // Clear current
+        function clearCurrent() {
+            currentPoints = [];
+            if (activePolyline) {
+                activePolyline.setMap(null);
+                activePolyline = null;
+            }
+            isMeasuring = false;
+            if (clickListener) {
+                google.maps.event.removeListener(clickListener);
+            }
+            updateUI();
+        }
+        
+        // Search address
+        function searchAddress() {
+            const address = document.getElementById('address-input').value;
+            if (!address) return;
+            
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: address }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    map.setCenter(results[0].geometry.location);
+                    map.setZoom(20);
+                } else {
+                    alert('Address not found');
+                }
+            });
+        }
+        
+        // Update UI
+        function updateUI() {
+            const startBtn = document.getElementById('start-btn');
+            const undoBtn = document.getElementById('undo-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const liveStats = document.getElementById('live-stats');
+            
+            if (isMeasuring) {
+                startBtn.style.display = 'none';
+                undoBtn.style.display = 'inline-block';
+                clearBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'inline-block';
+                saveBtn.disabled = currentPoints.length < 2;
+                liveStats.style.display = 'block';
+            } else {
+                startBtn.style.display = 'inline-block';
+                undoBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
+                saveBtn.style.display = 'none';
+                liveStats.style.display = 'none';
+            }
+        }
+        
+        // Update live stats
+        function updateLiveStats() {
+            document.getElementById('current-points').textContent = currentPoints.length;
+            const distance = calculateDistance(currentPoints);
+            document.getElementById('current-distance').textContent = distance.toFixed(1) + ' ft';
+        }
+        
+        // Update results
+        function updateResults() {
+            const perimeterDist = measurements.filter(m => m.type === 'perimeter').reduce((sum, m) => sum + m.distance, 0);
+            const ridgeDist = measurements.filter(m => m.type === 'ridge').reduce((sum, m) => sum + m.distance, 0);
+            const groundDist = measurements.filter(m => m.type === 'ground').reduce((sum, m) => sum + m.distance, 0);
+            const totalDist = perimeterDist + ridgeDist + groundDist;
+            
+            // Distance results
+            let distanceHTML = '';
+            if (perimeterDist > 0) {
+                distanceHTML += `<div class="stat-row" style="border-left: 3px solid #EF4444; padding-left: 10px;">
+                    <span>🔴 Perimeter</span><strong>${perimeterDist.toFixed(1)} ft</strong>
+                </div>`;
+            }
+            if (ridgeDist > 0) {
+                distanceHTML += `<div class="stat-row" style="border-left: 3px solid #3B82F6; padding-left: 10px;">
+                    <span>🔵 Ridge</span><strong>${ridgeDist.toFixed(1)} ft</strong>
+                </div>`;
+            }
+            if (groundDist > 0) {
+                distanceHTML += `<div class="stat-row" style="border-left: 3px solid #10B981; padding-left: 10px;">
+                    <span>🟢 Ground</span><strong>${groundDist.toFixed(1)} ft</strong>
+                </div>`;
+            }
+            if (totalDist > 0) {
+                distanceHTML += `<div class="stat-row total">
+                    <span>Total</span><strong>${totalDist.toFixed(1)} ft</strong>
+                </div>`;
+            }
+            
+            document.getElementById('distance-results').innerHTML = distanceHTML || 
+                '<p style="color: #9ca3af; text-align: center; padding: 20px;">No measurements yet.</p>';
+            
+            // Material results
+            if (totalDist > 0) {
+                const wireLength = Math.ceil(totalDist * 1.15);
+                const lights = Math.ceil(wireLength);
+                const clips = Math.ceil(wireLength);
+                const lightCost = (lights * 0.50).toFixed(2);
+                const clipCost = (clips * 0.25).toFixed(2);
+                const wireCost = (wireLength * 0.15).toFixed(2);
+                const totalCost = (parseFloat(lightCost) + parseFloat(clipCost) + parseFloat(wireCost)).toFixed(2);
+                
+                document.getElementById('material-results').innerHTML = `
+                    <div class="stat-row">
+                        <span>💡 LED Lights</span><strong>${lights} ($${lightCost})</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>📏 Wire Length</span><strong>${wireLength} ft ($${wireCost})</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>📎 Clips</span><strong>${clips} ($${clipCost})</strong>
+                    </div>
+                    <div class="stat-row total">
+                        <span>Total Cost</span><strong>$${totalCost}</strong>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load maps on page load
+        window.onload = () => {
+            loadGoogleMaps();
+        };
+    </script>
+</body>
+</html>

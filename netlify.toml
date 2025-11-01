@@ -1,13 +1,14 @@
 [build]
-  publish = "basin-pool-inventory"
+  publish = "."
 
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.leadconnectorhq.com https://link.msgsndr.com https://images.unsplash.com https://fonts.googleapis.com https://fonts.gstatic.com https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com; frame-src https://api.leadconnectorhq.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com;"
 
 [[headers]]
   for = "*.html"
