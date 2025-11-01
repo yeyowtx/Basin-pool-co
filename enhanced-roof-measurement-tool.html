@@ -392,6 +392,50 @@
             font-size: 14px;
             padding: 20px;
         }
+        
+        /* Google Places Autocomplete Styling */
+        .pac-container {
+            background-color: white;
+            z-index: 1000;
+            position: fixed;
+            display: inline-block;
+            float: left;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-top: 2px;
+        }
+        
+        .pac-item {
+            cursor: pointer;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+            line-height: 1.4;
+        }
+        
+        .pac-item:last-child {
+            border-bottom: none;
+        }
+        
+        .pac-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .pac-item-selected {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+        
+        .pac-matched {
+            font-weight: 600;
+        }
+        
+        .pac-item-query {
+            font-size: 16px;
+            color: #1f2937;
+        }
     </style>
 </head>
 <body>
@@ -577,20 +621,30 @@
             const input = document.getElementById('address-input');
             const autocomplete = new google.maps.places.Autocomplete(input, {
                 types: ['address'],
-                componentRestrictions: { country: 'us' }
+                componentRestrictions: { country: 'us' },
+                fields: ['place_id', 'geometry', 'name', 'formatted_address']
             });
+            
+            // Set bounds to bias results (optional - can help with local results)
+            autocomplete.setBounds(new google.maps.LatLngBounds(
+                new google.maps.LatLng(25.0, -130.0), // Southwest US
+                new google.maps.LatLng(49.0, -65.0)   // Northeast US
+            ));
             
             // When place is selected
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
                 if (!place.geometry || !place.geometry.location) {
-                    alert('No details available for input: ' + place.name);
+                    console.log('No details available for input: ' + place.name);
                     return;
                 }
                 
                 // Center map on selected location
                 map.setCenter(place.geometry.location);
                 map.setZoom(20);
+                
+                // Optional: Show success message
+                console.log('Loaded address: ' + place.formatted_address);
             });
         }
         
