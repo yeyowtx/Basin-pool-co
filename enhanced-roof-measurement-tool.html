@@ -411,11 +411,14 @@
                     type="text" 
                     class="address-input" 
                     id="address-input"
-                    placeholder="Enter the address to load satellite imagery for measurement"
+                    placeholder="Start typing address... (autocomplete enabled)"
                 />
                 <button class="load-btn" onclick="searchAddress()">
                     🏠 Load Property
                 </button>
+                <p style="color: #6b7280; font-size: 11px; margin-top: 8px;">
+                    💡 Address suggestions will appear as you type. Click a suggestion or press "Load Property"
+                </p>
             </div>
             
             <!-- Measurement Tools -->
@@ -550,7 +553,7 @@
         // Load Google Maps
         function loadGoogleMaps() {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry&callback=initMap&loading=async`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry,places&callback=initMap&loading=async`;
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
@@ -563,6 +566,31 @@
                 zoom: 20,
                 mapTypeId: 'satellite',
                 tilt: 0
+            });
+            
+            // Initialize autocomplete
+            initAutocomplete();
+        }
+        
+        // Initialize Google Places Autocomplete
+        function initAutocomplete() {
+            const input = document.getElementById('address-input');
+            const autocomplete = new google.maps.places.Autocomplete(input, {
+                types: ['address'],
+                componentRestrictions: { country: 'us' }
+            });
+            
+            // When place is selected
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    alert('No details available for input: ' + place.name);
+                    return;
+                }
+                
+                // Center map on selected location
+                map.setCenter(place.geometry.location);
+                map.setZoom(20);
             });
         }
         
@@ -739,18 +767,21 @@
             updateUI();
         }
         
-        // Search address
+        // Search address (fallback for manual search)
         function searchAddress() {
             const address = document.getElementById('address-input').value;
             if (!address) return;
             
             const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: address }, (results, status) => {
+            geocoder.geocode({ 
+                address: address,
+                componentRestrictions: { country: 'US' }
+            }, (results, status) => {
                 if (status === 'OK' && results[0]) {
                     map.setCenter(results[0].geometry.location);
                     map.setZoom(20);
                 } else {
-                    alert('Address not found');
+                    alert('Address not found. Please try a more specific address.');
                 }
             });
         }
