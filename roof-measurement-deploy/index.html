@@ -520,7 +520,7 @@
 
     <script>
         // Replace with your Google Maps API key
-        const API_KEY = 'AIzaSyBqiqFF63IrlciAk2qygXLg6Mf8Awln0-g';
+        const API_KEY = 'AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk';
         
         // State
         let map = null;
@@ -550,7 +550,7 @@
         // Load Google Maps
         function loadGoogleMaps() {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry&callback=initMap`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry&callback=initMap&loading=async`;
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
