@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Roof Measurement Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 400px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Property Address Section */
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::before {
+            content: "🏠";
+        }
+        
+        .address-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .load-btn {
+            width: 100%;
+            padding: 12px;
+            background: #374151;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .load-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Measurement Tools */
+        .measurement-tools .section-title::before {
+            content: "📏";
+        }
+        
+        .measurement-types {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .type-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        
+        .type-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .type-btn.perimeter {
+            background: #ef4444;
+        }
+        
+        .type-btn.ridge {
+            background: #3b82f6;
+        }
+        
+        .type-btn.ground {
+            background: #10b981;
+        }
+        
+        .type-btn.active {
+            opacity: 1;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.8);
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .start-btn:hover {
+            background: #059669;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Distance Results */
+        .distance-results .section-title::before {
+            content: "📊";
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid;
+        }
+        
+        .result-item.perimeter {
+            border-left-color: #ef4444;
+        }
+        
+        .result-item.ridge {
+            border-left-color: #3b82f6;
+        }
+        
+        .result-item.ground {
+            border-left-color: #10b981;
+        }
+        
+        .result-item.total {
+            background: #1f2937;
+            color: white;
+            border-left-color: #1f2937;
+        }
+        
+        .result-label {
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-weight: 600;
+        }
+        
+        /* Material Calculator */
+        .material-calculator .section-title::before {
+            content: "💡";
+        }
+        
+        .calculator-config {
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .config-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .config-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .config-group {
+            flex: 1;
+        }
+        
+        .config-label {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .config-select, .config-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .material-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .material-item {
+            background: #f9fafb;
+            border-radius: 6px;
+            padding: 16px;
+            border-left: 3px solid;
+        }
+        
+        .material-item.lights {
+            border-left-color: #fbbf24;
+        }
+        
+        .material-item.wire {
+            border-left-color: #3b82f6;
+        }
+        
+        .material-item.clips {
+            border-left-color: #8b5cf6;
+        }
+        
+        .material-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .material-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .material-spacing {
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .material-detail {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .material-cost {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 16px;
+        }
+        
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Live Stats Overlay */
+        .live-stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+        }
+        
+        .live-stats h4 {
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .no-measurements {
+            color: #9ca3af;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+            }
+            
+            .map-container {
+                flex: 1;
+                min-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Header -->
+            <div class="header">
+                <h1>Measurement</h1>
+                <p>Measure roof lines and calculate materials</p>
+            </div>
+            
+            <!-- Property Address -->
+            <div class="section">
+                <div class="section-title">Property Address</div>
+                <input 
+                    type="text" 
+                    class="address-input" 
+                    id="address-input"
+                    placeholder="Enter the address to load satellite imagery for measurement"
+                />
+                <button class="load-btn" onclick="searchAddress()">
+                    🏠 Load Property
+                </button>
+            </div>
+            
+            <!-- Measurement Tools -->
+            <div class="section measurement-tools">
+                <div class="section-title">Measurement Tools</div>
+                <p style="color: #6b7280; font-size: 12px; margin-bottom: 12px;">Select type and control drawing</p>
+                
+                <div class="measurement-types">
+                    <button class="type-btn perimeter active" onclick="setType('perimeter')">
+                        🔴 Perimeter
+                    </button>
+                    <button class="type-btn ridge" onclick="setType('ridge')">
+                        🔵 Ridge
+                    </button>
+                    <button class="type-btn ground" onclick="setType('ground')">
+                        🟢 Ground
+                    </button>
+                </div>
+                
+                <div class="controls">
+                    <button class="start-btn" id="start-btn" onclick="startMeasuring()">
+                        📏 Start Measuring
+                    </button>
+                    <div class="control-row" id="control-row" style="display: none;">
+                        <button class="control-btn" onclick="undoPoint()">↩️ Undo</button>
+                        <button class="control-btn" onclick="clearCurrent()">🗑️ Clear</button>
+                        <button class="control-btn" onclick="saveMeasurement()">💾 Save</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Distance Results -->
+            <div class="section distance-results">
+                <div class="section-title">Distance Results</div>
+                <div id="distance-results">
+                    <div class="no-measurements">No measurements yet</div>
+                </div>
+            </div>
+            
+            <!-- Material Calculator -->
+            <div class="section material-calculator">
+                <div class="section-title">Material Calculator</div>
+                
+                <div class="calculator-config">
+                    <div class="config-row">
+                        <div class="config-group">
+                            <label class="config-label">Light Spacing (inches)</label>
+                            <select class="config-select" id="light-spacing" onchange="updateMaterialEstimate()">
+                                <option value="6">6"</option>
+                                <option value="12" selected>12"</option>
+                                <option value="18">18"</option>
+                                <option value="24">24"</option>
+                            </select>
+                        </div>
+                        <div class="config-group">
+                            <label class="config-label">Clip Spacing (inches)</label>
+                            <select class="config-select" id="clip-spacing" onchange="updateMaterialEstimate()">
+                                <option value="6">6"</option>
+                                <option value="12" selected>12"</option>
+                                <option value="18">18"</option>
+                                <option value="24">24"</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-group">
+                            <label class="config-label">Wire Buffer (%)</label>
+                            <input type="number" class="config-input" id="wire-buffer" value="10" min="0" max="50" onchange="updateMaterialEstimate()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="material-items" id="material-items">
+                    <div class="no-measurements">Start measuring to see material estimates</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map" class="loading">Loading Google Maps...</div>
+            
+            <!-- Live Stats Overlay -->
+            <div class="live-stats" id="live-stats">
+                <h4>Current Segment</h4>
+                <div class="stat">
+                    <span class="stat-label">Type:</span>
+                    <span class="stat-value" id="current-type">perimeter</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Points:</span>
+                    <span class="stat-value" id="current-points">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Distance:</span>
+                    <span class="stat-value" id="current-distance">0.0 ft</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Replace with your Google Maps API key
+        const API_KEY = 'AIzaSyBqiqFF63IrlciAk2qygXLg6Mf8Awln0-g';
+        
+        // Material costs
+        const MATERIAL_COSTS = {
+            light: 0.75,
+            wire: 0.18,
+            clip: 0.25
+        };
+        
+        // State
+        let map = null;
+        let isMeasuring = false;
+        let currentType = 'perimeter';
+        let currentPoints = [];
+        let measurements = [];
+        let activePolyline = null;
+        let savedPolylines = [];
+        let savedMarkers = [];
+        let clickListener = null;
+        
+        // Colors
+        const COLORS = {
+            perimeter: '#ef4444',
+            ridge: '#3b82f6',
+            ground: '#10b981'
+        };
+        
+        // Load Google Maps
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+        
+        // Initialize map
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 31.9973, lng: -102.0779 }, // Midland, TX
+                zoom: 20,
+                mapTypeId: 'satellite',
+                tilt: 0
+            });
+        }
+        
+        // Search address
+        function searchAddress() {
+            const address = document.getElementById('address-input').value;
+            if (!address || !map) return;
+            
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: address }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    map.setCenter(results[0].geometry.location);
+                    map.setZoom(20);
+                } else {
+                    alert('Address not found');
+                }
+            });
+        }
+        
+        // Set measurement type
+        function setType(type) {
+            currentType = type;
+            document.getElementById('current-type').textContent = type;
+            
+            // Update button styles
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.type-btn.${type}`).classList.add('active');
+        }
+        
+        // Start measuring
+        function startMeasuring() {
+            if (!map) {
+                alert('Please load a property first');
+                return;
+            }
+            
+            isMeasuring = true;
+            currentPoints = [];
+            updateUI();
+            
+            // Add click listener
+            clickListener = map.addListener('click', (event) => {
+                if (!isMeasuring) return;
+                
+                const newPoint = {
+                    lat: event.latLng.lat(),
+                    lng: event.latLng.lng()
+                };
+                
+                currentPoints.push(newPoint);
+                updateActivePolyline();
+                updateLiveStats();
+            });
+        }
+        
+        // Update active polyline
+        function updateActivePolyline() {
+            if (currentPoints.length === 0) {
+                if (activePolyline) {
+                    activePolyline.setMap(null);
+                    activePolyline = null;
+                }
+                return;
+            }
+            
+            if (currentPoints.length === 1) {
+                if (activePolyline) {
+                    activePolyline.setMap(null);
+                }
+                activePolyline = new google.maps.Polyline({
+                    path: currentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
+                    geodesic: true,
+                    strokeColor: COLORS[currentType],
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    map: map
+                });
+            } else {
+                if (activePolyline) {
+                    activePolyline.setPath(currentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)));
+                }
+            }
+        }
+        
+        // Calculate distance
+        function calculateDistance(points) {
+            if (points.length < 2) return 0;
+            
+            let total = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng(points[i].lat, points[i].lng),
+                    new google.maps.LatLng(points[i + 1].lat, points[i + 1].lng)
+                );
+                total += distance;
+            }
+            
+            return total * 3.28084; // Convert to feet
+        }
+        
+        // Save measurement
+        function saveMeasurement() {
+            if (currentPoints.length < 2) {
+                alert('Need at least 2 points to save a measurement');
+                return;
+            }
+            
+            const measurement = {
+                type: currentType,
+                points: currentPoints,
+                distance: calculateDistance(currentPoints)
+            };
+            
+            measurements.push(measurement);
+            
+            if (activePolyline) {
+                activePolyline.setMap(null);
+                activePolyline = null;
+            }
+            
+            currentPoints = [];
+            isMeasuring = false;
+            
+            if (clickListener) {
+                google.maps.event.removeListener(clickListener);
+            }
+            
+            drawAllMeasurements();
+            updateDistanceResults();
+            updateMaterialEstimate();
+            updateUI();
+        }
+        
+        // Draw all saved measurements
+        function drawAllMeasurements() {
+            // Clear existing
+            savedPolylines.forEach(p => p.setMap(null));
+            savedMarkers.forEach(m => m.setMap(null));
+            savedPolylines = [];
+            savedMarkers = [];
+            
+            measurements.forEach(measurement => {
+                const color = COLORS[measurement.type];
+                
+                // Polyline
+                const polyline = new google.maps.Polyline({
+                    path: measurement.points.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
+                    geodesic: true,
+                    strokeColor: color,
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    map: map
+                });
+                savedPolylines.push(polyline);
+                
+                // Markers
+                measurement.points.forEach(point => {
+                    const marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(point.lat, point.lng),
+                        map: map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 3,
+                            fillColor: color,
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 1
+                        },
+                        clickable: false,
+                        optimized: false,
+                        zIndex: -100
+                    });
+                    savedMarkers.push(marker);
+                });
+            });
+        }
+        
+        // Undo point
+        function undoPoint() {
+            if (currentPoints.length > 0) {
+                currentPoints.pop();
+                updateActivePolyline();
+                updateLiveStats();
+            }
+        }
+        
+        // Clear current
+        function clearCurrent() {
+            currentPoints = [];
+            if (activePolyline) {
+                activePolyline.setMap(null);
+                activePolyline = null;
+            }
+            isMeasuring = false;
+            if (clickListener) {
+                google.maps.event.removeListener(clickListener);
+            }
+            updateUI();
+        }
+        
+        // Update UI
+        function updateUI() {
+            const startBtn = document.getElementById('start-btn');
+            const controlRow = document.getElementById('control-row');
+            const liveStats = document.getElementById('live-stats');
+            
+            if (isMeasuring) {
+                startBtn.style.display = 'none';
+                controlRow.style.display = 'flex';
+                liveStats.style.display = 'block';
+            } else {
+                startBtn.style.display = 'block';
+                controlRow.style.display = 'none';
+                liveStats.style.display = 'none';
+            }
+        }
+        
+        // Update live stats
+        function updateLiveStats() {
+            document.getElementById('current-points').textContent = currentPoints.length;
+            const distance = calculateDistance(currentPoints);
+            document.getElementById('current-distance').textContent = distance.toFixed(1) + ' ft';
+        }
+        
+        // Update distance results
+        function updateDistanceResults() {
+            const perimeterDist = measurements.filter(m => m.type === 'perimeter').reduce((sum, m) => sum + m.distance, 0);
+            const ridgeDist = measurements.filter(m => m.type === 'ridge').reduce((sum, m) => sum + m.distance, 0);
+            const groundDist = measurements.filter(m => m.type === 'ground').reduce((sum, m) => sum + m.distance, 0);
+            const totalDist = perimeterDist + ridgeDist + groundDist;
+            
+            let html = '';
+            if (perimeterDist > 0) {
+                html += `<div class="result-item perimeter">
+                    <span class="result-label">🔴 Perimeter</span>
+                    <span class="result-value">${perimeterDist.toFixed(1)} ft</span>
+                </div>`;
+            }
+            if (ridgeDist > 0) {
+                html += `<div class="result-item ridge">
+                    <span class="result-label">🔵 Ridge</span>
+                    <span class="result-value">${ridgeDist.toFixed(1)} ft</span>
+                </div>`;
+            }
+            if (groundDist > 0) {
+                html += `<div class="result-item ground">
+                    <span class="result-label">🟢 Ground</span>
+                    <span class="result-value">${groundDist.toFixed(1)} ft</span>
+                </div>`;
+            }
+            if (totalDist > 0) {
+                html += `<div class="result-item total">
+                    <span class="result-label">Total Distance</span>
+                    <span class="result-value">${totalDist.toFixed(1)} ft</span>
+                </div>`;
+            }
+            
+            document.getElementById('distance-results').innerHTML = html || '<div class="no-measurements">No measurements yet</div>';
+        }
+        
+        // Update material estimate
+        function updateMaterialEstimate() {
+            const totalDist = measurements.reduce((sum, m) => sum + m.distance, 0);
+            
+            if (totalDist === 0) {
+                document.getElementById('material-items').innerHTML = '<div class="no-measurements">Start measuring to see material estimates</div>';
+                return;
+            }
+            
+            const lightSpacing = parseInt(document.getElementById('light-spacing').value);
+            const clipSpacing = parseInt(document.getElementById('clip-spacing').value);
+            const wireBuffer = parseInt(document.getElementById('wire-buffer').value);
+            
+            // Calculate quantities
+            const lightsNeeded = Math.ceil((totalDist * 12) / lightSpacing);
+            const wireLength = Math.ceil(totalDist * (1 + wireBuffer / 100));
+            const clipsNeeded = Math.ceil((totalDist * 12) / clipSpacing);
+            
+            // Calculate costs
+            const lightCost = (lightsNeeded * MATERIAL_COSTS.light).toFixed(2);
+            const wireCost = (wireLength * MATERIAL_COSTS.wire).toFixed(2);
+            const clipCost = (clipsNeeded * MATERIAL_COSTS.clip).toFixed(2);
+            const totalCost = (parseFloat(lightCost) + parseFloat(wireCost) + parseFloat(clipCost)).toFixed(2);
+            
+            const html = `
+                <div class="material-item lights">
+                    <div class="material-header">
+                        <span class="material-title">💡 LED Lights</span>
+                        <span class="material-spacing">${lightSpacing}" spacing</span>
+                    </div>
+                    <div class="material-detail">${lightsNeeded} lights needed</div>
+                    <div class="material-cost">$${lightCost}</div>
+                </div>
+                
+                <div class="material-item wire">
+                    <div class="material-header">
+                        <span class="material-title">🔌 Wire Length</span>
+                        <span class="material-spacing">+${wireBuffer}% buffer</span>
+                    </div>
+                    <div class="material-detail">${wireLength} ft extension wire</div>
+                    <div class="material-cost">$${wireCost}</div>
+                </div>
+                
+                <div class="material-item clips">
+                    <div class="material-header">
+                        <span class="material-title">📎 Clips</span>
+                        <span class="material-spacing">${clipSpacing}" spacing</span>
+                    </div>
+                    <div class="material-detail">${clipsNeeded} mounting clips</div>
+                    <div class="material-cost">$${clipCost}</div>
+                </div>
+                
+                <div class="result-item total" style="margin-top: 8px;">
+                    <span class="result-label">Total Material Cost</span>
+                    <span class="result-value">$${totalCost}</span>
+                </div>
+            `;
+            
+            document.getElementById('material-items').innerHTML = html;
+        }
+        
+        // Load maps on page load
+        window.onload = () => {
+            loadGoogleMaps();
+        };
+    </script>
+</body>
+</html>
