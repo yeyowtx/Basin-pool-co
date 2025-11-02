@@ -176,6 +176,10 @@
             background: #10b981;
         }
         
+        .type-btn.zoom {
+            background: #f59e0b;
+        }
+        
         
         .type-btn.active {
             opacity: 1;
@@ -492,6 +496,9 @@
                     </button>
                     <button class="type-btn ground" onclick="setType('ground')">
                         🟢 Ground
+                    </button>
+                    <button class="type-btn zoom" onclick="activateZoomTool()">
+                        🔍 Zoom Tool
                     </button>
                 </div>
                 
@@ -815,6 +822,165 @@
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
             
             logger.success('Zoom area control added to map');
+        }
+        
+        // Activate zoom tool from sidebar button
+        function activateZoomTool() {
+            logger.interaction('Zoom Tool button clicked', {
+                mapLoaded: !!map,
+                currentZoomAreaMode: zoomAreaMode
+            });
+            
+            if (!map) {
+                logger.error('Zoom tool attempted before map initialization');
+                alert('Please load a property first');
+                return;
+            }
+            
+            // Add visual feedback to zoom button
+            const zoomButton = document.querySelector('.type-btn.zoom');
+            if (zoomButton) {
+                zoomButton.classList.add('clicked');
+                setTimeout(() => {
+                    zoomButton.classList.remove('clicked');
+                }, 300);
+            }
+            
+            // Activate the zoom area tool
+            activateZoomAreaTool();
+        }
+        
+        // Activate zoom area tool
+        function activateZoomAreaTool() {
+            if (!map) {
+                alert('Please load a property first');
+                return;
+            }
+            
+            zoomAreaMode = !zoomAreaMode;
+            
+            // Update control appearance
+            const zoomControl = document.querySelector('.zoom-area-control');
+            if (zoomControl) {
+                if (zoomAreaMode) {
+                    zoomControl.classList.add('active');
+                    zoomControl.title = 'Click and drag to select zoom area (Click again to exit)';
+                } else {
+                    zoomControl.classList.remove('active');
+                    zoomControl.title = 'Select area to zoom into';
+                }
+            }
+            
+            if (zoomAreaMode) {
+                logger.interaction('Zoom area tool activated');
+                startZoomAreaSelection();
+            } else {
+                logger.interaction('Zoom area tool deactivated');
+                stopZoomAreaSelection();
+            }
+        }
+        
+        // Start zoom area selection
+        function startZoomAreaSelection() {
+            // Clear any existing rectangle
+            if (zoomRectangle) {
+                zoomRectangle.setMap(null);
+                zoomRectangle = null;
+            }
+            
+            // Remove existing listeners
+            if (mouseDownListener) google.maps.event.removeListener(mouseDownListener);
+            if (mouseUpListener) google.maps.event.removeListener(mouseUpListener);
+            
+            let startPoint = null;
+            
+            // Add mouse down listener
+            mouseDownListener = map.addListener('mousedown', function(event) {
+                if (!zoomAreaMode) return;
+                startPoint = event.latLng;
+                logger.debug('Zoom area selection started', {
+                    startPoint: { lat: startPoint.lat(), lng: startPoint.lng() }
+                });
+            });
+            
+            // Add mouse up listener
+            mouseUpListener = map.addListener('mouseup', function(event) {
+                if (!zoomAreaMode || !startPoint) return;
+                
+                const endPoint = event.latLng;
+                logger.debug('Zoom area selection completed', {
+                    startPoint: { lat: startPoint.lat(), lng: startPoint.lng() },
+                    endPoint: { lat: endPoint.lat(), lng: endPoint.lng() }
+                });
+                
+                // Create bounds for the selection
+                const bounds = new google.maps.LatLngBounds();
+                bounds.extend(startPoint);
+                bounds.extend(endPoint);
+                
+                // Clear existing rectangle
+                if (zoomRectangle) {
+                    zoomRectangle.setMap(null);
+                }
+                
+                // Create visual rectangle
+                zoomRectangle = new google.maps.Rectangle({
+                    bounds: bounds,
+                    fillColor: '#f59e0b',
+                    fillOpacity: 0.2,
+                    strokeColor: '#f59e0b',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    map: map
+                });
+                
+                // Zoom to the selected area
+                map.fitBounds(bounds);
+                
+                // Apply additional artificial zoom after a short delay
+                setTimeout(() => {
+                    const currentZoom = map.getZoom();
+                    if (currentZoom < 25) {
+                        map.setZoom(Math.min(currentZoom + 3, 25));
+                    }
+                    logger.result('Zoom area applied', {
+                        finalZoom: map.getZoom(),
+                        artificialZoomApplied: currentZoom < 25
+                    });
+                }, 500);
+                
+                // Auto-deactivate tool after selection
+                setTimeout(() => {
+                    activateZoomAreaTool(); // This will toggle it off
+                }, 1000);
+                
+                startPoint = null;
+            });
+            
+            logger.debug('Zoom area selection listeners added');
+        }
+        
+        // Stop zoom area selection
+        function stopZoomAreaSelection() {
+            // Remove listeners
+            if (mouseDownListener) {
+                google.maps.event.removeListener(mouseDownListener);
+                mouseDownListener = null;
+            }
+            if (mouseUpListener) {
+                google.maps.event.removeListener(mouseUpListener);
+                mouseUpListener = null;
+            }
+            
+            // Clear rectangle after a delay
+            setTimeout(() => {
+                if (zoomRectangle) {
+                    zoomRectangle.setMap(null);
+                    zoomRectangle = null;
+                }
+            }, 2000);
+            
+            logger.debug('Zoom area selection stopped and cleaned up');
         }
         
         // Search address

@@ -126,15 +126,10 @@ Responsive: Desktop-first with mobile adaptation
                     <button class="type-btn perimeter active" onclick="setType('perimeter')">🔴 Perimeter</button>
                     <button class="type-btn ridge" onclick="setType('ridge')">🔵 Ridge</button>
                     <button class="type-btn ground" onclick="setType('ground')">🟢 Ground</button>
-                    <button class="type-btn zoom" onclick="activateZoomTool()">🔍 Zoom Tool</button>
                 </div>
                 
-                <!-- CRITICAL: Zoom Controls -->
-                <div class="zoom-controls" id="zoom-controls" style="display: none;">
-                    <button onclick="selectZoomArea()">📐 Select Area</button>
-                    <button onclick="resetZoom()">🔄 Reset</button>
-                    <button onclick="exitZoomMode()">❌ Exit</button>
-                </div>
+                <!-- CRITICAL: NO ZOOM CONTROLS IN SIDEBAR -->
+                <!-- Zoom tool is now integrated as custom Google Maps control -->
                 
                 <button class="start-btn" id="start-btn" onclick="startMeasuring()">📏 Start Measuring</button>
             </div>
@@ -297,30 +292,64 @@ function calculateDistance(points) {
     return total * 3.28084; // Convert to feet
 }
 
-// CRITICAL: Zoom Tool Implementation
-function activateZoomTool() {
-    if (!map) { alert('Please load a property first'); return; }
-    zoomModeActive = true;
-    document.getElementById('zoom-controls').style.display = 'block';
-    originalZoom = map.getZoom();
-    originalCenter = map.getCenter();
+// CRITICAL: Custom Google Maps Control for Zoom Tool
+function addZoomAreaControl() {
+    const controlDiv = document.createElement('div');
+    controlDiv.style.margin = '10px';
+    
+    const controlUI = document.createElement('div');
+    controlUI.className = 'zoom-area-control';
+    controlUI.title = 'Select area to zoom into';
+    controlUI.innerHTML = '🔍';
+    controlDiv.appendChild(controlUI);
+    
+    controlUI.addEventListener('click', function() {
+        activateZoomAreaTool();
+    });
+    
+    // Position next to rotate controls (TOP_RIGHT)
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
 }
 
-function selectZoomArea() {
-    if (!map || !zoomModeActive) return;
+// CRITICAL: Zoom Area Tool Implementation  
+function activateZoomAreaTool() {
+    if (!map) { alert('Please load a property first'); return; }
+    zoomAreaMode = !zoomAreaMode;
+    
+    const zoomControl = document.querySelector('.zoom-area-control');
+    if (zoomControl) {
+        if (zoomAreaMode) {
+            zoomControl.classList.add('active');
+            zoomControl.title = 'Click and drag to select zoom area (Click again to exit)';
+        } else {
+            zoomControl.classList.remove('active');
+            zoomControl.title = 'Select area to zoom into';
+        }
+    }
+    
+    if (zoomAreaMode) {
+        startZoomAreaSelection();
+    } else {
+        stopZoomAreaSelection();
+    }
+}
+
+function startZoomAreaSelection() {
     let startPoint = null;
     
-    const mouseDownListener = map.addListener('mousedown', function(event) {
+    mouseDownListener = map.addListener('mousedown', function(event) {
+        if (!zoomAreaMode) return;
         startPoint = event.latLng;
     });
     
-    const mouseUpListener = map.addListener('mouseup', function(event) {
-        if (!startPoint) return;
+    mouseUpListener = map.addListener('mouseup', function(event) {
+        if (!zoomAreaMode || !startPoint) return;
+        
         const bounds = new google.maps.LatLngBounds();
         bounds.extend(startPoint);
         bounds.extend(event.latLng);
         
-        // CRITICAL: Visual Rectangle
+        // CRITICAL: Visual Rectangle with Orange Highlight
         zoomRectangle = new google.maps.Rectangle({
             bounds: bounds,
             fillColor: '#f59e0b',
@@ -331,7 +360,7 @@ function selectZoomArea() {
             map: map
         });
         
-        // CRITICAL: Artificial Zoom Beyond Google Limits
+        // CRITICAL: Zoom to Selected Area + Artificial Zoom
         map.fitBounds(bounds);
         setTimeout(() => {
             const currentZoom = map.getZoom();
@@ -340,8 +369,12 @@ function selectZoomArea() {
             }
         }, 500);
         
-        google.maps.event.removeListener(mouseDownListener);
-        google.maps.event.removeListener(mouseUpListener);
+        // Auto-deactivate after selection
+        setTimeout(() => {
+            activateZoomAreaTool();
+        }, 1000);
+        
+        startPoint = null;
     });
 }
 
@@ -389,11 +422,13 @@ const COLORS = {
 
 ### 🎯 **Key Implementation Notes**
 1. **Sidebar Layout**: `.container { display: flex }` with `.sidebar { width: 400px }` and `.map-container { flex: 1 }`
-2. **Zoom Tool**: Mousedown/mouseup listeners create rectangle bounds, artificial zoom to level 25+
-3. **Business Logic**: Validated pricing structure with complexity multipliers for stories/difficulty
-4. **Google Maps**: Geometry library for distance calculations, satellite view default
-5. **State Management**: Global variables for map, measurements, zoom state
-6. **Color System**: Perimeter=red, Ridge=blue, Ground=green consistently applied
+2. **Zoom Tool**: Custom Google Maps control positioned at TOP_RIGHT next to rotate buttons
+3. **Area Selection**: Mousedown/mouseup listeners create rectangle bounds with orange highlight
+4. **Artificial Zoom**: Beyond Google Maps limits (zoom level 25+) after area selection
+5. **Business Logic**: Validated pricing structure with complexity multipliers for stories/difficulty
+6. **Google Maps**: Geometry library for distance calculations, satellite view default
+7. **State Management**: Global variables for map, measurements, zoom area mode
+8. **Color System**: Perimeter=red, Ridge=blue, Ground=green, Zoom area=orange
 
 ### ⚠️ **NEVER LOSE AGAIN**
 - **Google Maps API Key**: AIzaSyBqiqFF63IrlciAk2qygXLg6Mf8Awln0-g
@@ -402,8 +437,10 @@ const COLORS = {
 - **Zoom Scale Formula**: `Math.pow(1.5, artificialZoomLevel)` for smooth increments
 - **Zoom DOM Target**: `.gm-style > div:first-child` for precise map tile scaling
 - **Zoom Reset**: Clears transforms on address change, resets artificialZoomLevel to 0
+- **Custom Control**: `.zoom-area-control` positioned at `google.maps.ControlPosition.TOP_RIGHT`
+- **Zoom State Variables**: `zoomAreaMode`, `zoomRectangle`, `mouseDownListener`, `mouseUpListener`
 - **Sidebar Width**: Fixed 400px for tools, remaining space for map
-- **Google Maps Controls**: All enabled (Street View, Map Type, Scale, Fullscreen, Rotate)
+- **Google Maps Controls**: All enabled (Street View, Map Type, Scale, Fullscreen, Rotate) + Custom Zoom Tool
 
 ## 🚀 **Development Roadmap**
 
