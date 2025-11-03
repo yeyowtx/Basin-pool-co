@@ -339,11 +339,13 @@
             margin-bottom: 12px;
             border-left: 4px solid;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: box-shadow 0.2s;
+            transition: all 0.2s;
+            cursor: pointer;
         }
         
         .material-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
         
         .material-card.lights {
@@ -769,12 +771,15 @@
         
         // Hardware catalog and pricing
         const ledColors = {
-            'warm-white': { name: 'Warm White', price: 0.75 },
-            'cool-white': { name: 'Cool White', price: 0.75 },
-            'red': { name: 'Red', price: 0.85 },
-            'green': { name: 'Green', price: 0.85 },
-            'blue': { name: 'Blue', price: 0.85 },
-            'multicolor': { name: 'Multicolor', price: 1.25 }
+            'warm-white': { name: 'Warm White', price: 0.85, color: '#FFF3E0', textColor: '#8B4513' },
+            'cool-white': { name: 'Cool White', price: 0.85, color: '#F8F9FA', textColor: '#495057' },
+            'red': { name: 'Red', price: 0.85, color: '#FFEBEE', textColor: '#C62828' },
+            'green': { name: 'Green', price: 0.85, color: '#E8F5E8', textColor: '#2E7D32' },
+            'blue': { name: 'Blue', price: 0.85, color: '#E3F2FD', textColor: '#1565C0' },
+            'yellow': { name: 'Yellow', price: 0.85, color: '#FFFDE7', textColor: '#F57F17' },
+            'purple': { name: 'Purple', price: 0.85, color: '#F3E5F5', textColor: '#7B1FA2' },
+            'orange': { name: 'Orange', price: 0.85, color: '#FFF3E0', textColor: '#E65100' },
+            'multicolor': { name: 'Multicolor RGB', price: 0.85, color: 'linear-gradient(45deg, #ff0000, #00ff00, #0000ff)', textColor: '#333' }
         };
         
         const clipTypes = {
@@ -1299,10 +1304,10 @@
             }
             
             const html = `
-                <div class="material-card lights">
+                <div class="material-card lights" onclick="editLEDConfig()">
                     <div class="card-header">
                         <div class="card-title">💡 LED Lights</div>
-                        <div class="card-badge editable" onclick="editLEDConfig()">${projectConfig.lightSpacing}" spacing</div>
+                        <div style="color: #6b7280; font-size: 12px;">${projectConfig.lightSpacing}" spacing</div>
                     </div>
                     <div class="card-details">
                         ${lightsNeeded} lights • ${colorDescription}
@@ -1311,10 +1316,10 @@
                     <div class="card-cost">$${lightCost.toFixed(2)}</div>
                 </div>
                 
-                <div class="material-card wire">
+                <div class="material-card wire" onclick="editWireConfig()">
                     <div class="card-header">
                         <div class="card-title">🔌 Wire (${wireSpecs.type})</div>
-                        <div class="card-badge editable" onclick="editWireConfig()">+${projectConfig.wireBuffer}% buffer</div>
+                        <div style="color: #6b7280; font-size: 12px;">+${projectConfig.wireBuffer}% buffer</div>
                     </div>
                     <div class="card-details">
                         ${wireNeeded} ft needed • ${spoolsNeeded} spool${spoolsNeeded > 1 ? 's' : ''}
@@ -1323,10 +1328,10 @@
                     <div class="card-cost">$${wireCost.toFixed(2)}</div>
                 </div>
                 
-                <div class="material-card clips">
+                <div class="material-card clips" onclick="editClipConfig()">
                     <div class="card-header">
                         <div class="card-title">📎 Mounting Clips</div>
-                        <div class="card-badge editable" onclick="editClipConfig()">Configure</div>
+                        <div style="color: #6b7280; font-size: 12px;">Click to configure</div>
                     </div>
                     <div class="card-details">
                         ${clipDetails.join('<br>')}
@@ -1335,15 +1340,15 @@
                     <div class="card-cost">$${clipCost.toFixed(2)}</div>
                 </div>
                 
-                <div class="material-card labor">
+                <div class="material-card labor" onclick="editLaborConfig()">
                     <div class="card-header">
                         <div class="card-title">👷 Labor Cost</div>
-                        <div class="card-badge editable" onclick="editLaborConfig()">${projectConfig.complexityMultiplier.toFixed(1)}x complexity</div>
+                        <div style="color: #6b7280; font-size: 12px;">${projectConfig.complexityMultiplier.toFixed(1)}x complexity</div>
                     </div>
                     <div class="card-details">
                         Install: $${installCost.toFixed(2)} (${totalDist.toFixed(1)} ft × $${projectConfig.crewRate}/ft × ${projectConfig.crewCount} crew${projectConfig.crewCount > 1 ? 's' : ''} × ${projectConfig.complexityMultiplier.toFixed(1)}x)
                         ${projectConfig.includeTakedown ? `<br>Takedown: $${takedownCost.toFixed(2)} (60% rate × ${projectConfig.complexityMultiplier.toFixed(1)}x complexity)` : ''}
-                        <br><small style="color: #6b7280;">Complexity multiplier affects labor costs</small>
+                        <br><small style="color: #6b7280;">Click to configure crew and complexity</small>
                     </div>
                     <div class="card-cost">$${totalLaborCost.toFixed(2)}</div>
                 </div>
@@ -1398,43 +1403,61 @@
         
         // Hardware-specific configuration functions
         function editLEDConfig() {
-            const modal = createModal('LED Configuration', `
+            const modal = createModal('🎄 Light Colors & Pricing', `
                 <div style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Primary Color:</label>
-                    <select id="color1-select" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        ${Object.entries(ledColors).map(([key, color]) => 
-                            `<option value="${key}" ${key === projectConfig.ledColor1 ? 'selected' : ''}>${color.name} - $${color.price}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-                        <input type="checkbox" id="use-second-color" ${projectConfig.ledColor2 ? 'checked' : ''}> 
-                        Use second color (mix)
-                    </label>
-                </div>
-                
-                <div id="second-color-config" style="display: ${projectConfig.ledColor2 ? 'block' : 'none'}; margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Secondary Color:</label>
-                    <select id="color2-select" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 8px;">
-                        ${Object.entries(ledColors).map(([key, color]) => 
-                            `<option value="${key}" ${key === projectConfig.ledColor2 ? 'selected' : ''}>${color.name} - $${color.price}</option>`
-                        ).join('')}
-                    </select>
-                    
-                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Primary Color Split (%):</label>
-                    <input type="range" id="color-split" min="10" max="90" value="${projectConfig.colorSplit}" 
-                           style="width: 100%;" oninput="document.getElementById('split-value').textContent = this.value + '%'">
-                    <div style="text-align: center; color: #6b7280; font-size: 12px;">
-                        <span id="split-value">${projectConfig.colorSplit}%</span> primary, ${100-projectConfig.colorSplit}% secondary
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Main Light Color:</label>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                        <select id="color1-select" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px;">
+                            ${Object.entries(ledColors).map(([key, color]) => 
+                                `<option value="${key}" ${key === projectConfig.ledColor1 ? 'selected' : ''}>${color.name}</option>`
+                            ).join('')}
+                        </select>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span>$</span>
+                            <input type="number" id="price1-input" value="0.85" step="0.01" min="0" 
+                                   style="width: 80px; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
+                        </div>
                     </div>
+                    <small style="color: #6b7280;">Pick the main color and set price per light (usually $0.85)</small>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="use-second-color" ${projectConfig.ledColor2 ? 'checked' : ''}> 
+                        <span style="font-weight: 500;">Add a second color (mixed)</span>
+                    </label>
+                    <small style="color: #6b7280;">Check this if customer wants alternating colors (like red & green)</small>
+                </div>
+                
+                <div id="second-color-config" style="margin-bottom: 16px; display: ${projectConfig.ledColor2 ? 'block' : 'none'};">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Second Color:</label>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                        <select id="color2-select" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px;">
+                            ${Object.entries(ledColors).map(([key, color]) => 
+                                `<option value="${key}" ${key === projectConfig.ledColor2 ? 'selected' : ''}>${color.name}</option>`
+                            ).join('')}
+                        </select>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span>$</span>
+                            <input type="number" id="price2-input" value="0.85" step="0.01" min="0" 
+                                   style="width: 80px; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
+                        </div>
+                    </div>
+                    
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Color Mix:</label>
+                    <input type="range" id="color-split" min="10" max="90" value="${projectConfig.colorSplit}" 
+                           style="width: 100%; margin-bottom: 8px;" oninput="document.getElementById('split-value').textContent = this.value + '%'">
+                    <div style="text-align: center; font-weight: bold; margin-bottom: 4px;">
+                        <span id="split-value">${projectConfig.colorSplit}%</span> Main Color, ${100-projectConfig.colorSplit}% Second Color
+                    </div>
+                    <small style="color: #6b7280;">Slide to adjust the mix (50% = half and half)</small>
                 </div>
                 
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; margin-bottom: 4px; font-weight: 500;">Light Spacing (inches):</label>
                     <input type="number" id="light-spacing" value="${projectConfig.lightSpacing}" min="6" max="24" 
                            style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <small style="color: #6b7280;">Distance between each light (12 inches = standard, 6 inches = bright)</small>
                 </div>
             `);
             
@@ -1444,8 +1467,16 @@
             
             modal.onSave = function() {
                 projectConfig.ledColor1 = document.getElementById('color1-select').value;
-                projectConfig.ledColor2 = document.getElementById('use-second-color').checked ? 
-                    document.getElementById('color2-select').value : null;
+                projectConfig.ledColor1Price = parseFloat(document.getElementById('price1-input').value) || 0.85;
+                
+                if (document.getElementById('use-second-color').checked) {
+                    projectConfig.ledColor2 = document.getElementById('color2-select').value;
+                    projectConfig.ledColor2Price = parseFloat(document.getElementById('price2-input').value) || 0.85;
+                } else {
+                    projectConfig.ledColor2 = null;
+                    projectConfig.ledColor2Price = null;
+                }
+                
                 projectConfig.colorSplit = parseInt(document.getElementById('color-split').value);
                 projectConfig.lightSpacing = parseInt(document.getElementById('light-spacing').value);
                 updateMaterialEstimate();

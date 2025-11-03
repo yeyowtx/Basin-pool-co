@@ -1,207 +1,287 @@
-# CLAUDE.md - Roof Measurement Tool (CARDS WORKTREE)
+# CLAUDE.md - Christmas Light Inventory Tracker
 
-## 🎯 **WORKTREE FOCUS: Material Calculator ONLY**
+## 🎯 **PROJECT VISION**
 
-**⚠️ CRITICAL: Focus ONLY on the Material Calculator section (Stories, Difficulty, Profit Margin, Crew Count, spacing inputs, wire buffer). DO NOT modify sidebar, maps, or measurement tools.**
+**Purpose**: Professional Christmas light inventory tracking system for contractors  
+**Integration**: Connects with roof measurement tool for complete job material planning  
+**Users**: Installers, project managers, office staff, VAs
 
-## 🏗️ **Project Overview**
-**Purpose**: Professional roof measurement tool for calculating materials and costs  
-**Main File**: `index.html` (NOT roof-measurement-tool.html)  
-**Tech Stack**: Google Maps API, vanilla JavaScript, HTML/CSS  
-**Architecture**: Left sidebar (400px) + map container layout  
+## 🏗️ **PROJECT OVERVIEW**
 
-## 🧮 **Material Calculator Section - YOUR FOCUS AREA**
+### **Core Problem Solved**
+- **Real-time inventory tracking**: Know exactly what's in stock vs what needs ordering
+- **Cost basis management**: Track true material costs for accurate margins
+- **Job material planning**: Export from measurement tool, track actual usage
+- **Installer documentation**: Record what was actually used vs planned
 
-### **Configuration Inputs**
-- **Stories Dropdown**: 1, 2, 3+ story options with multipliers
-  - 1 Story: 1.0x multiplier
-  - 2 Story: 1.3x multiplier  
-  - 3+ Story: 1.6x multiplier
+### **Key Integration Points**
+- **Roof Measurement Tool**: Import calculated material lists
+- **Quote Generation**: Use real inventory costs for pricing
+- **Job Completion**: Track actual vs planned material usage
+- **Accounting Systems**: Export for QuickBooks/other systems
 
-- **Difficulty Dropdown**: Impact on labor costs
-  - Easy: 0.8x multiplier (simple rooflines)
-  - Medium: 1.0x multiplier (standard complexity)
-  - Hard: 1.3x multiplier (complex rooflines)
-  - Extreme: 1.6x multiplier (very complex rooflines)
+## 🎨 **DESIGN INSPIRATION: RooflinePro Analysis**
 
-- **Profit Margin Input**: Percentage field (default 35%)
-  - Applied to total material + labor costs
-  - Configurable by user for different job types
+### **Visual Design System (Extracted Nov 3, 2025)**
+- **Primary Color**: `#ECFF00` (bright yellow/green accent)
+- **Background**: Dark sidebar `#2d2d2d`, light main area `#F9FAFB`
+- **Typography**: Clean sans-serif, multiple font weights
+- **Component Style**: Rounded corners, subtle shadows, clean spacing
 
-- **Crew Count Dropdown**: 1-4 crews
-  - Affects labor calculation speed
-  - More crews = higher total labor cost
-
-### **Spacing Configuration**
-- **Light Spacing**: Distance between LED lights (inches)
-  - Affects total number of lights needed
-  - Typical values: 6", 8", 12"
-
-- **Clip Spacing**: Distance between mounting clips (inches)  
-  - Affects total number of clips needed
-  - Typical values: 12", 18", 24"
-
-- **Wire Buffer**: Extra wire percentage for installation
-  - Accounts for routing, connections, waste
-  - Typical values: 10-20%
-
-## 💰 **Business Logic - Material Calculator**
-
-### **Pricing Structure** 
-```javascript
-const basePricing = {
-    ledLight: 0.85,    // Per light
-    wire: 0.18,        // Per foot
-    clip: 0.32,        // Per clip
-    laborRate: 1.50    // Per foot base rate
-};
-
-const complexityMultipliers = {
-    stories: { 1: 1.0, 2: 1.3, 3: 1.6 },
-    difficulty: { easy: 0.8, medium: 1.0, hard: 1.3, extreme: 1.6 }
-};
+### **Layout Structure**
+```
+├── Fixed Dark Sidebar (Navigation)
+├── Main Content Area
+    ├── Header (Title + Action Buttons)
+    ├── Alert/Status Bar (Stock warnings)
+    ├── Settings Panel (Calculator inputs)
+    ├── Tab Navigation (Product categories)
+    └── Product Grid (Cards with details)
 ```
 
-### **Calculation Flow**
-1. **Get Measurements**: Total distances from measurement tools
-2. **Calculate Quantities**:
-   - Lights needed = (total distance × 12) / light spacing
-   - Clips needed = (total distance × 12) / clip spacing  
-   - Wire length = total distance × (1 + wire buffer %)
-3. **Apply Multipliers**:
-   - Story multiplier affects labor cost
-   - Difficulty multiplier affects labor cost
-   - Crew count multiplies labor cost
-4. **Calculate Totals**:
-   - Material costs = lights + clips + wire
-   - Labor cost = distance × labor rate × story × difficulty × crews
-   - Subtotal = materials + labor
-   - Profit = subtotal × profit margin %
-   - **Final Total = subtotal + profit**
+### **Product Card Pattern**
+- **Color Indicator**: Colored circle for visual identification
+- **Product Info**: Name, SKU, category
+- **Stock Data**: Current quantity, cost basis, sell price
+- **Status Badges**: Low stock alerts, availability
+- **Actions**: Edit, delete, quick adjust
+
+### **Tech Stack Observed**
+- **Framework**: React/Next.js with Tailwind CSS
+- **Components**: Modern component architecture
+- **Icons**: Lucide React icon library
+- **State**: Client-side state management
+
+## 💡 **OUR IMPLEMENTATION APPROACH**
+
+### **Starting Point**
+- **Base File**: index.html from roof measurement tool (Google Maps integration)
+- **Modify For**: Inventory management instead of measurement
+- **Keep**: Professional styling, responsive layout, clean UX
+
+### **Tech Stack (2025 Modern)**
+- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + real-time subscriptions)
+- **UI Components**: Shadcn/ui (matches RooflinePro aesthetic)
+- **State Management**: Zustand + React Query
+- **Mobile**: Progressive Web App (PWA) for installers
+
+## 📊 **DATABASE SCHEMA**
+
+### **Core Tables**
+```sql
+-- Product catalog
+products (
+    id UUID PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    sku VARCHAR UNIQUE NOT NULL,
+    category VARCHAR CHECK (category IN ('lights', 'clips', 'wire', 'extras')),
+    color VARCHAR,
+    cost_basis DECIMAL(10,2), -- What we paid
+    sell_price DECIMAL(10,2), -- What we charge
+    reorder_point INTEGER DEFAULT 5,
+    supplier VARCHAR,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Inventory transactions (all stock movements)
+inventory_transactions (
+    id UUID PRIMARY KEY,
+    product_id UUID REFERENCES products(id),
+    transaction_type VARCHAR CHECK (transaction_type IN ('purchase', 'sale', 'adjustment', 'job_usage')),
+    quantity INTEGER, -- Positive for in, negative for out
+    cost_each DECIMAL(10,2),
+    reason VARCHAR,
+    job_id UUID, -- Reference to job if applicable
+    created_by UUID, -- User who made the transaction
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Jobs and material planning
+jobs (
+    id UUID PRIMARY KEY,
+    customer_name VARCHAR NOT NULL,
+    address TEXT,
+    quote_total DECIMAL(10,2),
+    status VARCHAR DEFAULT 'planned',
+    roof_measurement_data JSONB, -- Import from measurement tool
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Job material requirements
+job_materials (
+    id UUID PRIMARY KEY,
+    job_id UUID REFERENCES jobs(id),
+    product_id UUID REFERENCES products(id),
+    planned_quantity INTEGER NOT NULL,
+    actual_quantity INTEGER, -- Filled by installer
+    cost_each DECIMAL(10,2),
+    notes TEXT
+);
+
+-- Current stock levels (materialized view)
+CREATE MATERIALIZED VIEW current_stock AS
+SELECT 
+    p.id as product_id,
+    p.name,
+    p.sku,
+    p.category,
+    COALESCE(SUM(it.quantity), 0) as current_quantity,
+    AVG(CASE WHEN it.quantity > 0 THEN it.cost_each END) as avg_cost,
+    MAX(it.created_at) as last_transaction
+FROM products p
+LEFT JOIN inventory_transactions it ON p.id = it.product_id
+GROUP BY p.id, p.name, p.sku, p.category;
+```
+
+## 🚀 **DEVELOPMENT PHASES**
+
+### **Phase 1: Core Inventory (Week 1)**
+- **Product Management**: CRUD for lights, clips, wire, extras
+- **Stock Tracking**: Add/adjust inventory levels
+- **Basic UI**: Clean product cards, category tabs
+- **Cost Basis**: Track purchase costs vs sell prices
+
+### **Phase 2: Integration (Week 2)**
+- **Measurement Tool Connection**: Import material calculations
+- **Job Planning**: Convert quotes to job material lists
+- **Stock Validation**: Check availability before job assignment
+- **Cost Integration**: Use real inventory costs in quotes
+
+### **Phase 3: Installer Interface (Week 3)**
+- **Mobile PWA**: Offline-capable interface for field use
+- **Job Checklist**: Mark materials used during installation
+- **Quick Adjustments**: Easy stock updates from job site
+- **Photo Documentation**: Before/after with material usage
+
+### **Phase 4: Business Intelligence (Week 4)**
+- **Reporting Dashboard**: Stock levels, usage trends, margins
+- **Reorder Management**: Automated alerts and purchase orders
+- **Cost Analysis**: True job profitability with real material costs
+- **Supplier Integration**: Track lead times and bulk pricing
+
+## 🎯 **KEY FEATURES ROADMAP**
+
+### **MVP (Minimum Viable Product)**
+- [ ] Product catalog with categories
+- [ ] Stock level tracking
+- [ ] Basic add/edit/delete products
+- [ ] Simple stock adjustments
+- [ ] Low stock alerts
+
+### **V1 (Production Ready)**
+- [ ] Job material planning
+- [ ] Integration with measurement tool
+- [ ] Installer mobile interface
+- [ ] Cost basis calculations
+- [ ] Real-time stock updates
+
+### **V2 (Advanced Features)**
+- [ ] Advanced reporting and analytics
+- [ ] Purchase order automation
+- [ ] Supplier management
+- [ ] Barcode scanning
+- [ ] Multi-location support
+
+## 📱 **USER WORKFLOWS**
+
+### **Office Staff Workflow**
+1. **Planning**: Import material list from measurement tool
+2. **Stock Check**: Verify availability of required materials
+3. **Procurement**: Generate purchase orders for missing items
+4. **Job Assignment**: Prepare material kit for installer
+
+### **Installer Workflow**
+1. **Job Start**: Review planned materials on mobile device
+2. **Installation**: Mark materials used as work progresses
+3. **Adjustments**: Record any changes or additional materials
+4. **Completion**: Submit final material usage report
+
+### **Manager Workflow**
+1. **Monitoring**: Real-time view of stock levels across all jobs
+2. **Analysis**: Review actual vs planned material usage
+3. **Optimization**: Adjust stocking levels based on usage patterns
+4. **Reporting**: Generate cost and margin reports
+
+## 🔧 **INTEGRATION SPECIFICATIONS**
+
+### **Roof Measurement Tool Integration**
+```javascript
+// Export material list from measurement tool
+const materialList = {
+    jobId: 'uuid',
+    customerInfo: {...},
+    materials: [
+        {
+            productSku: 'C9L011',
+            quantity: 150,
+            plannedCost: 127.50
+        }
+    ]
+};
+
+// Import to inventory tracker
+await createJobFromMeasurement(materialList);
+```
 
 ### **Real-time Updates**
-- Calculator updates automatically when:
-  - User changes any dropdown/input value
-  - New measurements are added
-  - Measurements are deleted or modified
+- **Supabase Subscriptions**: Live stock level updates
+- **WebSocket Integration**: Instant notifications across devices
+- **Offline Support**: PWA caching for field operations
 
-## 🎨 **CSS Classes - Material Calculator**
+## 📈 **SUCCESS METRICS**
 
-```css
-.material-calculator {
-    /* Calculator container styling */
-}
+### **Operational Efficiency**
+- **Stock Accuracy**: 99%+ inventory accuracy
+- **Job Prep Time**: 50% reduction in material preparation time
+- **Order Fulfillment**: 95%+ jobs completed without material shortages
 
-.calculator-config {
-    /* Configuration inputs container */
-}
+### **Financial Impact**
+- **Margin Visibility**: Real-time true cost calculations
+- **Inventory Turnover**: Optimize stock levels to reduce carrying costs
+- **Waste Reduction**: Track and minimize material waste
 
-.material-items {
-    /* Results display container */
-}
+### **User Adoption**
+- **Installer Usage**: 100% job material tracking compliance
+- **Manager Insights**: Daily review of inventory status
+- **Office Efficiency**: Automated reorder notifications
 
-.item-row {
-    /* Individual calculation row */
-}
+## 🚨 **TECHNICAL CONSIDERATIONS**
 
-.item-label, .item-value {
-    /* Label and value styling */
-}
+### **Performance**
+- **Real-time Updates**: Efficient database subscriptions
+- **Mobile Optimization**: Fast loading on cellular connections
+- **Offline Capability**: Critical for field operations
 
-.total-row {
-    /* Final total styling */
-}
-```
+### **Security**
+- **User Authentication**: Role-based access control
+- **Data Privacy**: Secure customer and cost information
+- **Audit Trail**: Complete transaction history
 
-## 🚫 **DO NOT MODIFY**
+### **Scalability**
+- **Multi-location**: Support for multiple warehouses/trucks
+- **High Volume**: Handle thousands of transactions daily
+- **Integration Ready**: APIs for third-party connections
 
-### **Areas Outside Your Scope**
-- **Sidebar Layout**: Width, positioning, overall structure
-- **Property Address Section**: Address input and Load Property button
-- **Measurement Tools**: Perimeter, Ridge, Ground buttons
-- **Distance Results**: Measurement display sections
-- **Map Container**: Google Maps integration and controls
-- **Zoom Tools**: Custom zoom controls and area selection
+## 🔗 **STARTING FILES**
 
-### **Files to Avoid**
-- Any Google Maps JavaScript code
-- Measurement tool event handlers
-- Address search functionality
-- Zoom control implementations
+### **Base Template**
+- **Source**: `/Users/apple/roof-worktree-cards/index.html`
+- **Contains**: Google Maps integration, professional styling, responsive layout
+- **Modify**: Replace measurement tools with inventory management
+- **Keep**: Overall structure, styling patterns, clean UX
 
-## 🧭 **Development Guidelines**
-
-### **Code Standards**
-- Maintain existing CSS class naming conventions
-- Keep material calculator responsive within sidebar
-- Use vanilla JavaScript (no frameworks)
-- Follow existing color scheme and typography
-
-### **State Management**
-```javascript
-// Key variables for material calculator
-let totalDistance = 0;
-let currentConfig = {
-    stories: 1,
-    difficulty: 'medium',
-    profitMargin: 35,
-    crewCount: 1,
-    lightSpacing: 12,
-    clipSpacing: 18,
-    wireBuffer: 15
-};
-```
-
-### **Testing Your Changes**
-```bash
-cd /Users/apple/roof-worktree-cards
-python3 -m http.server 8080
-# Open: http://localhost:8080/index.html
-```
-
-### **Testing Checklist**
-- [ ] All dropdown values update calculations correctly
-- [ ] Profit margin input accepts valid percentages
-- [ ] Wire buffer percentage applies correctly
-- [ ] Real-time updates work when measurements change
-- [ ] Final totals calculate accurately
-- [ ] Calculator stays within sidebar bounds
-- [ ] No interference with measurement or map functionality
-
-## 🚨 **Important Notes**
-
-### **Scope Limitations** 
-- **ONLY modify** the Material Calculator section
-- **DO NOT touch** any Google Maps code
-- **DO NOT modify** measurement tools or sidebar layout
-- **DO NOT change** address search or zoom functionality
-
-### **Integration Points**
-- Calculator receives total distance from measurement system
-- Updates happen via `updateMaterialEstimate()` function
-- Configuration changes trigger automatic recalculation
-
-## 🏆 **CURRENT STATUS: TRANSFORMATION COMPLETE**
-
-### **✅ Implemented Features (Nov 2, 2025)**
-- **Hardware-Specific Configuration**: Real product catalogs with accurate pricing
-- **LED Color Mixing**: Professional color selection with percentage splits
-- **C9 Wire Spool Tracking**: 1000ft spool management with remainder calculation
-- **Professional Clip Selection**: 7 clip types with individual use cases
-- **Crew-Based Labor**: Configurable crews of 2 with takedown options
-- **Sales Intelligence**: Target/minimum margin system for negotiations
-- **Modal Configuration**: Professional UI with detailed configuration dialogs
-- **Real-time Updates**: All changes instantly update calculations
-
-### **🎯 Ready for Production Use**
-- Perfect for VA training and usage
-- Professional sales presentations
-- Accurate material ordering
-- Flexible pricing negotiations
-- Hardware inventory management
+### **Key Components to Adapt**
+- **Sidebar Navigation**: Adapt for inventory categories
+- **Main Content Area**: Replace map with product grid
+- **Calculator Section**: Repurpose for stock management
+- **Modal System**: Use for add/edit product forms
 
 ---
 
-*Worktree: Cards (Material Calculator Focus)*  
-*Last Updated: November 2, 2025*  
-*Status: ✅ COMPLETE - Production Ready*
+*Project: Christmas Light Inventory Tracker*  
+*Created: November 3, 2025*  
+*Base: Roof Measurement Tool (Google Maps + Material Calculator)*  
+*Inspiration: RooflinePro Material Library Design*  
+*Status: 🚧 Planning Phase - Ready for Development*
