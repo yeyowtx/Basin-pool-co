@@ -278,55 +278,147 @@
             gap: 12px;
         }
         
-        .material-item {
-            background: #f9fafb;
-            border-radius: 6px;
+        .material-card {
+            background: white;
+            border-radius: 8px;
             padding: 16px;
-            border-left: 3px solid;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s;
         }
         
-        .material-item.lights {
+        .material-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .material-card.lights {
             border-left-color: #fbbf24;
         }
         
-        .material-item.wire {
+        .material-card.wire {
             border-left-color: #3b82f6;
         }
         
-        .material-item.clips {
+        .material-card.clips {
             border-left-color: #8b5cf6;
         }
         
-        .material-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 8px;
+        .material-card.labor {
+            border-left-color: #10b981;
         }
         
-        .material-title {
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-weight: 600;
             color: #1f2937;
+            font-size: 14px;
         }
         
-        .material-spacing {
+        .card-badge {
             background: #10b981;
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .card-badge.editable:hover {
+            background: #059669;
+        }
+        
+        .card-details {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .card-cost {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 18px;
+        }
+        
+        .editable-input {
+            background: transparent;
+            border: 1px dashed #d1d5db;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+            width: auto;
+            min-width: 60px;
+        }
+        
+        .editable-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            border-style: solid;
+            background: white;
+        }
+        
+        .summary-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+        }
+        
+        .summary-card.subtotal {
+            border-left-color: #f59e0b;
+        }
+        
+        .summary-card.profit {
+            border-left-color: #10b981;
+        }
+        
+        .summary-card.total {
+            border-left-color: #1f2937;
+            background: #1f2937;
+            color: white;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .summary-label {
+            font-size: 14px;
             font-weight: 500;
         }
         
-        .material-detail {
-            font-size: 14px;
-            color: #6b7280;
+        .summary-value {
+            font-size: 16px;
+            font-weight: 700;
         }
         
-        .material-cost {
-            font-weight: 600;
-            color: #1f2937;
-            font-size: 16px;
+        .margin-indicator {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .margin-warning {
+            color: #ef4444;
+        }
+        
+        .margin-good {
+            color: #10b981;
         }
         
         /* Map Container */
@@ -504,37 +596,9 @@
             
             <!-- Material Calculator -->
             <div class="section">
-                <div class="section-title">Quick Material Estimate</div>
-                <p style="color: #6b7280; font-size: 12px; margin-bottom: 12px;">Rough estimate based on measurements - refine when saving job</p>
+                <div class="section-title">Sales Calculator</div>
+                <p style="color: #6b7280; font-size: 12px; margin-bottom: 12px;">Professional pricing with target and minimum margins - all values are editable</p>
                 
-                <div class="calculator-config">
-                    <div class="config-row">
-                        <div class="config-group">
-                            <label class="config-label">Light Spacing (inches)</label>
-                            <select class="config-select" id="light-spacing" onchange="updateMaterialEstimate()">
-                                <option value="6">6"</option>
-                                <option value="12" selected>12"</option>
-                                <option value="18">18"</option>
-                                <option value="24">24"</option>
-                            </select>
-                        </div>
-                        <div class="config-group">
-                            <label class="config-label">Clip Spacing (inches)</label>
-                            <select class="config-select" id="clip-spacing" onchange="updateMaterialEstimate()">
-                                <option value="6">6"</option>
-                                <option value="12" selected>12"</option>
-                                <option value="18">18"</option>
-                                <option value="24">24"</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="config-row">
-                        <div class="config-group">
-                            <label class="config-label">Wire Buffer (%)</label>
-                            <input type="number" class="config-input" id="wire-buffer" value="10" min="0" max="50" onchange="updateMaterialEstimate()">
-                        </div>
-                    </div>
-                </div>
                 
                 <div class="material-items" id="material-items">
                     <div class="no-measurements">Start measuring to see material estimates</div>
@@ -587,11 +651,46 @@
             ground: '#10B981'
         };
         
-        // Material pricing (per unit)
-        const MATERIAL_COSTS = {
-            light: 0.85,
-            wire: 0.18,
-            clip: 0.32
+        // Hardware catalog and pricing
+        const ledColors = {
+            'warm-white': { name: 'Warm White', price: 0.75 },
+            'cool-white': { name: 'Cool White', price: 0.75 },
+            'red': { name: 'Red', price: 0.85 },
+            'green': { name: 'Green', price: 0.85 },
+            'blue': { name: 'Blue', price: 0.85 },
+            'multicolor': { name: 'Multicolor', price: 1.25 }
+        };
+        
+        const clipTypes = {
+            'all-in-one': { name: 'All-In-One Seasonal Clip', price: 0.11, description: 'Universal clip for seasonal lights' },
+            'led-plus': { name: 'LED Clip-All-Plus', price: 0.11, description: 'Enhanced universal clip' },
+            'c9-circle': { name: 'C9 Circle Clip V2+', price: 0.21, description: 'Specific for C9 bulb sockets' },
+            'shingle-tabs': { name: 'Shingle Tabs', price: 0.23, description: 'Light hangers for shingle roofs' },
+            'parapet': { name: 'Parapet Clip', price: 0.42, description: 'Heavy-duty permanent mounting' },
+            'magnetic': { name: 'Magnetic C9 Socket', price: 0.87, description: 'Magnetic mounting for metal' },
+            'ground-stake': { name: '7.5" Light Stake', price: 0.46, description: 'Ground stakes for pathways' }
+        };
+        
+        const wireSpecs = {
+            type: 'C9 12AWG 1000ft',
+            spoolLength: 1000,
+            pricePerSpool: 283.99
+        };
+        
+        // Project configuration
+        let projectConfig = {
+            ledColor1: 'warm-white',
+            ledColor2: null,
+            colorSplit: 100, // percentage for color1
+            lightSpacing: 12,
+            selectedClips: ['all-in-one'], // array of selected clip types
+            clipQuantities: { 'all-in-one': 1 }, // quantity per clip type
+            crewCount: 1,
+            crewRate: 1.50,
+            includeTakedown: false,
+            targetMargin: 35,
+            minimumMargin: 20,
+            wireBuffer: 15
         };
         
         // Load Google Maps
@@ -904,7 +1003,7 @@
             document.getElementById('distance-results').innerHTML = html || '<div class="no-measurements">No measurements yet</div>';
         }
         
-        // Update material estimate
+        // Update material estimate with hardware-specific cards
         function updateMaterialEstimate() {
             const totalDist = measurements.reduce((sum, m) => sum + m.distance, 0);
             
@@ -913,56 +1012,333 @@
                 return;
             }
             
-            const lightSpacing = parseInt(document.getElementById('light-spacing').value);
-            const clipSpacing = parseInt(document.getElementById('clip-spacing').value);
-            const wireBuffer = parseInt(document.getElementById('wire-buffer').value);
-            
             // Calculate quantities
-            const lightsNeeded = Math.ceil((totalDist * 12) / lightSpacing);
-            const wireLength = Math.ceil(totalDist * (1 + wireBuffer / 100));
-            const clipsNeeded = Math.ceil((totalDist * 12) / clipSpacing);
+            const lightsNeeded = Math.ceil((totalDist * 12) / projectConfig.lightSpacing);
+            const wireNeeded = Math.ceil(totalDist * (1 + projectConfig.wireBuffer / 100));
+            const spoolsNeeded = Math.ceil(wireNeeded / wireSpecs.spoolLength);
             
-            // Calculate costs
-            const lightCost = (lightsNeeded * MATERIAL_COSTS.light).toFixed(2);
-            const wireCost = (wireLength * MATERIAL_COSTS.wire).toFixed(2);
-            const clipCost = (clipsNeeded * MATERIAL_COSTS.clip).toFixed(2);
-            const totalCost = (parseFloat(lightCost) + parseFloat(wireCost) + parseFloat(clipCost)).toFixed(2);
+            // Calculate LED costs (with color mixing)
+            let lightCost = 0;
+            if (projectConfig.ledColor2) {
+                const color1Lights = Math.ceil(lightsNeeded * (projectConfig.colorSplit / 100));
+                const color2Lights = lightsNeeded - color1Lights;
+                lightCost = (color1Lights * ledColors[projectConfig.ledColor1].price) + 
+                           (color2Lights * ledColors[projectConfig.ledColor2].price);
+            } else {
+                lightCost = lightsNeeded * ledColors[projectConfig.ledColor1].price;
+            }
+            
+            // Calculate wire cost
+            const wireCost = spoolsNeeded * wireSpecs.pricePerSpool;
+            
+            // Calculate clips cost
+            let clipCost = 0;
+            let clipDetails = [];
+            projectConfig.selectedClips.forEach(clipId => {
+                const quantity = projectConfig.clipQuantities[clipId] || 1;
+                const neededPerType = Math.ceil(lightsNeeded / quantity);
+                const cost = neededPerType * clipTypes[clipId].price;
+                clipCost += cost;
+                clipDetails.push(`${neededPerType} ${clipTypes[clipId].name}`);
+            });
+            
+            // Calculate labor
+            const installCost = totalDist * projectConfig.crewRate * projectConfig.crewCount;
+            const takedownCost = projectConfig.includeTakedown ? totalDist * (projectConfig.crewRate * 0.6) * projectConfig.crewCount : 0;
+            const totalLaborCost = installCost + takedownCost;
+            
+            // Calculate totals
+            const materialSubtotal = lightCost + wireCost + clipCost;
+            const subtotal = materialSubtotal + totalLaborCost;
+            const targetProfit = subtotal * (projectConfig.targetMargin / 100);
+            const minimumProfit = subtotal * (projectConfig.minimumMargin / 100);
+            const targetTotal = subtotal + targetProfit;
+            const minimumTotal = subtotal + minimumProfit;
+            
+            // Generate color description
+            let colorDescription = ledColors[projectConfig.ledColor1].name;
+            if (projectConfig.ledColor2) {
+                colorDescription += ` (${projectConfig.colorSplit}%) + ${ledColors[projectConfig.ledColor2].name} (${100-projectConfig.colorSplit}%)`;
+            }
             
             const html = `
-                <div class="material-item lights">
-                    <div class="material-header">
-                        <span class="material-title">💡 LED Lights</span>
-                        <span class="material-spacing">${lightSpacing}" spacing</span>
+                <div class="material-card lights">
+                    <div class="card-header">
+                        <div class="card-title">💡 LED Lights</div>
+                        <div class="card-badge editable" onclick="editLEDConfig()">${projectConfig.lightSpacing}" spacing</div>
                     </div>
-                    <div class="material-detail">${lightsNeeded} lights needed</div>
-                    <div class="material-cost">$${lightCost}</div>
+                    <div class="card-details">
+                        ${lightsNeeded} lights • ${colorDescription}
+                        <br><small style="color: #6b7280;">Click to change colors or spacing</small>
+                    </div>
+                    <div class="card-cost">$${lightCost.toFixed(2)}</div>
                 </div>
                 
-                <div class="material-item wire">
-                    <div class="material-header">
-                        <span class="material-title">🔌 Wire Length</span>
-                        <span class="material-spacing">+${wireBuffer}% buffer</span>
+                <div class="material-card wire">
+                    <div class="card-header">
+                        <div class="card-title">🔌 Wire (${wireSpecs.type})</div>
+                        <div class="card-badge editable" onclick="editWireConfig()">+${projectConfig.wireBuffer}% buffer</div>
                     </div>
-                    <div class="material-detail">${wireLength} ft extension wire</div>
-                    <div class="material-cost">$${wireCost}</div>
+                    <div class="card-details">
+                        ${wireNeeded} ft needed • ${spoolsNeeded} spool${spoolsNeeded > 1 ? 's' : ''}
+                        <br><small style="color: #6b7280;">${spoolsNeeded * wireSpecs.spoolLength - wireNeeded} ft remaining</small>
+                    </div>
+                    <div class="card-cost">$${wireCost.toFixed(2)}</div>
                 </div>
                 
-                <div class="material-item clips">
-                    <div class="material-header">
-                        <span class="material-title">📎 Clips</span>
-                        <span class="material-spacing">${clipSpacing}" spacing</span>
+                <div class="material-card clips">
+                    <div class="card-header">
+                        <div class="card-title">📎 Mounting Clips</div>
+                        <div class="card-badge editable" onclick="editClipConfig()">Configure</div>
                     </div>
-                    <div class="material-detail">${clipsNeeded} mounting clips</div>
-                    <div class="material-cost">$${clipCost}</div>
+                    <div class="card-details">
+                        ${clipDetails.join('<br>')}
+                        <br><small style="color: #6b7280;">Click to change types and quantities</small>
+                    </div>
+                    <div class="card-cost">$${clipCost.toFixed(2)}</div>
                 </div>
                 
-                <div class="result-item total" style="margin-top: 8px;">
-                    <span class="result-label">Total Material Cost</span>
-                    <span class="result-value">$${totalCost}</span>
+                <div class="material-card labor">
+                    <div class="card-header">
+                        <div class="card-title">👷 Labor Cost</div>
+                        <div class="card-badge editable" onclick="editLaborConfig()">${projectConfig.crewCount} crew${projectConfig.crewCount > 1 ? 's' : ''}</div>
+                    </div>
+                    <div class="card-details">
+                        Install: $${installCost.toFixed(2)} (${totalDist.toFixed(1)} ft × $${projectConfig.crewRate}/ft × ${projectConfig.crewCount} crew${projectConfig.crewCount > 1 ? 's' : ''})
+                        ${projectConfig.includeTakedown ? `<br>Takedown: $${takedownCost.toFixed(2)} (60% rate)` : ''}
+                        <br><small style="color: #6b7280;">Click to adjust crews or add takedown</small>
+                    </div>
+                    <div class="card-cost">$${totalLaborCost.toFixed(2)}</div>
+                </div>
+                
+                <div class="summary-card subtotal">
+                    <div class="summary-row">
+                        <div class="summary-label">Material Subtotal</div>
+                        <div class="summary-value">$${materialSubtotal.toFixed(2)}</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card subtotal">
+                    <div class="summary-row">
+                        <div class="summary-label">Subtotal (Materials + Labor)</div>
+                        <div class="summary-value">$${subtotal.toFixed(2)}</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card profit">
+                    <div class="summary-row">
+                        <div class="summary-label">
+                            <input type="range" min="15" max="60" value="${projectConfig.targetMargin}" 
+                                   style="width: 100px; margin-right: 8px;" 
+                                   onchange="projectConfig.targetMargin = parseInt(this.value); updateMaterialEstimate();">
+                            Profit (${projectConfig.targetMargin}%)
+                        </div>
+                        <div class="summary-value">$${targetProfit.toFixed(2)}</div>
+                    </div>
+                    <div class="margin-indicator" style="color: #6b7280;">
+                        Minimum: $${minimumTotal.toFixed(2)} (${projectConfig.minimumMargin}% margin)
+                    </div>
+                </div>
+                
+                <div class="summary-card total">
+                    <div class="summary-row">
+                        <div class="summary-label">Final Quote</div>
+                        <div class="summary-value">$${targetTotal.toFixed(2)}</div>
+                    </div>
+                    <div class="margin-indicator" style="color: #9ca3af;">
+                        Can go as low as $${minimumTotal.toFixed(2)}
+                    </div>
                 </div>
             `;
             
             document.getElementById('material-items').innerHTML = html;
+        }
+        
+        // Hardware-specific configuration functions
+        function editLEDConfig() {
+            const modal = createModal('LED Configuration', `
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Primary Color:</label>
+                    <select id="color1-select" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        ${Object.entries(ledColors).map(([key, color]) => 
+                            `<option value="${key}" ${key === projectConfig.ledColor1 ? 'selected' : ''}>${color.name} - $${color.price}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+                        <input type="checkbox" id="use-second-color" ${projectConfig.ledColor2 ? 'checked' : ''}> 
+                        Use second color (mix)
+                    </label>
+                </div>
+                
+                <div id="second-color-config" style="display: ${projectConfig.ledColor2 ? 'block' : 'none'}; margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Secondary Color:</label>
+                    <select id="color2-select" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 8px;">
+                        ${Object.entries(ledColors).map(([key, color]) => 
+                            `<option value="${key}" ${key === projectConfig.ledColor2 ? 'selected' : ''}>${color.name} - $${color.price}</option>`
+                        ).join('')}
+                    </select>
+                    
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Primary Color Split (%):</label>
+                    <input type="range" id="color-split" min="10" max="90" value="${projectConfig.colorSplit}" 
+                           style="width: 100%;" oninput="document.getElementById('split-value').textContent = this.value + '%'">
+                    <div style="text-align: center; color: #6b7280; font-size: 12px;">
+                        <span id="split-value">${projectConfig.colorSplit}%</span> primary, ${100-projectConfig.colorSplit}% secondary
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Light Spacing (inches):</label>
+                    <input type="number" id="light-spacing" value="${projectConfig.lightSpacing}" min="6" max="24" 
+                           style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+            `);
+            
+            document.getElementById('use-second-color').onchange = function() {
+                document.getElementById('second-color-config').style.display = this.checked ? 'block' : 'none';
+            };
+            
+            modal.onSave = function() {
+                projectConfig.ledColor1 = document.getElementById('color1-select').value;
+                projectConfig.ledColor2 = document.getElementById('use-second-color').checked ? 
+                    document.getElementById('color2-select').value : null;
+                projectConfig.colorSplit = parseInt(document.getElementById('color-split').value);
+                projectConfig.lightSpacing = parseInt(document.getElementById('light-spacing').value);
+                updateMaterialEstimate();
+            };
+        }
+        
+        function editWireConfig() {
+            const modal = createModal('Wire Configuration', `
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Wire Type:</label>
+                    <div style="padding: 8px; background: #f3f4f6; border-radius: 4px; color: #6b7280;">
+                        ${wireSpecs.type} - $${wireSpecs.pricePerSpool} per ${wireSpecs.spoolLength}ft spool
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Wire Buffer (%):</label>
+                    <input type="number" id="wire-buffer-input" value="${projectConfig.wireBuffer}" min="0" max="50" 
+                           style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <small style="color: #6b7280;">Extra wire for connections, routing, and waste</small>
+                </div>
+            `);
+            
+            modal.onSave = function() {
+                projectConfig.wireBuffer = parseInt(document.getElementById('wire-buffer-input').value);
+                updateMaterialEstimate();
+            };
+        }
+        
+        function editClipConfig() {
+            const clipOptions = Object.entries(clipTypes).map(([key, clip]) => `
+                <div style="margin-bottom: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                    <label style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <input type="checkbox" value="${key}" ${projectConfig.selectedClips.includes(key) ? 'checked' : ''}
+                               style="margin-right: 8px;"> 
+                        <strong>${clip.name}</strong> - $${clip.price} each
+                    </label>
+                    <div style="color: #6b7280; font-size: 12px; margin-bottom: 8px;">${clip.description}</div>
+                    <label style="display: block; font-size: 12px;">
+                        Quantity per light: 
+                        <input type="number" min="1" max="5" value="${projectConfig.clipQuantities[key] || 1}"
+                               data-clip="${key}" class="clip-quantity"
+                               style="width: 60px; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; margin-left: 4px;">
+                    </label>
+                </div>
+            `).join('');
+            
+            const modal = createModal('Mounting Clips Configuration', clipOptions);
+            
+            modal.onSave = function() {
+                const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
+                const quantities = modal.querySelectorAll('.clip-quantity');
+                
+                projectConfig.selectedClips = [];
+                projectConfig.clipQuantities = {};
+                
+                checkboxes.forEach(cb => {
+                    if (cb.checked) {
+                        projectConfig.selectedClips.push(cb.value);
+                    }
+                });
+                
+                quantities.forEach(input => {
+                    const clipId = input.getAttribute('data-clip');
+                    projectConfig.clipQuantities[clipId] = parseInt(input.value);
+                });
+                
+                if (projectConfig.selectedClips.length === 0) {
+                    projectConfig.selectedClips = ['all-in-one'];
+                    projectConfig.clipQuantities['all-in-one'] = 1;
+                }
+                
+                updateMaterialEstimate();
+            };
+        }
+        
+        function editLaborConfig() {
+            const modal = createModal('Labor Configuration', `
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Number of Crews (2 people each):</label>
+                    <input type="number" id="crew-count-input" value="${projectConfig.crewCount}" min="1" max="5" 
+                           style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Rate per foot per crew ($):</label>
+                    <input type="number" id="crew-rate-input" value="${projectConfig.crewRate}" min="0.50" max="5.00" step="0.25"
+                           style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="include-takedown" ${projectConfig.includeTakedown ? 'checked' : ''}
+                               style="margin-right: 8px;"> 
+                        Include takedown labor for January (60% of install rate)
+                    </label>
+                </div>
+            `);
+            
+            modal.onSave = function() {
+                projectConfig.crewCount = parseInt(document.getElementById('crew-count-input').value);
+                projectConfig.crewRate = parseFloat(document.getElementById('crew-rate-input').value);
+                projectConfig.includeTakedown = document.getElementById('include-takedown').checked;
+                updateMaterialEstimate();
+            };
+        }
+        
+        // Modal utility function
+        function createModal(title, content) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.5); z-index: 10000; display: flex; 
+                align-items: center; justify-content: center;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 8px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="margin: 0 0 16px 0; color: #1f2937;">${title}</h3>
+                    ${content}
+                    <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+                        <button onclick="this.closest('[style*=fixed]').remove()" 
+                                style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="this.closest('[style*=fixed]').onSave(); this.closest('[style*=fixed]').remove()" 
+                                style="padding: 8px 16px; border: none; background: #3b82f6; color: white; border-radius: 4px; cursor: pointer;">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            return modal;
         }
         
         // Load maps on page load
