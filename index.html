@@ -596,9 +596,12 @@
             
             <!-- Material Calculator -->
             <div class="section">
-                <div class="section-title">Sales Calculator</div>
-                <p style="color: #6b7280; font-size: 12px; margin-bottom: 12px;">Professional pricing with target and minimum margins - all values are editable</p>
+                <div class="section-title">Cost Calculator</div>
+                <p style="color: #6b7280; font-size: 12px; margin-bottom: 12px;">Admin pricing control with ceiling/floor for sales negotiations - all values are editable</p>
                 
+                <div class="calculator-config" id="calculator-config">
+                    <!-- Configuration will be populated by JavaScript -->
+                </div>
                 
                 <div class="material-items" id="material-items">
                     <div class="no-measurements">Start measuring to see material estimates</div>
@@ -688,9 +691,11 @@
             crewCount: 1,
             crewRate: 1.50,
             includeTakedown: false,
-            targetMargin: 35,
-            minimumMargin: 20,
-            wireBuffer: 15
+            marginFloor: 35,
+            marginCeiling: 100,
+            currentMargin: 60,
+            wireBuffer: 15,
+            complexityMultiplier: 1.0
         };
         
         // Load Google Maps
@@ -1042,18 +1047,20 @@
                 clipDetails.push(`${neededPerType} ${clipTypes[clipId].name}`);
             });
             
-            // Calculate labor
-            const installCost = totalDist * projectConfig.crewRate * projectConfig.crewCount;
-            const takedownCost = projectConfig.includeTakedown ? totalDist * (projectConfig.crewRate * 0.6) * projectConfig.crewCount : 0;
+            // Calculate labor with complexity multiplier
+            const baseInstallCost = totalDist * projectConfig.crewRate * projectConfig.crewCount;
+            const baseTakedownCost = projectConfig.includeTakedown ? totalDist * (projectConfig.crewRate * 0.6) * projectConfig.crewCount : 0;
+            const installCost = baseInstallCost * projectConfig.complexityMultiplier;
+            const takedownCost = baseTakedownCost * projectConfig.complexityMultiplier;
             const totalLaborCost = installCost + takedownCost;
             
             // Calculate totals
             const materialSubtotal = lightCost + wireCost + clipCost;
             const subtotal = materialSubtotal + totalLaborCost;
-            const targetProfit = subtotal * (projectConfig.targetMargin / 100);
-            const minimumProfit = subtotal * (projectConfig.minimumMargin / 100);
-            const targetTotal = subtotal + targetProfit;
-            const minimumTotal = subtotal + minimumProfit;
+            const priceCeiling = subtotal * (1 + projectConfig.marginCeiling / 100);
+            const priceFloor = subtotal * (1 + projectConfig.marginFloor / 100);
+            const currentPrice = subtotal * (1 + projectConfig.currentMargin / 100);
+            const currentProfit = currentPrice - subtotal;
             
             // Generate color description
             let colorDescription = ledColors[projectConfig.ledColor1].name;
@@ -1101,12 +1108,12 @@
                 <div class="material-card labor">
                     <div class="card-header">
                         <div class="card-title">👷 Labor Cost</div>
-                        <div class="card-badge editable" onclick="editLaborConfig()">${projectConfig.crewCount} crew${projectConfig.crewCount > 1 ? 's' : ''}</div>
+                        <div class="card-badge editable" onclick="editLaborConfig()">${projectConfig.complexityMultiplier.toFixed(1)}x complexity</div>
                     </div>
                     <div class="card-details">
-                        Install: $${installCost.toFixed(2)} (${totalDist.toFixed(1)} ft × $${projectConfig.crewRate}/ft × ${projectConfig.crewCount} crew${projectConfig.crewCount > 1 ? 's' : ''})
-                        ${projectConfig.includeTakedown ? `<br>Takedown: $${takedownCost.toFixed(2)} (60% rate)` : ''}
-                        <br><small style="color: #6b7280;">Click to adjust crews or add takedown</small>
+                        Install: $${installCost.toFixed(2)} (${totalDist.toFixed(1)} ft × $${projectConfig.crewRate}/ft × ${projectConfig.crewCount} crew${projectConfig.crewCount > 1 ? 's' : ''} × ${projectConfig.complexityMultiplier.toFixed(1)}x)
+                        ${projectConfig.includeTakedown ? `<br>Takedown: $${takedownCost.toFixed(2)} (60% rate × ${projectConfig.complexityMultiplier.toFixed(1)}x complexity)` : ''}
+                        <br><small style="color: #6b7280;">Complexity multiplier affects labor costs</small>
                     </div>
                     <div class="card-cost">$${totalLaborCost.toFixed(2)}</div>
                 </div>
@@ -1127,26 +1134,31 @@
                 
                 <div class="summary-card profit">
                     <div class="summary-row">
-                        <div class="summary-label">
-                            <input type="range" min="15" max="60" value="${projectConfig.targetMargin}" 
-                                   style="width: 100px; margin-right: 8px;" 
-                                   onchange="projectConfig.targetMargin = parseInt(this.value); updateMaterialEstimate();">
-                            Profit (${projectConfig.targetMargin}%)
-                        </div>
-                        <div class="summary-value">$${targetProfit.toFixed(2)}</div>
+                        <div class="summary-label">Quote Margin (${projectConfig.currentMargin}%)</div>
+                        <div class="summary-value">$${currentPrice.toFixed(2)}</div>
                     </div>
-                    <div class="margin-indicator" style="color: #6b7280;">
-                        Minimum: $${minimumTotal.toFixed(2)} (${projectConfig.minimumMargin}% margin)
+                    <div style="margin-top: 12px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: #6b7280;">
+                            <span>Floor: ${projectConfig.marginFloor}% ($${priceFloor.toFixed(2)})</span>
+                            <span>Ceiling: ${projectConfig.marginCeiling}% ($${priceCeiling.toFixed(2)})</span>
+                        </div>
+                        <input type="range" min="${projectConfig.marginFloor}" max="${projectConfig.marginCeiling}" value="${projectConfig.currentMargin}" 
+                               style="width: 100%; height: 8px; border-radius: 5px; background: linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%); outline: none; -webkit-appearance: none;" 
+                               oninput="projectConfig.currentMargin = parseInt(this.value); updateMaterialEstimate();">
+                        <div style="text-align: center; margin-top: 4px; font-size: 12px; color: #374151; font-weight: 600;">
+                            ${projectConfig.currentMargin}% Margin
+                        </div>
                     </div>
                 </div>
                 
                 <div class="summary-card total">
                     <div class="summary-row">
-                        <div class="summary-label">Final Quote</div>
-                        <div class="summary-value">$${targetTotal.toFixed(2)}</div>
+                        <div class="summary-label">Base Cost (Materials + Labor)</div>
+                        <div class="summary-value">$${subtotal.toFixed(2)}</div>
                     </div>
-                    <div class="margin-indicator" style="color: #9ca3af;">
-                        Can go as low as $${minimumTotal.toFixed(2)}
+                    <div class="margin-indicator" style="color: #9ca3af; margin-top: 8px;">
+                        <strong>Current Quote:</strong> $${currentPrice.toFixed(2)} (${projectConfig.currentMargin}% margin)<br>
+                        <strong>Profit:</strong> $${currentProfit.toFixed(2)}
                     </div>
                 </div>
             `;
@@ -1341,9 +1353,25 @@
             return modal;
         }
         
+        // Update calculator configuration UI
+        function updateCalculatorConfig() {
+            const configHtml = `
+                <div class="config-row">
+                    <div class="config-group" style="width: 100%;">
+                        <label class="config-label" id="complexity-multiplier-label">Labor Complexity Multiplier (${projectConfig.complexityMultiplier.toFixed(1)}x)</label>
+                        <input type="range" min="1.0" max="2.0" step="0.1" value="${projectConfig.complexityMultiplier}" 
+                               class="config-input" style="margin-top: 4px; width: 100%;"
+                               oninput="projectConfig.complexityMultiplier = parseFloat(this.value); document.getElementById('complexity-multiplier-label').textContent = 'Labor Complexity Multiplier (' + this.value + 'x)'; updateMaterialEstimate();">
+                    </div>
+                </div>
+            `;
+            document.getElementById('calculator-config').innerHTML = configHtml;
+        }
+        
         // Load maps on page load
         window.onload = () => {
             loadGoogleMaps();
+            updateCalculatorConfig();
         };
     </script>
 </body>
