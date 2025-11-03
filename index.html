@@ -432,6 +432,14 @@
             height: 100%;
         }
         
+        #map.measuring {
+            cursor: crosshair !important;
+        }
+        
+        #map.measuring * {
+            cursor: crosshair !important;
+        }
+        
         .loading {
             display: flex;
             align-items: center;
@@ -636,7 +644,56 @@
         // Replace with your Google Maps API key
         const API_KEY = 'AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk';
         
-        // State
+        // Professional measurement state management
+        const MeasurementState = {
+            map: null,
+            isActive: false,
+            currentType: 'perimeter',
+            activePoints: [],
+            completedMeasurements: [],
+            
+            // Visual elements
+            activePolyline: null,
+            livePreviewLine: null,
+            savedPolylines: [],
+            savedMarkers: [],
+            
+            // Event listeners
+            clickListener: null,
+            mouseMoveListener: null,
+            
+            // Reset all state
+            reset() {
+                this.isActive = false;
+                this.activePoints = [];
+                this.clearVisualElements();
+                this.removeEventListeners();
+            },
+            
+            clearVisualElements() {
+                if (this.activePolyline) {
+                    this.activePolyline.setMap(null);
+                    this.activePolyline = null;
+                }
+                if (this.livePreviewLine) {
+                    this.livePreviewLine.setMap(null);
+                    this.livePreviewLine = null;
+                }
+            },
+            
+            removeEventListeners() {
+                if (this.clickListener) {
+                    google.maps.event.removeListener(this.clickListener);
+                    this.clickListener = null;
+                }
+                if (this.mouseMoveListener) {
+                    google.maps.event.removeListener(this.mouseMoveListener);
+                    this.mouseMoveListener = null;
+                }
+            }
+        };
+        
+        // Legacy variables for backward compatibility
         let map = null;
         let isMeasuring = false;
         let currentType = 'perimeter';
@@ -646,6 +703,8 @@
         let savedPolylines = [];
         let savedMarkers = [];
         let clickListener = null;
+        let mouseMoveListener = null;
+        let livePreviewLine = null;
         
         // Colors
         const COLORS = {
@@ -707,14 +766,36 @@
             document.head.appendChild(script);
         }
         
-        // Initialize map
+        // Initialize map with professional settings
         function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
+            const mapOptions = {
                 center: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
                 zoom: 20,
                 mapTypeId: 'satellite',
-                tilt: 0
-            });
+                tilt: 0,
+                
+                // Professional measurement optimizations
+                clickableIcons: false,
+                disableDoubleClickZoom: true, // Prevent accidental zoom during measurement
+                gestureHandling: 'greedy',
+                keyboardShortcuts: false,
+                
+                // Precision settings
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                    position: google.maps.ControlPosition.TOP_CENTER,
+                },
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.RIGHT_CENTER
+                },
+                streetViewControl: false,
+                fullscreenControl: false
+            };
+            
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+            MeasurementState.map = map;
             
             // Initialize autocomplete
             initAutocomplete();
@@ -762,30 +843,112 @@
             document.querySelector(`.type-btn.${type}`).classList.add('active');
         }
         
-        // Start measuring
+        // Professional measurement initialization
         function startMeasuring() {
+            // Reset any existing measurement state
+            MeasurementState.reset();
+            
+            // Set new measurement state
+            MeasurementState.isActive = true;
+            MeasurementState.currentType = currentType;
+            MeasurementState.activePoints = [];
+            
+            // Update legacy variables for compatibility
             isMeasuring = true;
             currentPoints = [];
-            updateUI();
             
-            // Add click listener
-            clickListener = map.addListener('click', (event) => {
-                if (!isMeasuring) return;
-                
-                const newPoint = {
-                    lat: event.latLng.lat(),
-                    lng: event.latLng.lng()
-                };
-                
-                currentPoints.push(newPoint);
-                updateActivePolyline();
-                updateLiveStats();
-            });
+            // Add crosshair cursor
+            document.getElementById('map').classList.add('measuring');
+            
+            // Precise click handling without delays
+            MeasurementState.clickListener = map.addListener('click', handleMeasurementClick);
+            
+            // Smooth mouse tracking without throttling for precision
+            MeasurementState.mouseMoveListener = map.addListener('mousemove', handleMouseMove);
+            
+            // Update legacy variables
+            clickListener = MeasurementState.clickListener;
+            mouseMoveListener = MeasurementState.mouseMoveListener;
+            
+            updateUI();
         }
         
-        // Update active polyline
+        // Professional click handler
+        function handleMeasurementClick(event) {
+            if (!MeasurementState.isActive && !isMeasuring) return;
+            
+            const newPoint = {
+                lat: event.latLng.lat(),
+                lng: event.latLng.lng()
+            };
+            
+            // Add to both state systems
+            MeasurementState.activePoints.push(newPoint);
+            currentPoints.push(newPoint);
+            
+            // Immediate visual updates
+            updateActivePolyline();
+            updateLiveStats();
+            updateLivePreview(event.latLng);
+        }
+        
+        // Professional mouse move handler
+        function handleMouseMove(event) {
+            if (!MeasurementState.isActive || MeasurementState.activePoints.length === 0) return;
+            updateLivePreview(event.latLng);
+        }
+        
+        // Professional live preview with precise rendering
+        function updateLivePreview(mousePosition) {
+            const points = MeasurementState.activePoints.length > 0 ? MeasurementState.activePoints : currentPoints;
+            if (points.length === 0) return;
+            
+            const lastPoint = points[points.length - 1];
+            const previewPath = [
+                new google.maps.LatLng(lastPoint.lat, lastPoint.lng),
+                mousePosition
+            ];
+            
+            if (MeasurementState.livePreviewLine) {
+                MeasurementState.livePreviewLine.setPath(previewPath);
+            } else {
+                MeasurementState.livePreviewLine = new google.maps.Polyline({
+                    path: previewPath,
+                    geodesic: true,
+                    strokeColor: COLORS[MeasurementState.currentType],
+                    strokeOpacity: 0.85,
+                    strokeWeight: 3,
+                    strokePattern: [10, 5], // Professional dash pattern
+                    zIndex: 1000, // Ensure it's above other elements
+                    map: map
+                });
+                
+                // Update legacy reference
+                livePreviewLine = MeasurementState.livePreviewLine;
+            }
+        }
+        
+        // Professional cleanup
+        function clearLivePreview() {
+            if (MeasurementState.livePreviewLine) {
+                MeasurementState.livePreviewLine.setMap(null);
+                MeasurementState.livePreviewLine = null;
+            }
+            if (livePreviewLine) {
+                livePreviewLine.setMap(null);
+                livePreviewLine = null;
+            }
+        }
+        
+        // Professional polyline rendering
         function updateActivePolyline() {
-            if (currentPoints.length === 0) {
+            const points = MeasurementState.activePoints.length > 0 ? MeasurementState.activePoints : currentPoints;
+            
+            if (points.length === 0) {
+                if (MeasurementState.activePolyline) {
+                    MeasurementState.activePolyline.setMap(null);
+                    MeasurementState.activePolyline = null;
+                }
                 if (activePolyline) {
                     activePolyline.setMap(null);
                     activePolyline = null;
@@ -793,21 +956,43 @@
                 return;
             }
             
-            if (currentPoints.length === 1) {
-                if (activePolyline) {
-                    activePolyline.setMap(null);
+            const pathPoints = points.map(pt => new google.maps.LatLng(pt.lat, pt.lng));
+            
+            if (points.length === 1) {
+                // Clear existing polyline for single point
+                if (MeasurementState.activePolyline) {
+                    MeasurementState.activePolyline.setMap(null);
                 }
-                activePolyline = new google.maps.Polyline({
-                    path: currentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
+                
+                // Create new polyline for measurement in progress
+                MeasurementState.activePolyline = new google.maps.Polyline({
+                    path: pathPoints,
                     geodesic: true,
-                    strokeColor: COLORS[currentType],
-                    strokeOpacity: 1,
-                    strokeWeight: 3,
+                    strokeColor: COLORS[MeasurementState.currentType],
+                    strokeOpacity: 1.0,
+                    strokeWeight: 4,
+                    zIndex: 500,
                     map: map
                 });
-            } else {
-                if (activePolyline) {
-                    activePolyline.setPath(currentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)));
+                
+                // Update legacy reference
+                activePolyline = MeasurementState.activePolyline;
+            } else if (points.length > 1) {
+                // Update existing polyline path
+                if (MeasurementState.activePolyline) {
+                    MeasurementState.activePolyline.setPath(pathPoints);
+                } else {
+                    // Create if it doesn't exist
+                    MeasurementState.activePolyline = new google.maps.Polyline({
+                        path: pathPoints,
+                        geodesic: true,
+                        strokeColor: COLORS[MeasurementState.currentType],
+                        strokeOpacity: 1.0,
+                        strokeWeight: 4,
+                        zIndex: 500,
+                        map: map
+                    });
+                    activePolyline = MeasurementState.activePolyline;
                 }
             }
         }
@@ -845,12 +1030,21 @@
                 activePolyline = null;
             }
             
+            // Clean up measurement state
             currentPoints = [];
             isMeasuring = false;
             
+            // Remove listeners and cursor
             if (clickListener) {
                 google.maps.event.removeListener(clickListener);
             }
+            if (mouseMoveListener) {
+                google.maps.event.removeListener(mouseMoveListener);
+            }
+            
+            // Clear live preview and cursor
+            clearLivePreview();
+            document.getElementById('map').classList.remove('measuring');
             
             drawAllMeasurements();
             updateDistanceResults();
@@ -911,17 +1105,24 @@
             }
         }
         
-        // Clear current
+        // Professional measurement cleanup
         function clearCurrent() {
+            // Reset professional state
+            MeasurementState.reset();
+            
+            // Reset legacy variables
             currentPoints = [];
+            isMeasuring = false;
+            
             if (activePolyline) {
                 activePolyline.setMap(null);
                 activePolyline = null;
             }
-            isMeasuring = false;
-            if (clickListener) {
-                google.maps.event.removeListener(clickListener);
-            }
+            
+            // Clear visual elements
+            clearLivePreview();
+            document.getElementById('map').classList.remove('measuring');
+            
             updateUI();
         }
         
