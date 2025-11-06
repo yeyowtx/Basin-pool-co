@@ -1237,7 +1237,7 @@
         .mb-4 { margin-bottom: 16px; }
     </style>
     
-    <!-- Google Maps API with Places Library -->
+    <!-- Google Maps API with Places Library (2025 New API) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk&libraries=places&loading=async" async defer></script>
 </head>
 <body>
@@ -2018,9 +2018,9 @@
             }
         }
         
-        // NEW MOBILE INTERFACE FUNCTIONS (Google Maps Style)
+        // NEW MOBILE INTERFACE FUNCTIONS (Google Maps Style - 2025 API)
         let mobileAutocomplete = null;
-        let mobileSessionToken = null;
+        let placesLibrary = null;
         
         // Mobile Interface State Management
         let currentMobileInterface = null; // 'search', 'streetview', 'crop', 'drawing'
@@ -2039,87 +2039,137 @@
             initializePlacesWithRetry();
         }
         
-        // Retry Google Places initialization with better error handling
-        function initializePlacesWithRetry(attempts = 0) {
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                console.log('Google Maps API loaded, initializing autocomplete...');
-                initializeMobilePlacesAutocomplete();
-            } else {
-                if (attempts < 10) {
-                    console.log(`Google Maps API not ready, retrying... (${attempts + 1}/10)`);
-                    setTimeout(() => initializePlacesWithRetry(attempts + 1), 500);
+        // Initialize Google Places 2025 API with retry logic
+        async function initializePlacesWithRetry(attempts = 0) {
+            try {
+                if (typeof google !== 'undefined' && google.maps) {
+                    console.log('Google Maps API loaded, importing Places library...');
+                    // Import Places library (2025 new way)
+                    placesLibrary = await google.maps.importLibrary("places");
+                    console.log('Places library imported successfully');
+                    initializeMobilePlacesAutocomplete();
                 } else {
-                    console.error('Google Maps API failed to load after 10 attempts');
-                    // Show fallback message
-                    updateMobileProgress('Google Maps failed to load. Please try refreshing or use photo upload.');
+                    if (attempts < 10) {
+                        console.log(`Google Maps API not ready, retrying... (${attempts + 1}/10)`);
+                        setTimeout(() => initializePlacesWithRetry(attempts + 1), 500);
+                    } else {
+                        console.error('Google Maps API failed to load after 10 attempts');
+                        updateMobileProgress('Google Maps failed to load. Please try refreshing or use photo upload.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error importing Places library:', error);
+                if (attempts < 5) {
+                    setTimeout(() => initializePlacesWithRetry(attempts + 1), 1000);
+                } else {
+                    updateMobileProgress('Address search unavailable. Please use photo upload instead.');
                 }
             }
         }
         
-        // Google Places Autocomplete (2025 API)
+        // Google Places Autocomplete (2025 NEW API)
         function initializeMobilePlacesAutocomplete() {
+            const searchContainer = document.querySelector('.search-input-wrapper');
             const mobileSearchInput = document.getElementById('mobileAddressSearch');
-            if (!mobileSearchInput) {
-                console.error('Mobile search input not found');
+            
+            if (!searchContainer || !mobileSearchInput) {
+                console.error('Mobile search container or input not found');
                 return;
             }
             
             try {
-                // Create session token for cost optimization
-                mobileSessionToken = new google.maps.places.AutocompleteSessionToken();
+                // Hide the old input temporarily
+                mobileSearchInput.style.display = 'none';
                 
-                // Initialize Autocomplete with mobile-optimized settings
-                mobileAutocomplete = new google.maps.places.Autocomplete(mobileSearchInput, {
-                    types: ['address'],
-                    componentRestrictions: { country: 'US' },
-                    fields: ['formatted_address', 'geometry.location', 'name'],
-                    sessionToken: mobileSessionToken
+                // Create new PlaceAutocompleteElement (2025 API)
+                mobileAutocomplete = new placesLibrary.PlaceAutocompleteElement({
+                    componentRestrictions: { country: 'us' },
+                    includedPrimaryTypes: ['street_address', 'premise', 'subpremise'],
+                    locationBias: { radius: 100000, center: { lat: 37.4419, lng: -122.1419 } }, // US center
+                    requestedLanguage: 'en',
+                    requestedRegion: 'US'
                 });
                 
-                console.log('Google Places Autocomplete initialized successfully');
+                // Style the new autocomplete element to match our design
+                mobileAutocomplete.style.width = '100%';
+                mobileAutocomplete.style.border = 'none';
+                mobileAutocomplete.style.outline = 'none';
+                mobileAutocomplete.style.fontSize = '16px';
+                mobileAutocomplete.style.padding = '12px 40px 12px 40px';
+                mobileAutocomplete.style.borderRadius = '12px';
+                mobileAutocomplete.style.backgroundColor = '#f9fafb';
+                
+                // Add placeholder text
+                mobileAutocomplete.placeholder = 'Enter your address';
+                
+                // Replace the old input with new autocomplete element
+                searchContainer.appendChild(mobileAutocomplete);
+                
+                console.log('Google Places Autocomplete (2025) initialized successfully');
                 updateMobileProgress('Start typing an address...');
                 
-                // Handle place selection
-                mobileAutocomplete.addListener('place_changed', function() {
-                    const place = mobileAutocomplete.getPlace();
-                    console.log('Place selected:', place);
+                // Handle place selection with new API
+                mobileAutocomplete.addEventListener('gmp-placeselect', async (event) => {
+                    console.log('Place selected with new API:', event);
                     
-                    if (place.geometry && place.geometry.location) {
-                        // Valid address selected
-                        const lat = place.geometry.location.lat();
-                        const lng = place.geometry.location.lng();
+                    try {
+                        const place = event.place;
                         
-                        console.log('Loading Street View for:', lat, lng);
-                        // Load Street View for this location
-                        loadMobileStreetViewAtLocation(lat, lng, place.formatted_address);
-                    } else {
-                        // Invalid place - try geocoding the typed address
-                        console.log('Invalid place, trying geocoding...');
-                        tryGeocodeAddress(mobileSearchInput.value);
-                    }
-                });
-                
-                // Handle Enter key
-                mobileSearchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        // Try to use the current input value for geocoding
-                        if (mobileSearchInput.value.length > 5) {
-                            tryGeocodeAddress(mobileSearchInput.value);
+                        // Fetch the required fields
+                        await place.fetchFields({ 
+                            fields: ['displayName', 'formattedAddress', 'location'] 
+                        });
+                        
+                        console.log('Place details:', {
+                            name: place.displayName,
+                            address: place.formattedAddress,
+                            location: place.location
+                        });
+                        
+                        if (place.location) {
+                            const lat = place.location.lat();
+                            const lng = place.location.lng();
+                            
+                            console.log('Loading Street View for:', lat, lng);
+                            loadMobileStreetViewAtLocation(lat, lng, place.formattedAddress);
+                        } else {
+                            throw new Error('No location data found');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error processing selected place:', error);
+                        // Fallback to geocoding
+                        const inputValue = mobileAutocomplete.value || event.place.displayName;
+                        if (inputValue) {
+                            tryGeocodeAddress(inputValue);
                         }
                     }
                 });
                 
-                // Clear button functionality
-                mobileSearchInput.addEventListener('input', function() {
+                // Handle input events for better UX
+                mobileAutocomplete.addEventListener('input', function() {
                     if (this.value.length === 0) {
                         updateMobileProgress('Enter your address to get started with your Christmas light design');
+                    } else if (this.value.length > 2) {
+                        updateMobileProgress('Select an address from the suggestions...');
                     }
                 });
                 
             } catch (error) {
-                console.error('Error initializing Google Places Autocomplete:', error);
-                updateMobileProgress('Address search unavailable. Please use photo upload instead.');
+                console.error('Error initializing Google Places Autocomplete (2025):', error);
+                // Fallback to show the old input
+                mobileSearchInput.style.display = 'block';
+                updateMobileProgress('Using basic address input. Type address and press Enter.');
+                
+                // Add fallback geocoding for Enter key
+                mobileSearchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (this.value.length > 5) {
+                            tryGeocodeAddress(this.value);
+                        }
+                    }
+                });
             }
         }
         
