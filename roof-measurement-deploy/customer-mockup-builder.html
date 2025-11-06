@@ -2036,56 +2036,112 @@
             }
             
             // Initialize Google Places Autocomplete when Maps API is loaded
+            initializePlacesWithRetry();
+        }
+        
+        // Retry Google Places initialization with better error handling
+        function initializePlacesWithRetry(attempts = 0) {
             if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                console.log('Google Maps API loaded, initializing autocomplete...');
                 initializeMobilePlacesAutocomplete();
             } else {
-                // Retry after Maps API loads
-                setTimeout(initializeMobileInterfaces, 1000);
+                if (attempts < 10) {
+                    console.log(`Google Maps API not ready, retrying... (${attempts + 1}/10)`);
+                    setTimeout(() => initializePlacesWithRetry(attempts + 1), 500);
+                } else {
+                    console.error('Google Maps API failed to load after 10 attempts');
+                    // Show fallback message
+                    updateMobileProgress('Google Maps failed to load. Please try refreshing or use photo upload.');
+                }
             }
         }
         
         // Google Places Autocomplete (2025 API)
         function initializeMobilePlacesAutocomplete() {
             const mobileSearchInput = document.getElementById('mobileAddressSearch');
-            if (!mobileSearchInput) return;
+            if (!mobileSearchInput) {
+                console.error('Mobile search input not found');
+                return;
+            }
             
-            // Create session token for cost optimization
-            mobileSessionToken = new google.maps.places.AutocompleteSessionToken();
-            
-            // Initialize Autocomplete
-            mobileAutocomplete = new google.maps.places.Autocomplete(mobileSearchInput, {
-                types: ['address'],
-                componentRestrictions: { country: 'US' },
-                fields: ['formatted_address', 'geometry.location', 'name'],
-                sessionToken: mobileSessionToken
-            });
-            
-            // Handle place selection
-            mobileAutocomplete.addListener('place_changed', function() {
-                const place = mobileAutocomplete.getPlace();
+            try {
+                // Create session token for cost optimization
+                mobileSessionToken = new google.maps.places.AutocompleteSessionToken();
                 
-                if (place.geometry && place.geometry.location) {
-                    // Valid address selected
-                    const lat = place.geometry.location.lat();
-                    const lng = place.geometry.location.lng();
+                // Initialize Autocomplete with mobile-optimized settings
+                mobileAutocomplete = new google.maps.places.Autocomplete(mobileSearchInput, {
+                    types: ['address'],
+                    componentRestrictions: { country: 'US' },
+                    fields: ['formatted_address', 'geometry.location', 'name'],
+                    sessionToken: mobileSessionToken
+                });
+                
+                console.log('Google Places Autocomplete initialized successfully');
+                updateMobileProgress('Start typing an address...');
+                
+                // Handle place selection
+                mobileAutocomplete.addListener('place_changed', function() {
+                    const place = mobileAutocomplete.getPlace();
+                    console.log('Place selected:', place);
                     
-                    // Load Street View for this location
-                    loadMobileStreetViewAtLocation(lat, lng, place.formatted_address);
-                } else {
-                    // Invalid place
-                    alert('Please select a valid address from the suggestions.');
-                }
-            });
-            
-            // Handle Enter key
-            mobileSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    // Trigger the first autocomplete prediction
-                    const firstPrediction = document.querySelector('.pac-item:first-child');
-                    if (firstPrediction) {
-                        google.maps.event.trigger(firstPrediction, 'click');
+                    if (place.geometry && place.geometry.location) {
+                        // Valid address selected
+                        const lat = place.geometry.location.lat();
+                        const lng = place.geometry.location.lng();
+                        
+                        console.log('Loading Street View for:', lat, lng);
+                        // Load Street View for this location
+                        loadMobileStreetViewAtLocation(lat, lng, place.formatted_address);
+                    } else {
+                        // Invalid place - try geocoding the typed address
+                        console.log('Invalid place, trying geocoding...');
+                        tryGeocodeAddress(mobileSearchInput.value);
                     }
+                });
+                
+                // Handle Enter key
+                mobileSearchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        // Try to use the current input value for geocoding
+                        if (mobileSearchInput.value.length > 5) {
+                            tryGeocodeAddress(mobileSearchInput.value);
+                        }
+                    }
+                });
+                
+                // Clear button functionality
+                mobileSearchInput.addEventListener('input', function() {
+                    if (this.value.length === 0) {
+                        updateMobileProgress('Enter your address to get started with your Christmas light design');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error initializing Google Places Autocomplete:', error);
+                updateMobileProgress('Address search unavailable. Please use photo upload instead.');
+            }
+        }
+        
+        // Fallback geocoding function
+        function tryGeocodeAddress(address) {
+            if (!google.maps || !google.maps.Geocoder) {
+                alert('Address lookup is not available. Please use photo upload instead.');
+                return;
+            }
+            
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: address }, function(results, status) {
+                if (status === 'OK' && results[0]) {
+                    const location = results[0].geometry.location;
+                    const lat = location.lat();
+                    const lng = location.lng();
+                    const formattedAddress = results[0].formatted_address;
+                    
+                    console.log('Geocoded address:', formattedAddress);
+                    loadMobileStreetViewAtLocation(lat, lng, formattedAddress);
+                } else {
+                    alert('Address not found. Please try a different address or use photo upload.');
                 }
             });
         }
