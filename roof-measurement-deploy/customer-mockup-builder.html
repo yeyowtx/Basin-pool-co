@@ -1,0 +1,4162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Light Design Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 400px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .company-logo::before {
+            content: "⚡";
+            font-size: 32px;
+            color: white;
+        }
+        
+        .company-logo::after {
+            content: "🎄";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 20px;
+        }
+        
+        .company-name {
+            color: #dc2626;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        
+        .tagline {
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .tool-title {
+            color: #dc2626;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* Contact Information Section */
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title.contact::before { content: "🏠"; }
+        .section-title.upload::before { content: "📸"; }
+        .section-title.design::before { content: "🎨"; }
+        .section-title.effects::before { content: "✨"; }
+        .section-title.quote::before { content: "💰"; }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+        
+        .primary-btn {
+            width: 100%;
+            padding: 12px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        
+        .primary-btn:hover {
+            background: #b91c1c;
+        }
+        
+        .secondary-btn {
+            width: 100%;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        
+        .secondary-btn:hover {
+            background: #059669;
+        }
+        
+        .capture-btn {
+            padding: 10px 16px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .capture-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+        
+        .capture-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Upload Section */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+        
+        .upload-area:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .upload-area.dragover {
+            border-color: #059669;
+            background-color: #ecfdf5;
+        }
+        
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .upload-text {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .upload-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .preview-actions {
+            padding: 8px;
+            background: #f9fafb;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-small:hover {
+            background: #f3f4f6;
+        }
+        
+        /* Design Tools */
+        .tool-group {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .tool-header {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .drawing-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .control-btn {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .control-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .control-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+        
+        /* Color Pattern */
+        .color-pattern {
+            margin-bottom: 16px;
+        }
+        
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .color-option {
+            width: 100%;
+            height: 32px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .color-option.selected {
+            border-color: #059669;
+            transform: scale(1.05);
+        }
+        
+        .color-option.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* Predefined colors */
+        .color-red { background: #ef4444; }
+        .color-green { background: #22c55e; }
+        .color-blue { background: #3b82f6; }
+        .color-yellow { background: #eab308; }
+        .color-white { background: #ffffff; border-color: #d1d5db; }
+        .color-warm { background: #f59e0b; }
+        .color-cool { background: #06b6d4; }
+        .color-multicolor { 
+            background: linear-gradient(45deg, #ef4444 0%, #22c55e 25%, #3b82f6 50%, #eab308 75%, #ef4444 100%);
+        }
+        
+        /* Effects */
+        .effect-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .effect-label {
+            font-size: 14px;
+            color: #1f2937;
+        }
+        
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #d1d5db;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .toggle-switch.active {
+            background: #10b981;
+        }
+        
+        .toggle-switch::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+        
+        .slider-container {
+            margin: 12px 0;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #10b981;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #10b981;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Quote Section */
+        .quote-summary {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 1px solid #d1fae5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .quote-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .quote-total {
+            border-top: 1px solid #a7f3d0;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #059669;
+        }
+        
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #f9fafb;
+        }
+        
+        .canvas-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .design-canvas {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .design-canvas:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+        
+        .design-canvas.drawing-active {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.1);
+            transform: scale(1.001);
+        }
+        
+        .canvas-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        .canvas-placeholder .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .canvas-placeholder h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .canvas-placeholder p {
+            font-size: 14px;
+            max-width: 300px;
+        }
+        
+        .canvas-overlay {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .canvas-info {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        /* Light dots */
+        .light-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            z-index: 10;
+        }
+        
+        .light-dot.red { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
+        .light-dot.green { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+        .light-dot.blue { background: #3b82f6; box-shadow: 0 0 12px #3b82f6; }
+        .light-dot.yellow { background: #eab308; box-shadow: 0 0 12px #eab308; }
+        .light-dot.white { background: #ffffff; box-shadow: 0 0 12px #ffffff; border: 1px solid #d1d5db; }
+        .light-dot.warm { background: #f59e0b; box-shadow: 0 0 12px #f59e0b; }
+        .light-dot.cool { background: #06b6d4; box-shadow: 0 0 12px #06b6d4; }
+        
+        .light-dot.glow {
+            animation: lightPulse 2s infinite;
+        }
+        
+        @keyframes lightPulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        /* Google Maps Style Mobile Interface */
+        
+        /* Mobile Search Interface */
+        .mobile-search-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f9fa;
+            z-index: 2000;
+            flex-direction: column;
+        }
+        
+        .mobile-search-header {
+            background: white;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #dc2626;
+        }
+        
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .mobile-search-content {
+            flex: 1;
+            padding: 32px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .search-instruction {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .search-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+        
+        .search-instruction h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .search-instruction p {
+            font-size: 16px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        /* Google Maps Style Search Bar */
+        .mobile-search-bar-container {
+            margin-bottom: 32px;
+            position: relative;
+        }
+        
+        .mobile-search-bar {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            gap: 12px;
+        }
+        
+        .search-icon-small {
+            font-size: 18px;
+            color: #6b7280;
+        }
+        
+        #mobileAddressSearch {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #1f2937;
+            background: transparent;
+        }
+        
+        #mobileAddressSearch::placeholder {
+            color: #9ca3af;
+        }
+        
+        .search-clear {
+            background: none;
+            border: none;
+            color: #6b7280;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        /* Google Maps Style Suggestions */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .suggestion-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background-color 0.15s;
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .suggestion-icon {
+            font-size: 16px;
+            color: #6b7280;
+        }
+        
+        .suggestion-text {
+            flex: 1;
+        }
+        
+        .suggestion-main {
+            color: #1f2937;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .suggestion-secondary {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+        
+        /* Alternative Upload Option */
+        .search-alternative {
+            text-align: center;
+        }
+        
+        .divider {
+            margin: 24px 0;
+            position: relative;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+            z-index: -1;
+        }
+        
+        .divider span {
+            background: #f8f9fa;
+            padding: 0 16px;
+        }
+        
+        .photo-upload-btn {
+            background: white;
+            border: 2px dashed #d1d5db;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+        
+        .photo-upload-btn:hover {
+            border-color: #9ca3af;
+            background: #fafafa;
+        }
+        
+        .upload-icon {
+            font-size: 20px;
+        }
+        
+        /* Mobile Street View Interface */
+        .mobile-streetview-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: black;
+            z-index: 2000;
+            flex-direction: column;
+        }
+        
+        .streetview-header {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 10;
+        }
+        
+        .back-button, .cancel-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .streetview-address {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .streetview-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .streetview-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .capture-button {
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .capture-button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        /* Mobile Crop Interface */
+        .mobile-crop-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: black;
+            z-index: 2000;
+            flex-direction: column;
+        }
+        
+        .crop-header {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        
+        .crop-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .done-button {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .crop-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #cropCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .crop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .crop-box {
+            position: absolute;
+            border: 2px solid #007aff;
+            border-radius: 4px;
+            pointer-events: all;
+        }
+        
+        .crop-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #007aff;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: grab;
+        }
+        
+        .crop-handle.top-left { top: -10px; left: -10px; }
+        .crop-handle.top-right { top: -10px; right: -10px; }
+        .crop-handle.bottom-left { bottom: -10px; left: -10px; }
+        .crop-handle.bottom-right { bottom: -10px; right: -10px; }
+        
+        .crop-controls {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .crop-control {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 20px;
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* Mobile Drawing Interface */
+        .mobile-drawing-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f9fa;
+            z-index: 2000;
+            flex-direction: column;
+        }
+        
+        .drawing-header {
+            background: white;
+            color: #1f2937;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .drawing-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .next-button {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .drawing-container {
+            flex: 1;
+            position: relative;
+            background: white;
+        }
+        
+        .drawing-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .drawing-fab {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .drawing-fab:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+        
+        .drawing-fab.active {
+            background: #059669;
+        }
+        
+        .drawing-tool {
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0 4px;
+            transition: all 0.2s;
+        }
+        
+        .drawing-tool:hover {
+            background: #e5e7eb;
+        }
+        
+        .drawing-stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #1f2937;
+            display: flex;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Tablet Responsive (768px and below) */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+        }
+        
+        /* Mobile Phone Responsive (480px and below) */
+        @media (max-width: 480px) {
+            /* Hide desktop sidebar completely */
+            .sidebar {
+                display: none;
+            }
+            
+            /* Show mobile components */
+            .mobile-header {
+                display: flex;
+            }
+            
+            .mobile-tab-bar {
+                display: block;
+            }
+            
+            .mobile-fab {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .mobile-steps {
+                display: block;
+            }
+            
+            /* Full screen container */
+            .container {
+                flex-direction: column;
+                height: 100vh;
+                padding-top: 60px;
+                padding-bottom: 70px;
+            }
+            
+            /* Full screen canvas */
+            .map-container {
+                height: 100%;
+                flex: 1;
+            }
+            
+            .canvas-wrapper {
+                height: 100%;
+                border-radius: 0;
+            }
+            
+            .design-canvas {
+                border-radius: 0;
+                touch-action: none;
+            }
+            
+            /* Touch-optimized placeholder */
+            .canvas-placeholder {
+                padding: 20px;
+            }
+            
+            .canvas-placeholder .placeholder-icon {
+                font-size: 48px;
+            }
+            
+            .canvas-placeholder h3 {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+            
+            .canvas-placeholder p {
+                font-size: 14px;
+                max-width: 280px;
+            }
+            
+            /* Mobile-optimized overlays */
+            .canvas-overlay {
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(8px);
+                border-radius: 12px;
+                padding: 12px 16px;
+            }
+            
+            .canvas-info {
+                font-size: 13px;
+            }
+            
+            /* Street View optimizations */
+            #streetViewMainContainer {
+                padding-top: 0;
+            }
+            
+            /* Touch-friendly buttons in Street View */
+            .street-view-controls {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                z-index: 20;
+            }
+            
+            .street-view-controls button {
+                height: 48px;
+                padding: 12px 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(8px);
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1f2937;
+                cursor: pointer;
+                transition: all 0.2s;
+                min-width: 140px;
+            }
+            
+            .street-view-controls button:hover {
+                background: white;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            
+            .street-view-controls button:active {
+                transform: translateY(0);
+            }
+        }
+        
+        /* Utilities */
+        .hidden { display: none; }
+        .text-center { text-align: center; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+    </style>
+    
+    <!-- Google Maps API with Places Library -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk&libraries=places&loading=async" async defer></script>
+</head>
+<body>
+    <!-- Mobile Search Interface (Google Maps Style) -->
+    <div class="mobile-search-interface" id="mobileSearchInterface">
+        <div class="mobile-search-header">
+            <div class="mobile-brand">
+                <div class="brand-icon">⚡</div>
+                <span>Incredible Lighting</span>
+            </div>
+        </div>
+        
+        <div class="mobile-search-content">
+            <div class="search-instruction">
+                <div class="search-icon">🏠</div>
+                <h2>Find Your House</h2>
+                <p>Enter your address to get started with your Christmas light design</p>
+            </div>
+            
+            <div class="mobile-search-bar-container">
+                <div class="mobile-search-bar">
+                    <div class="search-input-wrapper">
+                        <div class="search-icon-small">📍</div>
+                        <input type="text" 
+                               id="mobileAddressSearch" 
+                               placeholder="Enter your address"
+                               autocomplete="off"
+                               spellcheck="false">
+                        <button class="search-clear" onclick="clearMobileSearch()" style="display:none;">✕</button>
+                    </div>
+                </div>
+                <div class="search-suggestions" id="mobileSuggestions" style="display:none;">
+                    <!-- Autocomplete suggestions will appear here -->
+                </div>
+            </div>
+            
+            <div class="search-alternative">
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <button class="photo-upload-btn" onclick="triggerPhotoUpload()">
+                    <span class="upload-icon">📸</span>
+                    Upload House Photo
+                </button>
+                <input type="file" id="mobilePhotoUpload" accept="image/*" style="display:none;" onchange="handleMobilePhotoUpload(this)">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Street View Interface -->
+    <div class="mobile-streetview-interface" id="mobileStreetViewInterface" style="display:none;">
+        <div class="streetview-header">
+            <button class="back-button" onclick="backToSearch()">← Back</button>
+            <span class="streetview-address" id="currentAddress">Loading...</span>
+        </div>
+        <div class="streetview-container" id="mobileStreetViewContainer">
+            <!-- Street View will be loaded here -->
+        </div>
+        <div class="streetview-controls">
+            <button class="capture-button" onclick="captureMobileStreetView()" id="captureButton">
+                📷 Capture This View
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mobile Crop Interface -->
+    <div class="mobile-crop-interface" id="mobileCropInterface" style="display:none;">
+        <div class="crop-header">
+            <button class="cancel-button" onclick="cancelCrop()">← Back</button>
+            <span class="crop-title">Crop Your View</span>
+            <button class="done-button" onclick="completeMobileCrop()">Done</button>
+        </div>
+        <div class="crop-container" id="cropContainer">
+            <canvas id="cropCanvas"></canvas>
+            <div class="crop-overlay" id="cropOverlay">
+                <div class="crop-box" id="cropBox">
+                    <div class="crop-handle top-left"></div>
+                    <div class="crop-handle top-right"></div>
+                    <div class="crop-handle bottom-left"></div>
+                    <div class="crop-handle bottom-right"></div>
+                </div>
+            </div>
+        </div>
+        <div class="crop-controls">
+            <button class="crop-control" onclick="rotateCrop()">🔄 Rotate</button>
+            <button class="crop-control" onclick="resetCrop()">↻ Reset</button>
+        </div>
+    </div>
+    
+    <!-- Mobile Drawing Interface -->
+    <div class="mobile-drawing-interface" id="mobileDrawingInterface" style="display:none;">
+        <div class="drawing-header">
+            <button class="back-button" onclick="backToCrop()">← Back</button>
+            <span class="drawing-title">Design Your Lights</span>
+            <button class="next-button" onclick="finishDrawing()">Next</button>
+        </div>
+        <div class="drawing-container">
+            <!-- Canvas will be moved here -->
+        </div>
+        <div class="drawing-controls" id="drawingControls">
+            <button class="drawing-fab" onclick="startMobileDrawing()" id="mobileDrawingFab">
+                ✏️ Start Drawing
+            </button>
+            <button class="drawing-tool" onclick="finishMobileDrawing()">✓ Finish Line</button>
+            <button class="drawing-tool" onclick="undoMobileDrawing()">↶ Undo</button>
+        </div>
+        <div class="drawing-stats" id="drawingStats" style="display:none;">
+            <span>Strings: <strong id="mobileStringCount">0</strong></span>
+            <span>Lights: <strong id="mobileLightCount">0</strong></span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Header -->
+            <div class="header">
+                <div class="company-logo"></div>
+                <div class="company-name">Incredible Lighting</div>
+                <div class="tagline">Powered by</div>
+                <div class="tool-title">Professional Christmas Light Design Tool</div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="section">
+                <div class="section-title contact">Contact Information</div>
+                <input type="text" class="form-input" id="fullName" placeholder="Full Name" required>
+                <input type="tel" class="form-input" id="phoneNumber" placeholder="Phone Number" required>
+                <input type="email" class="form-input" id="emailAddress" placeholder="Email Address" required>
+            </div>
+
+            <!-- Property Address -->
+            <div class="section">
+                <div class="section-title contact">Property Address</div>
+                <input type="text" class="form-input" id="propertyAddress" placeholder="Enter property address for Street View (e.g., 123 Main St, Dallas, TX)">
+                <button class="primary-btn" onclick="loadProperty()">
+                    🌐 Load Street View
+                </button>
+                <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                    🎯 Interactive Street View loads in main view with capture tools
+                </div>
+            </div>
+
+            <!-- OR Separator -->
+            <div style="text-align: center; margin: 20px 0; position: relative;">
+                <div style="border-top: 1px solid #e5e7eb; width: 100%;"></div>
+                <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 15px; color: #6b7280; font-weight: 500; font-size: 14px;">
+                    OR
+                </div>
+            </div>
+
+            <!-- Photo Upload -->
+            <div class="section">
+                <div class="section-title upload">Upload House Photo</div>
+                
+                <div id="uploadArea" class="upload-area" onclick="document.getElementById('imageInput').click()">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Click to upload or drag & drop</div>
+                    <div class="upload-subtitle">JPG, PNG up to 10MB</div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                </div>
+                
+                <div id="imagePreview" class="image-preview hidden">
+                    <img id="previewImg" class="preview-image" alt="House Preview">
+                    <div class="preview-actions">
+                        <button class="btn-small" onclick="replaceImage()">Replace</button>
+                        <button class="btn-small" onclick="removeImage()">Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design Tools -->
+            <div class="section">
+                <div class="section-title design">Design Your Lights</div>
+                
+                <div class="tool-group">
+                    <div class="tool-header">Quick Start</div>
+                    <button class="primary-btn" id="startDrawingBtn" onclick="startDrawingLights()" style="margin-bottom: 12px;">
+                        💡 Start Drawing Lights
+                    </button>
+                    
+                    <div id="drawingActions" class="drawing-controls" style="display: none; margin-bottom: 12px;">
+                        <button class="secondary-btn" id="finishLineBtn" onclick="finishCurrentLine()" disabled>
+                            ✅ Finish Line (<span id="pointCount">0</span> points)
+                        </button>
+                        <button class="control-btn" id="undoPointBtn" onclick="undoLastPoint()" disabled>
+                            ↶ Undo Point
+                        </button>
+                        <button class="control-btn" onclick="cancelCurrentLine()">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                    
+                    <div class="drawing-controls">
+                        <button class="control-btn" onclick="undoLastElement()" id="undoBtn" disabled>
+                            ↩️ Undo Last Element
+                        </button>
+                        <button class="control-btn" onclick="clearAllLights()">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+                    
+                    <div style="font-size: 11px; color: #6b7280; text-align: center; margin-top: 8px;">
+                        <div id="drawingInstructions">Click "Start Drawing Lights" then draw lines on your house roofline</div>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <div class="tool-header">Color Pattern</div>
+                    
+                    <div class="pattern-mode-selector" style="margin-bottom: 12px;">
+                        <label style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="radio" name="patternMode" value="alternating" onchange="setPatternMode('alternating')" style="margin-right: 8px;">
+                            <span>Alternating Pattern</span>
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="radio" name="patternMode" value="solid" checked onchange="setPatternMode('solid')" style="margin-right: 8px;">
+                            <span>Solid Color</span>
+                        </label>
+                    </div>
+                    
+                    <div id="colorSelection">
+                        <div id="patternColors">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="width: 20px; font-size: 14px; font-weight: 600;">1:</span>
+                                <select id="color0Select" onchange="updateColorFromDropdown(0, this.value)" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                    <option value="red">Red</option>
+                                    <option value="green">Green</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="orange">Orange</option>
+                                    <option value="yellow">Yellow</option>
+                                    <option value="teal">Teal</option>
+                                    <option value="pink">Pink</option>
+                                    <option value="coolwhite">Cool White</option>
+                                    <option value="warmwhite" selected>Warm White</option>
+                                    <option value="multicolor">Multi-color</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;" id="color2Row">
+                                <span style="width: 20px; font-size: 14px; font-weight: 600;">2:</span>
+                                <select id="color1Select" onchange="updateColorFromDropdown(1, this.value)" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                    <option value="red" selected>Red</option>
+                                    <option value="green">Green</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="orange">Orange</option>
+                                    <option value="yellow">Yellow</option>
+                                    <option value="teal">Teal</option>
+                                    <option value="pink">Pink</option>
+                                    <option value="coolwhite">Cool White</option>
+                                    <option value="warmwhite">Warm White</option>
+                                    <option value="multicolor">Multi-color</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 12px;">
+                            <button class="control-btn" onclick="addColor()" id="addColorBtn" style="width: 100%;">
+                                ➕ Add Color
+                            </button>
+                            <button class="control-btn" onclick="resetPattern()" style="width: 100%; margin-top: 4px;">
+                                🔄 Reset Pattern
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="patternPreview" style="margin-top: 12px; padding: 8px; background: #f0fdf4; border-radius: 6px; font-size: 11px; color: #059669;">
+                        <div style="font-weight: 600;">Pattern Preview</div>
+                        <div style="margin-top: 4px;">Click points on canvas to create alternating color light strings</div>
+                    </div>
+                </div>
+                
+                <!-- Visual Effects Panel -->
+                <div class="tool-group">
+                    <div class="tool-header">✨ Visual Effects</div>
+                    
+                    <!-- Night Mode Darkness -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 600;">Night Mode Darkness</span>
+                            <span id="darknessLevel" style="background: #fed7aa; color: #9a3412; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">20%</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 24px; margin-right: 8px;">☀️</span>
+                            <span style="font-size: 12px; color: #6b7280;">Bright Day</span>
+                            <div style="display: flex; margin-left: 8px;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; margin-right: 2px;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; margin-right: 2px;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #d97706; margin-right: 2px;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #b45309;"></div>
+                            </div>
+                        </div>
+                        <input type="range" id="darknessSlider" min="0" max="80" value="20" 
+                               style="width: 100%; margin-bottom: 8px;" 
+                               oninput="adjustDarkness(this.value)">
+                        <div style="font-size: 11px; color: #6b7280;">
+                            Adjust darkness level to showcase how lights look at different times
+                        </div>
+                    </div>
+                    
+                    <!-- Glow Effect -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 600;">Glow Effect</span>
+                            <span id="glowStatus" style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">ON</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 18px; margin-right: 8px;">💡</span>
+                            <span style="font-size: 12px; color: #6b7280;">Realistic light glow enabled</span>
+                            <div style="display: flex; margin-left: 8px;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; margin-right: 2px;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; margin-right: 2px;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+                            </div>
+                        </div>
+                        <label style="display: flex; align-items: center; background: #fef9c3; padding: 8px; border-radius: 6px; cursor: pointer;">
+                            <input type="checkbox" id="glowToggle" checked onchange="toggleGlow(this.checked)" style="margin-right: 8px;">
+                            <span style="font-size: 14px; font-weight: 600;">Glow Enabled</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <div class="tool-header">Bulb Settings</div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px;">Bulb Size</span>
+                            <span style="background: #fbbf24; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">Large (C9)</span>
+                        </div>
+                        <div style="font-size: 12px; color: #6b7280;">Professional grade C9 bulbs for optimal visibility</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px;">Bulb Spacing</span>
+                            <span style="background: #a3e635; color: #365314; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">12" Tight</span>
+                        </div>
+                        <div style="font-size: 12px; color: #6b7280;">Optimal spacing for professional installation</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Design Canvas -->
+        <div class="map-container">
+            <div class="canvas-wrapper">
+                <canvas id="designCanvas" 
+                        class="design-canvas absolute inset-0 max-w-full max-h-full cursor-crosshair" 
+                        width="800" 
+                        height="600" 
+                        tabindex="0" 
+                        style="width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; touch-action: none;"></canvas>
+                
+                <!-- Street View Panorama (full-screen in main view) -->
+                <div id="streetViewMainContainer" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;">
+                    <div id="streetViewPanorama" style="width: 100%; height: 100%;"></div>
+                    
+                    <!-- Street View Controls Overlay -->
+                    <div style="position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 20;">
+                        <button class="capture-btn" onclick="captureFullStreetView()" title="Capture Full View">
+                            📸 Capture Full View
+                        </button>
+                        <button class="capture-btn" onclick="enableCropMode()" title="Crop & Capture">
+                            ✂️ Crop & Capture
+                        </button>
+                        <button class="capture-btn" onclick="closeStreetView()" title="Close Street View">
+                            ✕ Close
+                        </button>
+                    </div>
+                    
+                    <!-- Crop Selection Overlay -->
+                    <div id="cropOverlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 15;">
+                        <div id="cropSelection" style="position: absolute; border: 3px dashed #dc2626; background: rgba(220, 38, 38, 0.1); cursor: move; min-width: 200px; min-height: 112px; display: none;">
+                            <div style="position: absolute; top: -30px; left: 0; background: #dc2626; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                                Drag to position | Locked to 16:9 ratio (1920x1080)
+                            </div>
+                            <div class="crop-handle" style="position: absolute; width: 10px; height: 10px; background: #dc2626; bottom: -5px; right: -5px; cursor: nw-resize;"></div>
+                        </div>
+                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px;">
+                            <button class="capture-btn" onclick="captureCroppedView()">
+                                🎯 Capture Crop
+                            </button>
+                            <button class="capture-btn" onclick="cancelCropMode()">
+                                ❌ Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="canvas-placeholder" id="canvasPlaceholder">
+                    <div class="placeholder-icon">🏠</div>
+                    <h3>Load Street View or Upload Photo</h3>
+                    <p>Enter an address to load interactive Street View, or upload a photo of your house to start designing your holiday light display.</p>
+                </div>
+                
+                <div class="canvas-overlay" id="canvasInfo" style="display: none;">
+                    <div class="canvas-info">
+                        <div>Lights: <span id="overlayLightCount">0</span></div>
+                        <div>Mode: <span id="overlayMode">Select</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- html2canvas for Street View capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        // Google Maps API Key (from roof measurement tool)
+        const API_KEY = 'AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk';
+        
+        // Crop aspect ratio constant for 16:9 (1920x1080)
+        const CROP_ASPECT_RATIO = 1920 / 1080; // 1.777... (16:9)
+        
+        // Mobile Interface Management
+        let currentMobilePanel = null;
+        let currentMobileStep = 1;
+        let mobileDrawingMode = false;
+        
+        // Mobile Panel Management
+        function showMobilePanel(panelType) {
+            const panel = document.getElementById('mobilePanel');
+            const title = document.getElementById('mobilePanelTitle');
+            const content = document.getElementById('mobilePanelContent');
+            
+            // Update active tab
+            document.querySelectorAll('.mobile-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`[onclick="showMobilePanel('${panelType}')"]`).classList.add('active');
+            
+            // Set panel content
+            currentMobilePanel = panelType;
+            
+            switch(panelType) {
+                case 'address':
+                    title.textContent = 'Load House Photo';
+                    content.innerHTML = getMobileAddressContent();
+                    break;
+                case 'design':
+                    title.textContent = 'Design Tools';
+                    content.innerHTML = getMobileDesignContent();
+                    break;
+                case 'colors':
+                    title.textContent = 'Light Colors';
+                    content.innerHTML = getMobileColorsContent();
+                    break;
+                case 'contact':
+                    title.textContent = 'Get Quote';
+                    content.innerHTML = getMobileContactContent();
+                    break;
+            }
+            
+            // Show panel
+            panel.classList.remove('hidden');
+            
+            // Update step indicator
+            updateMobileStep(panelType);
+        }
+        
+        function hideMobilePanel() {
+            const panel = document.getElementById('mobilePanel');
+            panel.classList.add('hidden');
+            currentMobilePanel = null;
+        }
+        
+        function toggleMobileMenu() {
+            // For now, just show the address panel
+            showMobilePanel('address');
+        }
+        
+        function updateMobileStep(panelType) {
+            const steps = ['address', 'design', 'colors', 'contact'];
+            const stepIndex = steps.indexOf(panelType);
+            
+            document.querySelectorAll('.mobile-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < stepIndex) {
+                    step.classList.add('completed');
+                } else if (index === stepIndex) {
+                    step.classList.add('active');
+                }
+            });
+        }
+        
+        function toggleDrawingMode() {
+            mobileDrawingMode = !mobileDrawingMode;
+            const fab = document.getElementById('mobileFab');
+            
+            if (mobileDrawingMode) {
+                startDrawing();
+                fab.textContent = '✅';
+                fab.style.background = 'linear-gradient(135deg, #059669, #047857)';
+            } else {
+                stopDrawing();
+                fab.textContent = '✏️';
+                fab.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+            }
+        }
+        
+        // Mobile Panel Content Generators
+        function getMobileAddressContent() {
+            return `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🏠</div>
+                    <h3 style="margin-bottom: 8px; color: #1f2937;">Load Your House</h3>
+                    <p style="color: #6b7280; margin-bottom: 24px;">Enter your address for Street View or upload a photo</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Property Address</label>
+                    <input type="text" 
+                           id="mobilePropertyAddress" 
+                           class="mobile-input"
+                           placeholder="123 Main St, Your City, State"
+                           style="width: 100%; border: 1px solid #d1d5db; margin-bottom: 12px;">
+                    <button onclick="loadMobileStreetView()" 
+                            class="mobile-button-large"
+                            style="width: 100%; background: linear-gradient(135deg, #059669, #047857); color: white; border: none;">
+                        📍 Load Street View
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0; color: #6b7280;">
+                    — OR —
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Upload Photo</label>
+                    <input type="file" 
+                           id="mobilePhotoUpload" 
+                           accept="image/*"
+                           onchange="handleMobilePhotoUpload(this)"
+                           style="width: 100%; padding: 12px; border: 2px dashed #d1d5db; border-radius: 12px; text-align: center; cursor: pointer;">
+                </div>
+            `;
+        }
+        
+        function getMobileDesignContent() {
+            return `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">✏️</div>
+                    <h3 style="margin-bottom: 8px; color: #1f2937;">Design Your Lights</h3>
+                    <p style="color: #6b7280; margin-bottom: 24px;">Tap points on your house to create light strings</p>
+                </div>
+                
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; color: #059669; margin-bottom: 8px;">How to Draw Lights:</div>
+                    <ol style="color: #047857; font-size: 14px; margin-left: 16px;">
+                        <li>Tap the ✏️ button to start drawing</li>
+                        <li>Tap points along your roofline</li>
+                        <li>Tap ✅ to finish the light string</li>
+                        <li>Repeat for more rooflines</li>
+                    </ol>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <button onclick="toggleDrawingMode()" 
+                            class="mobile-button"
+                            style="flex: 1; background: ${mobileDrawingMode ? '#059669' : '#dc2626'}; color: white; border: none;">
+                        ${mobileDrawingMode ? '✅ Finish Line' : '✏️ Start Drawing'}
+                    </button>
+                    <button onclick="undoLastPoint()" 
+                            class="mobile-button"
+                            style="background: #6b7280; color: white; border: none;">
+                        ↶ Undo
+                    </button>
+                </div>
+                
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                    <div style="font-weight: 600; color: #1e293b; margin-bottom: 8px;">Drawing Stats:</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; color: #64748b;">
+                        <span>Light Strings: <strong id="mobileStringCount">0</strong></span>
+                        <span>Total Bulbs: <strong id="mobileBulbCount">0</strong></span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getMobileColorsContent() {
+            return `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🎨</div>
+                    <h3 style="margin-bottom: 8px; color: #1f2937;">Choose Colors</h3>
+                    <p style="color: #6b7280; margin-bottom: 24px;">Select colors for your Christmas lights</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1f2937;">Pattern Style</label>
+                    <select onchange="updateMobilePattern(this.value)" 
+                            class="mobile-input"
+                            style="width: 100%; border: 1px solid #d1d5db;">
+                        <option value="solid">Solid Color</option>
+                        <option value="alternating">Alternating Colors</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1f2937;">Primary Color</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                        ${getMobileColorButtons()}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1f2937;">Effects</label>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: 500;">Night Mode</span>
+                            <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" onchange="toggleMobileGlow()" style="opacity: 0; width: 0; height: 0;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px;"></span>
+                                <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                            </label>
+                        </div>
+                        <input type="range" 
+                               min="0" max="80" value="20" 
+                               onchange="updateMobileDarkness(this.value)"
+                               style="width: 100%; margin-top: 8px;">
+                        <div style="text-align: center; font-size: 12px; color: #6b7280; margin-top: 4px;">
+                            Darkness: <span id="mobileDarknessValue">20</span>%
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getMobileContactContent() {
+            return `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">💬</div>
+                    <h3 style="margin-bottom: 8px; color: #1f2937;">Get Your Quote</h3>
+                    <p style="color: #6b7280; margin-bottom: 24px;">Tell us about your project for a custom quote</p>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Full Name</label>
+                    <input type="text" 
+                           class="mobile-input"
+                           placeholder="Your full name"
+                           style="width: 100%; border: 1px solid #d1d5db;">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Phone Number</label>
+                    <input type="tel" 
+                           class="mobile-input"
+                           placeholder="(555) 123-4567"
+                           style="width: 100%; border: 1px solid #d1d5db;">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Email Address</label>
+                    <input type="email" 
+                           class="mobile-input"
+                           placeholder="your@email.com"
+                           style="width: 100%; border: 1px solid #d1d5db;">
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Project Details</label>
+                    <textarea class="mobile-input"
+                              placeholder="Tell us about your Christmas light installation project..."
+                              style="width: 100%; height: 100px; border: 1px solid #d1d5db; resize: vertical;"></textarea>
+                </div>
+                
+                <button onclick="submitMobileQuote()" 
+                        class="mobile-button-large"
+                        style="width: 100%; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border: none;">
+                    🎄 Get My Christmas Light Quote
+                </button>
+                
+                <div style="text-align: center; margin-top: 16px; font-size: 12px; color: #6b7280;">
+                    We'll call you within 24 hours with your custom quote
+                </div>
+            `;
+        }
+        
+        function getMobileColorButtons() {
+            const colors = {
+                warmwhite: '#FFFBDC',
+                red: '#dc2626',
+                green: '#16a34a',
+                blue: '#2563eb',
+                purple: '#9333ea',
+                orange: '#ea580c'
+            };
+            
+            let html = '';
+            for (const [name, color] of Object.entries(colors)) {
+                html += `
+                    <button onclick="setMobileColor('${name}')" 
+                            style="height: 48px; border: 2px solid #e5e7eb; border-radius: 12px; background: ${color}; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                        <span style="color: ${name === 'warmwhite' ? '#000' : '#fff'}; font-weight: 600; font-size: 12px; text-transform: capitalize;">
+                            ${name}
+                        </span>
+                    </button>
+                `;
+            }
+            return html;
+        }
+        
+        // Mobile Function Handlers
+        function loadMobileStreetView() {
+            const address = document.getElementById('mobilePropertyAddress').value;
+            if (address) {
+                document.getElementById('propertyAddress').value = address;
+                loadStreetView();
+                hideMobilePanel();
+                showMobilePanel('design');
+            }
+        }
+        
+        function handleMobilePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('fileInput').files = input.files;
+                document.getElementById('fileInput').dispatchEvent(new Event('change'));
+                hideMobilePanel();
+                showMobilePanel('design');
+            }
+        }
+        
+        function setMobileColor(colorName) {
+            colorPattern = [colorName];
+            updateColorFromDropdown(0, colorName);
+            
+            // Visual feedback
+            const buttons = document.querySelectorAll('[onclick^="setMobileColor"]');
+            buttons.forEach(btn => btn.style.border = '2px solid #e5e7eb');
+            event.target.style.border = '3px solid #059669';
+        }
+        
+        function updateMobilePattern(pattern) {
+            patternMode = pattern;
+            if (pattern === 'solid') {
+                colorPattern = [colorPattern[0] || 'warmwhite'];
+            } else {
+                colorPattern = ['warmwhite', 'red'];
+            }
+            drawCanvas();
+        }
+        
+        function toggleMobileGlow() {
+            glowEnabled = !glowEnabled;
+            drawCanvas();
+        }
+        
+        function updateMobileDarkness(value) {
+            darknessLevel = parseInt(value);
+            document.getElementById('mobileDarknessValue').textContent = value;
+            drawCanvas();
+        }
+        
+        function submitMobileQuote() {
+            // Add form validation and submission logic here
+            alert('Thank you! We\'ll contact you within 24 hours with your custom Christmas light quote.');
+            hideMobilePanel();
+        }
+        
+        // Update mobile stats
+        function updateMobileStats() {
+            if (currentMobilePanel === 'design') {
+                const stringCountEl = document.getElementById('mobileStringCount');
+                const bulbCountEl = document.getElementById('mobileBulbCount');
+                
+                if (stringCountEl && bulbCountEl) {
+                    stringCountEl.textContent = lightStrings.length;
+                    
+                    let totalBulbs = 0;
+                    lightStrings.forEach(string => {
+                        totalBulbs += string.bulbs.length;
+                    });
+                    bulbCountEl.textContent = totalBulbs;
+                }
+            }
+        }
+        
+        // NEW MOBILE INTERFACE FUNCTIONS (Google Maps Style)
+        let mobileAutocomplete = null;
+        let mobileSessionToken = null;
+        
+        // Mobile Interface State Management
+        let currentMobileInterface = null; // 'search', 'streetview', 'crop', 'drawing'
+        
+        // Initialize mobile interfaces when DOM is ready
+        function initializeMobileInterfaces() {
+            // Detect mobile device
+            const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // Show mobile search interface by default
+                showMobileInterface('search');
+            }
+            
+            // Initialize Google Places Autocomplete when Maps API is loaded
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                initializeMobilePlacesAutocomplete();
+            } else {
+                // Retry after Maps API loads
+                setTimeout(initializeMobileInterfaces, 1000);
+            }
+        }
+        
+        // Google Places Autocomplete (2025 API)
+        function initializeMobilePlacesAutocomplete() {
+            const mobileSearchInput = document.getElementById('mobileAddressSearch');
+            if (!mobileSearchInput) return;
+            
+            // Create session token for cost optimization
+            mobileSessionToken = new google.maps.places.AutocompleteSessionToken();
+            
+            // Initialize Autocomplete
+            mobileAutocomplete = new google.maps.places.Autocomplete(mobileSearchInput, {
+                types: ['address'],
+                componentRestrictions: { country: 'US' },
+                fields: ['formatted_address', 'geometry.location', 'name'],
+                sessionToken: mobileSessionToken
+            });
+            
+            // Handle place selection
+            mobileAutocomplete.addListener('place_changed', function() {
+                const place = mobileAutocomplete.getPlace();
+                
+                if (place.geometry && place.geometry.location) {
+                    // Valid address selected
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    
+                    // Load Street View for this location
+                    loadMobileStreetViewAtLocation(lat, lng, place.formatted_address);
+                } else {
+                    // Invalid place
+                    alert('Please select a valid address from the suggestions.');
+                }
+            });
+            
+            // Handle Enter key
+            mobileSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Trigger the first autocomplete prediction
+                    const firstPrediction = document.querySelector('.pac-item:first-child');
+                    if (firstPrediction) {
+                        google.maps.event.trigger(firstPrediction, 'click');
+                    }
+                }
+            });
+        }
+        
+        // Mobile Interface Navigation
+        function showMobileInterface(interfaceType) {
+            // Hide all interfaces
+            const interfaces = ['mobileSearchInterface', 'mobileStreetviewInterface', 'mobileCropInterface', 'mobileDrawingInterface'];
+            interfaces.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+            
+            // Show requested interface
+            const targetInterface = document.getElementById(`mobile${interfaceType.charAt(0).toUpperCase() + interfaceType.slice(1)}Interface`);
+            if (targetInterface) {
+                targetInterface.style.display = 'flex';
+                currentMobileInterface = interfaceType;
+            }
+            
+            // Update interface-specific behavior
+            switch(interfaceType) {
+                case 'search':
+                    // Focus search input
+                    setTimeout(() => {
+                        const searchInput = document.getElementById('mobileAddressSearch');
+                        if (searchInput) searchInput.focus();
+                    }, 100);
+                    break;
+                case 'streetview':
+                    // Initialize Street View if not already done
+                    if (!streetViewPanorama) {
+                        // Will be initialized when location is loaded
+                    }
+                    break;
+                case 'crop':
+                    // Initialize crop canvas if needed
+                    break;
+                case 'drawing':
+                    // Prepare drawing tools
+                    break;
+            }
+        }
+        
+        // Load Street View at specific location
+        function loadMobileStreetViewAtLocation(lat, lng, address) {
+            // Update progress
+            updateMobileProgress('Loading Street View...');
+            
+            // Switch to Street View interface
+            showMobileInterface('streetview');
+            
+            // Initialize Street View
+            const panoramaDiv = document.getElementById('mobileStreetViewContainer');
+            if (!panoramaDiv) {
+                console.error('Street View container not found');
+                return;
+            }
+            
+            // Create Street View panorama
+            streetViewPanorama = new google.maps.StreetViewPanorama(panoramaDiv, {
+                position: { lat, lng },
+                pov: { heading: 0, pitch: 5 },
+                zoom: 1,
+                visible: true,
+                addressControl: false,
+                linksControl: true,
+                panControl: true,
+                zoomControl: true,
+                fullscreenControl: false,
+                clickToGo: true,
+                scrollwheel: true
+            });
+            
+            // Handle Street View load
+            streetViewPanorama.addListener('pano_changed', function() {
+                updateMobileProgress('Street View loaded! Adjust the view and capture.');
+            });
+            
+            // Handle errors
+            streetViewPanorama.addListener('status_changed', function() {
+                const status = streetViewPanorama.getStatus();
+                if (status !== google.maps.StreetViewStatus.OK) {
+                    alert('Street View is not available for this location. Please try a nearby address or upload a photo instead.');
+                    showMobileInterface('search');
+                }
+            });
+        }
+        
+        // Capture Street View for mobile
+        function captureMobileStreetView() {
+            const panoramaDiv = document.getElementById('mobileStreetViewContainer');
+            if (!panoramaDiv) return;
+            
+            updateMobileProgress('Capturing image...');
+            
+            // Use html2canvas to capture Street View
+            html2canvas(panoramaDiv, {
+                useCORS: true,
+                allowTaint: true,
+                scale: 1,
+                logging: false
+            }).then(canvas => {
+                const img = new Image();
+                img.onload = function() {
+                    // Store captured image
+                    currentImage = img;
+                    
+                    // Move to crop interface
+                    showMobileInterface('crop');
+                    initializeMobileCrop(img);
+                };
+                img.src = canvas.toDataURL();
+            }).catch(error => {
+                console.error('Street View capture failed:', error);
+                alert('Failed to capture Street View. Please try again.');
+            });
+        }
+        
+        // Initialize mobile crop interface
+        function initializeMobileCrop(image) {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas || !image) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to screen dimensions
+            const container = document.querySelector('.crop-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Calculate image scaling to fit screen
+            const imageAspect = image.width / image.height;
+            const screenAspect = canvas.width / canvas.height;
+            
+            let drawWidth, drawHeight, offsetX, offsetY;
+            
+            if (imageAspect > screenAspect) {
+                // Image is wider than screen
+                drawHeight = canvas.height;
+                drawWidth = drawHeight * imageAspect;
+                offsetX = (canvas.width - drawWidth) / 2;
+                offsetY = 0;
+            } else {
+                // Image is taller than screen
+                drawWidth = canvas.width;
+                drawHeight = drawWidth / imageAspect;
+                offsetX = 0;
+                offsetY = (canvas.height - drawHeight) / 2;
+            }
+            
+            // Draw image
+            ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+            
+            // Create crop overlay (16:9 ratio)
+            createMobileCropOverlay();
+        }
+        
+        // Create crop overlay for 16:9 ratio
+        function createMobileCropOverlay() {
+            const canvas = document.getElementById('cropCanvas');
+            const overlay = document.querySelector('.crop-overlay');
+            
+            // Calculate 16:9 crop box
+            const targetAspect = 16 / 9;
+            const canvasAspect = canvas.width / canvas.height;
+            
+            let cropWidth, cropHeight, cropX, cropY;
+            
+            if (canvasAspect > targetAspect) {
+                // Canvas is wider than 16:9
+                cropHeight = Math.min(canvas.height * 0.8, canvas.height - 100);
+                cropWidth = cropHeight * targetAspect;
+                cropX = (canvas.width - cropWidth) / 2;
+                cropY = (canvas.height - cropHeight) / 2;
+            } else {
+                // Canvas is taller than 16:9
+                cropWidth = Math.min(canvas.width * 0.9, canvas.width - 40);
+                cropHeight = cropWidth / targetAspect;
+                cropX = (canvas.width - cropWidth) / 2;
+                cropY = (canvas.height - cropHeight) / 2;
+            }
+            
+            // Create crop box
+            let cropBox = document.querySelector('.crop-box');
+            if (!cropBox) {
+                cropBox = document.createElement('div');
+                cropBox.className = 'crop-box';
+                overlay.appendChild(cropBox);
+            }
+            
+            // Position crop box
+            cropBox.style.left = cropX + 'px';
+            cropBox.style.top = cropY + 'px';
+            cropBox.style.width = cropWidth + 'px';
+            cropBox.style.height = cropHeight + 'px';
+            
+            // Store crop dimensions for later use
+            window.mobileCropBox = { x: cropX, y: cropY, width: cropWidth, height: cropHeight };
+        }
+        
+        // Complete crop and move to drawing
+        function completeMobileCrop() {
+            const canvas = document.getElementById('cropCanvas');
+            const cropBox = window.mobileCropBox;
+            
+            if (!canvas || !cropBox) return;
+            
+            // Create cropped canvas
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = 1920; // 16:9 target width
+            croppedCanvas.height = 1080; // 16:9 target height
+            
+            const croppedCtx = croppedCanvas.getContext('2d');
+            
+            // Copy cropped area to new canvas
+            croppedCtx.drawImage(canvas, 
+                cropBox.x, cropBox.y, cropBox.width, cropBox.height,
+                0, 0, 1920, 1080
+            );
+            
+            // Convert to image
+            const croppedImg = new Image();
+            croppedImg.onload = function() {
+                currentImage = croppedImg;
+                
+                // Move to drawing interface
+                showMobileInterface('drawing');
+                initializeMobileDrawing();
+            };
+            croppedImg.src = croppedCanvas.toDataURL();
+        }
+        
+        // Initialize mobile drawing interface
+        function initializeMobileDrawing() {
+            // Move canvas to mobile drawing container
+            const canvas = document.getElementById('canvas');
+            const mobileContainer = document.querySelector('.drawing-container');
+            
+            if (canvas && mobileContainer && currentImage) {
+                // Temporarily move canvas to mobile container
+                mobileContainer.appendChild(canvas);
+                
+                // Setup canvas with cropped image
+                const ctx = canvas.getContext('2d');
+                canvas.width = 1920;
+                canvas.height = 1080;
+                
+                // Draw background image
+                ctx.drawImage(currentImage, 0, 0, 1920, 1080);
+                
+                // Update canvas style for mobile
+                canvas.style.width = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.maxHeight = 'calc(100vh - 200px)';
+                canvas.style.objectFit = 'contain';
+                
+                // Enable drawing mode
+                isDrawing = false; // Start with drawing disabled
+                updateDrawingUI();
+            }
+            
+            // Show drawing tools
+            showMobileDrawingTools();
+        }
+        
+        // Show mobile drawing tools
+        function showMobileDrawingTools() {
+            const toolsContainer = document.querySelector('.mobile-drawing-tools');
+            if (toolsContainer) {
+                toolsContainer.style.display = 'flex';
+            }
+        }
+        
+        // Mobile drawing tool handlers
+        function startMobileDrawing() {
+            isDrawing = true;
+            currentLine = [];
+            
+            // Update UI
+            const startBtn = document.querySelector('[onclick="startMobileDrawing()"]');
+            if (startBtn) {
+                startBtn.textContent = 'Drawing...';
+                startBtn.classList.add('active');
+            }
+        }
+        
+        function finishMobileDrawing() {
+            if (currentLine.length > 0) {
+                finishLine();
+            }
+            
+            // Update UI
+            const startBtn = document.querySelector('[onclick="startMobileDrawing()"]');
+            if (startBtn) {
+                startBtn.textContent = 'Start Drawing';
+                startBtn.classList.remove('active');
+            }
+        }
+        
+        function undoMobileDrawing() {
+            undoLastLine();
+        }
+        
+        // Mobile progress updates
+        function updateMobileProgress(message) {
+            // Find progress text elements and update them
+            const progressElements = document.querySelectorAll('.mobile-progress-text, .search-instruction p');
+            progressElements.forEach(el => {
+                if (el) el.textContent = message;
+            });
+        }
+        
+        // Additional mobile interface functions
+        function clearMobileSearch() {
+            const searchInput = document.getElementById('mobileAddressSearch');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
+        }
+        
+        function triggerPhotoUpload() {
+            const photoUpload = document.getElementById('mobilePhotoUpload');
+            if (photoUpload) {
+                photoUpload.click();
+            }
+        }
+        
+        function handleMobilePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        currentImage = img;
+                        showMobileInterface('crop');
+                        initializeMobileCrop(img);
+                    };
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function backToSearch() {
+            showMobileInterface('search');
+        }
+        
+        function backToStreetView() {
+            showMobileInterface('streetview');
+        }
+        
+        function backToCrop() {
+            showMobileInterface('crop');
+        }
+        
+        function cancelCrop() {
+            // If came from photo upload, go back to search
+            // If came from street view, go back to street view
+            if (streetViewPanorama) {
+                showMobileInterface('streetview');
+            } else {
+                showMobileInterface('search');
+            }
+        }
+        
+        // Street View panorama instance
+        let streetViewPanorama = null;
+        
+        // Fix WebGL context for Street View capture (based on GitHub/Stack Overflow research)
+        const originalGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function(type, attributes) {
+            if (type === 'webgl' || type === 'webgl2') {
+                attributes = Object.assign({}, attributes, {
+                    preserveDrawingBuffer: true
+                });
+            }
+            return originalGetContext.call(this, type, attributes);
+        };
+        
+        // Global State - Roofline Pro Style
+        let _currentImage = null;
+        
+        // Add debugging wrapper for currentImage
+        Object.defineProperty(window, 'currentImage', {
+            get: function() {
+                return _currentImage;
+            },
+            set: function(value) {
+                if (value === null && _currentImage !== null) {
+                    console.error('❌ WARNING: currentImage being reset to null!', new Error().stack);
+                }
+                if (value !== null && _currentImage === null) {
+                    console.log('✅ currentImage being set to image:', value.width, 'x', value.height);
+                }
+                _currentImage = value;
+            }
+        });
+        let isDrawingActive = false; // Are we in drawing mode?
+        let isCurrentlyDrawing = false; // Are we actively drawing a line?
+        let currentPath = [];
+        let lightStrings = []; // Completed light strings
+        let patternMode = 'solid'; // Default to solid warm white
+        let colorPattern = ['warmwhite']; // Default to warm white solid
+        let bulbSize = 8; // C9 size
+        let bulbSpacing = 12; // 12" spacing
+        let glowEnabled = true;
+        let darknessLevel = 20; // Default 20% darkness to make lights visible
+        let animationEnabled = false;
+
+        // Canvas setup
+        const canvas = document.getElementById('designCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Pricing configuration
+        const pricing = {
+            costPerFoot: 8.50,
+            laborPerFoot: 3.25,
+            lightSpacing: 6, // inches
+            feetPerLight: 0.5
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            
+            // Setup drag and drop
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('drop', handleDrop);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            
+            // Initialize UI states
+            setPatternMode('solid');
+            updateColorPatternUI();
+            
+            // Initialize mobile interfaces
+            initializeMobileInterfaces();
+        });
+
+        function setupEventListeners() {
+            // Enhanced drawing event listeners - Roofline Pro style
+            // Mouse events
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            canvas.addEventListener('mouseenter', handleCanvasMouseEnter);
+            canvas.addEventListener('mouseleave', handleCanvasMouseLeave);
+            
+            // Pointer events for touch support
+            canvas.addEventListener('pointerdown', handleCanvasPointerDown);
+            canvas.addEventListener('pointermove', handleCanvasPointerMove);
+            canvas.addEventListener('pointerup', handleCanvasPointerUp);
+            canvas.addEventListener('pointercancel', handleCanvasPointerCancel);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleCanvasTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleCanvasTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleCanvasTouchEnd, { passive: false });
+            
+            // Keyboard support
+            canvas.addEventListener('keydown', handleCanvasKeyDown);
+            canvas.addEventListener('focus', handleCanvasFocus);
+            canvas.addEventListener('blur', handleCanvasBlur);
+            
+            // Resize canvas to fit container
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            if (currentImage) {
+                drawCanvas();
+            }
+        }
+
+        // File Upload Functions
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                loadImage(files[0]);
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadImage(file);
+            }
+        }
+
+        function loadImage(file) {
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImage = img;
+                    // Store backup in case of accidental reset
+                    window._imageBackup = img;
+                    showImagePreview(e.target.result);
+                    drawCanvas();
+                    document.getElementById('canvasPlaceholder').style.display = 'none';
+                    document.getElementById('canvasInfo').style.display = 'block';
+                    
+                    // Ensure drawing tools are available after image upload
+                    ensureDrawingToolsAvailable();
+                    updateQuoteButton();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showImagePreview(src) {
+            document.getElementById('uploadArea').classList.add('hidden');
+            document.getElementById('imagePreview').classList.remove('hidden');
+            document.getElementById('previewImg').src = src;
+        }
+
+        window.replaceImage = function replaceImage() {
+            document.getElementById('imageInput').click();
+        }
+
+        window.removeImage = function removeImage() {
+            currentImage = null;
+            window._imageBackup = null; // Clear backup too
+            lights = [];
+            
+            // Check if Street View is available and loaded
+            if (streetViewPanorama && streetViewPanorama.getPosition()) {
+                // Return to Street View instead of upload area
+                document.getElementById('uploadArea').classList.add('hidden');
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('streetViewMainContainer').style.display = 'block';
+                document.getElementById('canvasPlaceholder').style.display = 'none';
+                document.getElementById('canvasInfo').style.display = 'none';
+                
+                // Make Street View visible again
+                if (streetViewPanorama) {
+                    streetViewPanorama.setVisible(true);
+                }
+                
+                console.log('🔄 Returned to Street View after removing captured image');
+            } else {
+                // No Street View available, return to upload area
+                document.getElementById('uploadArea').classList.remove('hidden');
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('canvasPlaceholder').style.display = 'block';
+                document.getElementById('canvasInfo').style.display = 'none';
+                
+                console.log('🔄 Returned to upload area (no Street View available)');
+            }
+            
+            clearCanvas();
+            updateQuoteButton();
+        }
+
+        // Roofline Pro Workflow Functions
+        window.startDrawingLights = function startDrawingLights() {
+            if (!currentImage) {
+                alert('Please upload a house photo first!');
+                return;
+            }
+            
+            isDrawingActive = true;
+            currentPath = [];
+            
+            // Update UI
+            document.getElementById('startDrawingBtn').style.display = 'none';
+            document.getElementById('drawingActions').style.display = 'block';
+            document.getElementById('drawingInstructions').textContent = 'Click points on your house roofline to draw light strings';
+            
+            // Set canvas to drawing mode
+            canvas.style.cursor = 'crosshair';
+            canvas.classList.add('drawing-active');
+            
+            updateOverlayMode('Drawing');
+        }
+
+        window.finishCurrentLine = function finishCurrentLine() {
+            if (currentPath.length < 2) {
+                alert('Please click at least 2 points to create a light string');
+                return;
+            }
+            
+            // Create light string with C9 bulbs at 12" spacing
+            const lightString = createLightString(currentPath, colorPattern, patternMode);
+            lightStrings.push(lightString);
+            
+            // Update mobile stats
+            updateMobileStats();
+            
+            // Reset for next line
+            currentPath = [];
+            isCurrentlyDrawing = false;
+            
+            // Update UI - ready for next line with null checks
+            const finishBtn = document.getElementById('finishLineBtn');
+            if (finishBtn) {
+                finishBtn.disabled = true;
+                finishBtn.textContent = 'Finish Line (0 points)';
+            }
+            
+            const pointCountEl = document.getElementById('pointCount');
+            if (pointCountEl) pointCountEl.textContent = '0';
+            
+            const undoBtn = document.getElementById('undoPointBtn');
+            if (undoBtn) undoBtn.disabled = true;
+            
+            const instructionsEl = document.getElementById('drawingInstructions');
+            if (instructionsEl) instructionsEl.textContent = 'Line completed! Click points to start drawing the next light string';
+            
+            // Enable undo button
+            const mainUndoBtn = document.getElementById('undoBtn');
+            if (mainUndoBtn) mainUndoBtn.disabled = false;
+            
+            drawCanvas();
+            updateUI();
+        }
+
+        window.cancelCurrentLine = function cancelCurrentLine() {
+            currentPath = [];
+            isCurrentlyDrawing = false;
+            isDrawingActive = false;
+            
+            // Reset UI with null checks
+            const startBtn = document.getElementById('startDrawingBtn');
+            if (startBtn) startBtn.style.display = 'block';
+            
+            const drawingActions = document.getElementById('drawingActions');
+            if (drawingActions) drawingActions.style.display = 'none';
+            
+            const instructionsEl = document.getElementById('drawingInstructions');
+            if (instructionsEl) instructionsEl.textContent = 'Click "Start Drawing Lights" then draw lines on your house roofline';
+            
+            const finishBtn = document.getElementById('finishLineBtn');
+            if (finishBtn) finishBtn.disabled = true;
+            
+            const pointCountEl = document.getElementById('pointCount');
+            if (pointCountEl) pointCountEl.textContent = '0';
+            
+            const undoBtn = document.getElementById('undoPointBtn');
+            if (undoBtn) undoBtn.disabled = true;
+            
+            if (canvas) {
+                canvas.style.cursor = 'default';
+                canvas.classList.remove('drawing-active');
+            }
+            
+            updateOverlayMode('Select');
+            drawCanvas();
+        }
+
+        // New functions to match Roofline Pro workflow
+        window.undoLastPoint = function undoLastPoint() {
+            if (currentPath.length > 0) {
+                currentPath.pop();
+                
+                // Update UI to match Roofline Pro style with null checks
+                const pointCountEl = document.getElementById('pointCount');
+                if (pointCountEl) pointCountEl.textContent = currentPath.length;
+                
+                const finishBtn = document.getElementById('finishLineBtn');
+                if (finishBtn) {
+                    finishBtn.disabled = currentPath.length < 2;
+                    finishBtn.textContent = `Finish Line (${currentPath.length} points)`;
+                }
+                
+                const undoBtn = document.getElementById('undoPointBtn');
+                if (undoBtn) undoBtn.disabled = currentPath.length === 0;
+                
+                if (currentPath.length === 0) {
+                    isCurrentlyDrawing = false;
+                    const instructionsEl = document.getElementById('drawingInstructions');
+                    if (instructionsEl) instructionsEl.textContent = 'Click points on your house roofline to draw light strings';
+                }
+                
+                drawCanvas();
+            }
+        }
+
+        function cancelDrawing() {
+            // Same as cancelCurrentLine for now, but could be enhanced differently
+            cancelCurrentLine();
+        }
+
+        window.undoLastElement = function undoLastElement() {
+            if (lightStrings.length > 0) {
+                lightStrings.pop();
+                
+                if (lightStrings.length === 0) {
+                    const undoBtn = document.getElementById('undoBtn');
+                    if (undoBtn) undoBtn.disabled = true;
+                }
+                
+                // Update mobile stats
+                updateMobileStats();
+                
+                drawCanvas();
+                    updateUI();
+            }
+        }
+
+        window.clearAllLights = function clearAllLights() {
+            if (lightStrings.length > 0 && confirm('Are you sure you want to clear all light strings?')) {
+                lightStrings = [];
+                currentPath = [];
+                isDrawingActive = false;
+                isCurrentlyDrawing = false;
+                
+                // Reset UI
+                cancelCurrentLine();
+                const undoBtn = document.getElementById('undoBtn');
+                if (undoBtn) undoBtn.disabled = true;
+                
+                drawCanvas();
+                    updateUI();
+            }
+        }
+
+        function setPatternMode(mode) {
+            patternMode = mode;
+            
+            if (mode === 'solid') {
+                // Show only first color for solid mode
+                const color2Row = document.getElementById('color2Row');
+                if (color2Row) color2Row.style.display = 'none';
+                
+                const addColorBtn = document.getElementById('addColorBtn');
+                if (addColorBtn) addColorBtn.style.display = 'none';
+            } else {
+                // Show alternating colors
+                const color2Row = document.getElementById('color2Row');
+                if (color2Row) color2Row.style.display = 'flex';
+                
+                const addColorBtn = document.getElementById('addColorBtn');
+                if (addColorBtn) addColorBtn.style.display = 'block';
+            }
+            
+            // Update all existing light strings with new pattern mode
+            lightStrings.forEach(lightString => {
+                if (lightString.bulbs) {
+                    lightString.bulbs.forEach((bulb, index) => {
+                        if (mode === 'solid') {
+                            bulb.color = colorPattern[0];
+                        } else {
+                            // Alternating pattern
+                            bulb.color = colorPattern[index % colorPattern.length];
+                        }
+                    });
+                }
+                lightString.mode = mode;
+            });
+            
+            drawCanvas(); // Redraw with new pattern
+        }
+
+        function selectColorForPosition(position) {
+            // Open color picker modal (simplified for now)
+            const colors = {
+                'red': '#ef4444',
+                'green': '#22c55e', 
+                'blue': '#3b82f6',
+                'yellow': '#eab308',
+                'white': '#ffffff',
+                'darkgreen': '#006400',
+                'orange': '#f97316',
+                'purple': '#a855f7',
+                'pink': '#ec4899'
+            };
+            
+            const colorNames = Object.keys(colors);
+            const currentColor = colorPattern[position];
+            const currentIndex = colorNames.indexOf(currentColor);
+            const nextIndex = (currentIndex + 1) % colorNames.length;
+            const newColor = colorNames[nextIndex];
+            
+            // Update color pattern
+            colorPattern[position] = newColor;
+            
+            // Update UI
+            const swatch = document.querySelector(`[data-position="${position}"]`);
+            const nameSpan = document.getElementById(`colorName${position}`);
+            
+            swatch.style.background = colors[newColor];
+            nameSpan.textContent = newColor;
+            
+            // Update border to show selection
+            document.querySelectorAll('.color-swatch').forEach(el => {
+                el.style.border = '2px solid #d1d5db';
+            });
+            swatch.style.border = '2px solid #059669';
+        }
+
+        window.addColor = function addColor() {
+            if (colorPattern.length < 6) {
+                colorPattern.push('warmwhite');
+                
+                // Create a new dropdown for the new color
+                const patternColors = document.getElementById('patternColors');
+                const newColorIndex = colorPattern.length - 1;
+                
+                const newRow = document.createElement('div');
+                newRow.style.cssText = 'display: flex; align-items: center; margin-bottom: 8px;';
+                newRow.id = `color${newColorIndex + 1}Row`;
+                newRow.innerHTML = `
+                    <span style="width: 20px; font-size: 14px; font-weight: 600;">${newColorIndex + 1}:</span>
+                    <select id="color${newColorIndex}Select" onchange="updateColorFromDropdown(${newColorIndex}, this.value)" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="blue">Blue</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="teal">Teal</option>
+                        <option value="pink">Pink</option>
+                        <option value="coolwhite">Cool White</option>
+                        <option value="warmwhite" selected>Warm White</option>
+                        <option value="multicolor">Multi-color</option>
+                    </select>
+                `;
+                patternColors.appendChild(newRow);
+                
+                // Update all existing light strings with expanded pattern
+                lightStrings.forEach(lightString => {
+                    if (lightString.bulbs && patternMode === 'alternating') {
+                        lightString.bulbs.forEach((bulb, index) => {
+                            bulb.color = colorPattern[index % colorPattern.length];
+                        });
+                    }
+                    lightString.colors = [...colorPattern];
+                });
+                
+                drawCanvas();
+            }
+        }
+
+        window.resetPattern = function resetPattern() {
+            colorPattern = ['warmwhite', 'red'];
+            
+            // Remove any extra color dropdowns beyond the first 2
+            const patternColors = document.getElementById('patternColors');
+            const allRows = patternColors.children;
+            
+            // Keep only the first 2 rows (index 0 and 1)
+            for (let i = allRows.length - 1; i >= 2; i--) {
+                allRows[i].remove();
+            }
+            
+            // Update all existing light strings with reset pattern
+            lightStrings.forEach(lightString => {
+                if (lightString.bulbs) {
+                    lightString.bulbs.forEach((bulb, index) => {
+                        if (patternMode === 'solid') {
+                            bulb.color = colorPattern[0];
+                        } else {
+                            bulb.color = colorPattern[index % colorPattern.length];
+                        }
+                    });
+                }
+                lightString.colors = [...colorPattern];
+            });
+            
+            updateColorPatternUI();
+            drawCanvas(); // Redraw immediately
+        }
+        
+        function updateColorFromDropdown(position, color) {
+            colorPattern[position] = color;
+            
+            // Update all existing light strings with new color pattern
+            lightStrings.forEach(lightString => {
+                if (lightString.bulbs) {
+                    lightString.bulbs.forEach((bulb, index) => {
+                        if (patternMode === 'solid') {
+                            bulb.color = colorPattern[0];
+                        } else {
+                            // Alternating pattern
+                            bulb.color = colorPattern[index % colorPattern.length];
+                        }
+                    });
+                }
+                // Update the colors array in the light string
+                lightString.colors = [...colorPattern];
+                lightString.mode = patternMode;
+            });
+            
+            drawCanvas(); // Redraw immediately when color changes
+        }
+
+        function updateColorPatternUI() {
+            // Update dropdown selections to match current pattern
+            const color0Select = document.getElementById('color0Select');
+            const color1Select = document.getElementById('color1Select');
+            
+            if (color0Select && colorPattern[0]) {
+                color0Select.value = colorPattern[0];
+            }
+            if (color1Select && colorPattern[1]) {
+                color1Select.value = colorPattern[1];
+            }
+        }
+
+        // Canvas click handler - Roofline Pro style
+        // Enhanced coordinate transformation function
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientX, clientY;
+            if (e.touches && e.touches[0]) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleCanvasClick(e) {
+            if (!isDrawingActive || !currentImage) return;
+            e.preventDefault();
+
+            const coords = getCanvasCoordinates(e);
+
+            // Add point to current path
+            currentPath.push(coords);
+            
+            // Update UI to match Roofline Pro style
+            const pointCountEl = document.getElementById('pointCount');
+            if (pointCountEl) pointCountEl.textContent = currentPath.length;
+            
+            const finishBtn = document.getElementById('finishLineBtn');
+            if (finishBtn) {
+                finishBtn.disabled = currentPath.length < 2;
+                finishBtn.textContent = `Finish Line (${currentPath.length} points)`;
+            }
+            
+            const undoBtn = document.getElementById('undoPointBtn');
+            if (undoBtn) undoBtn.disabled = currentPath.length === 0;
+            
+            if (currentPath.length === 1) {
+                isCurrentlyDrawing = true;
+                const instructionsEl = document.getElementById('drawingInstructions');
+                if (instructionsEl) instructionsEl.textContent = 'Click more points to continue the line, then click "Finish Line"';
+            }
+            
+            drawCanvas();
+        }
+
+        // Additional event handlers for comprehensive interaction support
+        function handleCanvasMouseDown(e) {
+            if (!isDrawingActive) return;
+            canvas.focus(); // Ensure canvas has focus for keyboard events
+        }
+
+        function handleCanvasMouseMove(e) {
+            if (!isDrawingActive || !currentImage) return;
+            // Could add line preview here in the future
+        }
+
+        function handleCanvasMouseUp(e) {
+            // Reserved for future drag functionality
+        }
+
+        function handleCanvasMouseEnter(e) {
+            if (isDrawingActive && currentImage) {
+                canvas.style.cursor = 'crosshair';
+                canvas.style.filter = 'brightness(1.05)';
+            } else {
+                canvas.style.cursor = 'default';
+            }
+        }
+
+        function handleCanvasMouseLeave(e) {
+            canvas.style.filter = 'none';
+            if (!isDrawingActive) {
+                canvas.style.cursor = 'default';
+            }
+        }
+
+        // Pointer events (same logic as mouse events)
+        function handleCanvasPointerDown(e) {
+            handleCanvasMouseDown(e);
+        }
+
+        function handleCanvasPointerMove(e) {
+            handleCanvasMouseMove(e);
+        }
+
+        function handleCanvasPointerUp(e) {
+            handleCanvasMouseUp(e);
+        }
+
+        function handleCanvasPointerCancel(e) {
+            // Handle pointer cancellation
+        }
+
+        // Touch events for mobile support
+        function handleCanvasTouchStart(e) {
+            e.preventDefault(); // Prevent scrolling
+            
+            // Enhanced touch handling for mobile
+            const touch = e.touches[0];
+            if (touch) {
+                // Add visual feedback for touch
+                const canvas = e.target;
+                canvas.style.filter = 'brightness(1.05)';
+                
+                // Haptic feedback if available
+                if (navigator.vibrate) {
+                    navigator.vibrate(50); // Quick vibration for touch feedback
+                }
+                
+                handleCanvasClick(e);
+            }
+        }
+
+        function handleCanvasTouchMove(e) {
+            e.preventDefault(); // Prevent scrolling
+        }
+
+        function handleCanvasTouchEnd(e) {
+            e.preventDefault(); // Prevent scrolling
+            
+            // Remove visual feedback
+            const canvas = e.target;
+            canvas.style.filter = 'none';
+        }
+
+        // Keyboard events
+        function handleCanvasKeyDown(e) {
+            if (!isDrawingActive) return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    cancelDrawing();
+                    break;
+                case 'Enter':
+                    if (currentPath.length >= 2) {
+                        finishCurrentLine();
+                    }
+                    break;
+                case 'Backspace':
+                case 'Delete':
+                    undoLastPoint();
+                    break;
+            }
+        }
+
+        function handleCanvasFocus(e) {
+            // Canvas focused
+        }
+
+        function handleCanvasBlur(e) {
+            // Canvas lost focus
+        }
+
+        // Create light string with C9 bulbs at 12" spacing
+        function createLightString(path, colors, mode) {
+            const lightString = {
+                id: Date.now() + Math.random(),
+                path: [...path],
+                colors: [...colors],
+                mode: mode,
+                bulbs: generateBulbsAlongPath(path, colors, mode)
+            };
+            
+            return lightString;
+        }
+
+        function generateBulbsAlongPath(path, colors, mode) {
+            const bulbs = [];
+            const spacing = bulbSpacing; // 12 inches in pixels
+            
+            // Enhanced algorithm to match Roofline Pro exactly
+            for (let i = 0; i < path.length - 1; i++) {
+                const p1 = path[i];
+                const p2 = path[i + 1];
+                const segmentLength = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                
+                // Calculate number of bulbs for this segment
+                const numBulbs = Math.max(1, Math.floor(segmentLength / spacing));
+                
+                // Place bulbs evenly along the segment
+                for (let j = 0; j <= numBulbs; j++) {
+                    const ratio = numBulbs > 0 ? j / numBulbs : 0;
+                    const x = p1.x + (p2.x - p1.x) * ratio;
+                    const y = p1.y + (p2.y - p1.y) * ratio;
+                    
+                    // Skip duplicate points at segment connections (except for first segment)
+                    if (i > 0 && j === 0) continue;
+                    
+                    // Determine bulb color based on pattern
+                    let color;
+                    if (mode === 'solid') {
+                        color = colors[0];
+                    } else {
+                        // Alternating pattern - consistent across entire string
+                        color = colors[bulbs.length % colors.length];
+                    }
+                    
+                    bulbs.push({
+                        x: Math.round(x),
+                        y: Math.round(y),
+                        color: color,
+                        id: `bulb_${Date.now()}_${bulbs.length}`,
+                        segmentIndex: i,
+                        positionInSegment: j
+                    });
+                }
+            }
+            
+            return bulbs;
+        }
+
+        function updateOverlayMode(mode) {
+            const overlay = document.getElementById('overlayMode');
+            if (overlay) {
+                overlay.textContent = mode;
+            }
+        }
+
+
+        function drawCanvas() {
+            console.log('drawCanvas called - Canvas dimensions:', canvas.width, 'x', canvas.height);
+            console.log('currentImage exists:', !!currentImage);
+            
+            // Check for backup if currentImage is null
+            if (!currentImage && window._imageBackup) {
+                console.log('🔄 Restoring currentImage from backup');
+                currentImage = window._imageBackup;
+            }
+            
+            if (currentImage) {
+                console.log('currentImage dimensions:', currentImage.width, 'x', currentImage.height);
+            }
+            
+            // Clear with white background instead of transparent
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!currentImage) {
+                console.log('No currentImage - returning early');
+                return;
+            }
+
+            // Apply darkness filter
+            if (darknessLevel > 0) {
+                ctx.filter = `brightness(${1 - darknessLevel / 100})`;
+            } else {
+                ctx.filter = 'none';
+            }
+
+            // Draw background image
+            const scale = Math.min(canvas.width / currentImage.width, canvas.height / currentImage.height);
+            const width = currentImage.width * scale;
+            const height = currentImage.height * scale;
+            const offsetX = (canvas.width - width) / 2;
+            const offsetY = (canvas.height - height) / 2;
+            
+            console.log('Drawing image - scale:', scale, 'dimensions:', width, 'x', height, 'offset:', offsetX, offsetY);
+            
+            ctx.drawImage(currentImage, offsetX, offsetY, width, height);
+            
+            console.log('Image drawn successfully');
+
+            // Reset filter for lights
+            ctx.filter = 'none';
+
+            // Draw completed light strings
+            lightStrings.forEach(lightString => {
+                drawLightString(lightString);
+            });
+
+            // Draw current path being drawn (preview)
+            if (currentPath.length > 0) {
+                drawCurrentPath();
+            }
+            
+            // Apply final darkness overlay for night mode effect
+            if (darknessLevel > 0) {
+                ctx.fillStyle = `rgba(0, 0, 0, ${darknessLevel / 100 * 0.6})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function drawLightString(lightString) {
+            if (!lightString || !lightString.path) return;
+            
+            // Only draw the bulbs - NO connecting lines for realistic appearance
+            if (lightString.bulbs) {
+                lightString.bulbs.forEach(bulb => {
+                    drawBulb(bulb.x, bulb.y, bulbSize, bulb.color);
+                });
+            }
+        }
+
+        function drawCurrentPath() {
+            if (currentPath.length === 0) return;
+            
+            // Only draw preview bulbs - NO lines or connection paths
+            if (currentPath.length > 1) {
+                const previewBulbs = generateBulbsAlongPath(currentPath, colorPattern, patternMode);
+                previewBulbs.forEach(bulb => {
+                    drawBulb(bulb.x, bulb.y, bulbSize, bulb.color, 0.5); // Semi-transparent preview
+                });
+            }
+            
+            // Show click points only while drawing
+            currentPath.forEach((point, index) => {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        function drawBulb(x, y, size, color, opacity = 1) {
+            const colors = {
+                red: '#ff4444',
+                green: '#22c55e',
+                blue: '#3b82f6',
+                purple: '#a855f7',
+                orange: '#f97316',
+                yellow: '#eab308',
+                teal: '#14b8a6',
+                pink: '#ec4899',
+                coolwhite: '#ffffff',
+                warmwhite: '#FFFBDC',  // Exact warm white from reference tool
+                multicolor: '#ff4444'
+            };
+
+            const bulbColor = colors[color] || colors.warmwhite;
+            
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            
+            // Minimal, realistic glow - much more subtle
+            if (glowEnabled) {
+                // Very subtle glow - barely noticeable
+                const subtleGlow = (color === 'warmwhite') ? 4 : 3; // Much smaller glow
+                ctx.shadowColor = (color === 'warmwhite') ? '#FFFBDC' : bulbColor;
+                ctx.shadowBlur = subtleGlow;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
+            
+            // Main bulb - clean and simple
+            ctx.fillStyle = bulbColor;
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, 2 * Math.PI); // Smaller, cleaner bulb
+            ctx.fill();
+            
+            // Tiny highlight dot for realism
+            if (glowEnabled) {
+                ctx.shadowBlur = 0; // No blur on highlight
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.beginPath();
+                ctx.arc(x - 0.3, y - 0.3, 0.5, 0, 2 * Math.PI); // Very small highlight
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+
+
+        // Visual Effect Functions
+        function toggleGlow(enabled) {
+            glowEnabled = enabled;
+            const statusEl = document.getElementById('glowStatus');
+            if (statusEl) {
+                statusEl.textContent = enabled ? 'ON' : 'OFF';
+                statusEl.style.background = enabled ? '#dcfce7' : '#fee2e2';
+                statusEl.style.color = enabled ? '#166534' : '#dc2626';
+            }
+            drawCanvas();
+        }
+        
+        function adjustDarkness(value) {
+            darknessLevel = parseInt(value);
+            const levelEl = document.getElementById('darknessLevel');
+            if (levelEl) {
+                levelEl.textContent = darknessLevel + '%';
+                // Update background color based on darkness level
+                if (darknessLevel === 0) {
+                    levelEl.style.background = '#fef3c7';
+                    levelEl.style.color = '#92400e';
+                } else if (darknessLevel < 40) {
+                    levelEl.style.background = '#fed7aa';
+                    levelEl.style.color = '#9a3412';
+                } else {
+                    levelEl.style.background = '#374151';
+                    levelEl.style.color = '#f9fafb';
+                }
+            }
+            drawCanvas();
+        }
+
+        function toggleAnimation() {
+            animationEnabled = !animationEnabled;
+            const toggle = document.getElementById('animationToggle');
+            toggle.classList.toggle('active', animationEnabled);
+            
+            // Add animation class to lights
+            document.querySelectorAll('.light-dot').forEach(dot => {
+                dot.classList.toggle('glow', animationEnabled);
+            });
+        }
+
+        function updateDarkness(value) {
+            darknessLevel = parseInt(value);
+            document.getElementById('darknessValue').textContent = darknessLevel + '%';
+            drawCanvas();
+        }
+
+
+        function updateUI() {
+            const overlayCount = document.getElementById('overlayLightCount');
+            if (overlayCount) {
+                const totalBulbs = lightStrings.reduce((total, string) => total + string.bulbs.length, 0);
+                overlayCount.textContent = totalBulbs;
+            }
+        }
+
+
+
+        window.loadProperty = function loadProperty() {
+            const address = document.getElementById('propertyAddress').value;
+            if (!address.trim()) {
+                alert('Please enter a property address first.');
+                return;
+            }
+            
+            // Show loading state
+            const loadBtn = document.querySelector('.primary-btn');
+            const originalText = loadBtn.innerHTML;
+            loadBtn.innerHTML = '🔄 Loading Street View...';
+            loadBtn.disabled = true;
+            
+            // Initialize Google Maps Geocoder if not already done
+            if (!window.google) {
+                loadGoogleMapsAPI().then(() => {
+                    geocodeAndLoadStreetView(address, loadBtn, originalText);
+                }).catch((error) => {
+                    console.error('Failed to load Google Maps API:', error);
+                    loadBtn.innerHTML = originalText;
+                    loadBtn.disabled = false;
+                    alert('Failed to load mapping service. Please try again.');
+                });
+            } else {
+                geocodeAndLoadStreetView(address, loadBtn, originalText);
+            }
+        }
+        
+        function loadGoogleMapsAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.google) {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=geometry,places`;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        function geocodeAndLoadStreetView(address, loadBtn, originalText) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 
+                address: address,
+                componentRestrictions: { country: 'US' }
+            }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    const lat = results[0].geometry.location.lat();
+                    const lng = results[0].geometry.location.lng();
+                    
+                    // Update address field with formatted address
+                    const propertyAddressEl = document.getElementById('propertyAddress');
+                    if (propertyAddressEl) {
+                        propertyAddressEl.value = results[0].formatted_address;
+                    }
+                    
+                    loadInteractiveStreetView(lat, lng, loadBtn, originalText);
+                } else {
+                    loadBtn.innerHTML = originalText;
+                    loadBtn.disabled = false;
+                    alert('Address not found. Please try a more specific address.');
+                }
+            });
+        }
+        
+        function loadInteractiveStreetView(lat, lng, loadBtn, originalText) {
+            const position = { lat: lat, lng: lng };
+            
+            // Create Street View Service to check if panorama exists
+            const streetViewService = new google.maps.StreetViewService();
+            
+            streetViewService.getPanorama({
+                location: position,
+                radius: 50,
+                source: google.maps.StreetViewSource.OUTDOOR
+            }, (data, status) => {
+                if (status === 'OK') {
+                    // Initialize interactive panorama in main view
+                    const panoramaDiv = document.getElementById('streetViewPanorama');
+                    
+                    streetViewPanorama = new google.maps.StreetViewPanorama(panoramaDiv, {
+                        position: position,
+                        pov: {
+                            heading: 0,
+                            pitch: 5
+                        },
+                        zoom: 1,
+                        visible: true,
+                        addressControl: true,
+                        fullscreenControl: true,
+                        imageDateControl: false,
+                        linksControl: true,
+                        panControl: true,
+                        zoomControl: true,
+                        clickToGo: true,
+                        scrollwheel: true,
+                        disableDoubleClickZoom: false,
+                        motionTracking: false,
+                        motionTrackingControl: false
+                    });
+                    
+                    // Show main Street View container and hide canvas placeholder
+                    document.getElementById('streetViewMainContainer').style.display = 'block';
+                    document.getElementById('canvasPlaceholder').style.display = 'none';
+                    
+                    // Reset load button
+                    loadBtn.innerHTML = '✅ Street View Loaded!';
+                    setTimeout(() => {
+                        loadBtn.innerHTML = originalText;
+                        loadBtn.disabled = false;
+                    }, 2000);
+                    
+                    console.log('Interactive Street View loaded in main view for coordinates:', lat, lng);
+                } else {
+                    console.error('Street View not available:', status);
+                    loadBtn.innerHTML = originalText;
+                    loadBtn.disabled = false;
+                    alert('Street View not available for this address. Please try uploading a photo instead.');
+                }
+            });
+        }
+        
+        // Global crop variables
+        let cropMode = false;
+        let cropStartX, cropStartY, cropEndX, cropEndY;
+        let isDragging = false;
+        let isResizing = false;
+        
+        window.captureFullStreetView = function captureFullStreetView() {
+            if (!streetViewPanorama) {
+                alert('No Street View loaded to capture.');
+                return;
+            }
+
+            const captureBtn = document.querySelector('button[onclick="captureFullStreetView()"]');
+            const originalText = captureBtn.innerHTML;
+            
+            captureBtn.innerHTML = '📸 Capturing...';
+            captureBtn.disabled = true;
+            
+            // Method 1: Try Static API capture first (most reliable according to research)
+            captureViaStaticAPI(captureBtn, originalText)
+                .then(success => {
+                    if (!success) {
+                        // Method 2: Fallback to improved html2canvas
+                        captureViaHTML2Canvas(captureBtn, originalText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Static API capture failed, trying html2canvas:', error);
+                    captureViaHTML2Canvas(captureBtn, originalText);
+                });
+        }
+        
+        // Method 1: Capture using Street View Static API (from research)
+        function captureViaStaticAPI(captureBtn, originalText) {
+            return new Promise((resolve, reject) => {
+                if (!streetViewPanorama) {
+                    resolve(false);
+                    return;
+                }
+                
+                try {
+                    // Get current panorama properties
+                    const pov = streetViewPanorama.getPov();
+                    const position = streetViewPanorama.getPosition();
+                    
+                    if (!position) {
+                        resolve(false);
+                        return;
+                    }
+                    
+                    // Build Static API URL
+                    const lat = position.lat();
+                    const lng = position.lng();
+                    const heading = Math.round(pov.heading);
+                    const pitch = Math.round(pov.pitch);
+                    const fov = 90; // Default field of view
+                    const size = "640x640"; // Max size for static API
+                    
+                    const staticURL = `https://maps.googleapis.com/maps/api/streetview?` +
+                        `size=${size}&location=${lat},${lng}&heading=${heading}&pitch=${pitch}` +
+                        `&fov=${fov}&key=${API_KEY}`;
+                    
+                    console.log('📸 Capturing via Static API:', staticURL);
+                    
+                    // Load the static image
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = function() {
+                        console.log('✅ Static API image loaded successfully');
+                        
+                        // Create canvas from static image
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        processCapture(canvas, captureBtn, originalText);
+                        resolve(true);
+                    };
+                    img.onerror = function() {
+                        console.log('❌ Static API failed, will try html2canvas');
+                        resolve(false);
+                    };
+                    img.src = staticURL;
+                    
+                } catch (error) {
+                    console.error('Static API error:', error);
+                    resolve(false);
+                }
+            });
+        }
+        
+        // Method 2: Improved html2canvas with WebGL fix (from research)
+        function captureViaHTML2Canvas(captureBtn, originalText) {
+            const panoramaDiv = document.getElementById('streetViewPanorama');
+            
+            // Use improved html2canvas with filter to remove UI elements
+            html2canvas(panoramaDiv, {
+                useCORS: true,
+                allowTaint: true,
+                scale: 1,
+                backgroundColor: null,
+                width: panoramaDiv.offsetWidth,
+                height: panoramaDiv.offsetHeight,
+                logging: false,
+                // Filter out Google Maps UI elements based on research
+                ignoreElements: function(element) {
+                    return element.classList.contains('gmnoprint') ||
+                           element.classList.contains('gm-style-cc') ||
+                           element.tagName.toLowerCase() === 'button' ||
+                           element.getAttribute('title') === 'Toggle fullscreen view' ||
+                           element.getAttribute('title') === 'Rotate view' ||
+                           element.getAttribute('title') === 'Zoom in' ||
+                           element.getAttribute('title') === 'Zoom out';
+                }
+            }).then(canvas => {
+                console.log('✅ html2canvas capture completed');
+                processCapture(canvas, captureBtn, originalText);
+            }).catch(error => {
+                console.error('Failed to capture Street View with html2canvas:', error);
+                captureBtn.innerHTML = originalText;
+                captureBtn.disabled = false;
+                alert('Failed to capture Street View. Please try uploading a photo instead.');
+            });
+        }
+        
+        function processCapture(canvas, captureBtn, originalText) {
+            console.log('Processing capture - Canvas dimensions:', canvas.width, 'x', canvas.height);
+            
+            // Convert canvas to image
+            const img = new Image();
+            img.onload = function() {
+                console.log('Image loaded - Dimensions:', img.width, 'x', img.height);
+                
+                // Set as current image for canvas drawing
+                currentImage = img;
+                
+                // Store backup in case of accidental reset
+                window._imageBackup = img;
+                
+                // Update image preview section
+                const uploadArea = document.getElementById('uploadArea');
+                const imagePreview = document.getElementById('imagePreview');
+                const previewImg = document.getElementById('previewImg');
+                
+                if (uploadArea) uploadArea.classList.add('hidden');
+                if (imagePreview) imagePreview.classList.remove('hidden');
+                if (previewImg) previewImg.src = canvas.toDataURL();
+                
+                // Close Street View and show canvas
+                closeStreetView();
+                
+                // Ensure canvas placeholder is hidden
+                const placeholder = document.getElementById('canvasPlaceholder');
+                if (placeholder) placeholder.style.display = 'none';
+                
+                // Force canvas to be visible and resize
+                const designCanvas = document.getElementById('designCanvas');
+                if (designCanvas) {
+                    designCanvas.style.display = 'block';
+                    designCanvas.style.visibility = 'visible';
+                    
+                    // Trigger resize to ensure proper dimensions
+                    setTimeout(() => {
+                        resizeCanvas();
+                        drawCanvas();
+                        console.log('Canvas resized and redrawn after capture');
+                    }, 100);
+                } else {
+                    // Fallback - draw immediately
+                    drawCanvas();
+                }
+                
+                // Show canvas info overlay
+                const canvasInfo = document.getElementById('canvasInfo');
+                if (canvasInfo) canvasInfo.style.display = 'block';
+                
+                // Force UI update to show captured image is ready for drawing
+                setTimeout(() => {
+                    // Make sure placeholder is hidden and canvas is visible
+                    const placeholder = document.getElementById('canvasPlaceholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                    
+                    // Ensure canvas is visible and has the image
+                    if (currentImage) {
+                        console.log('UI updated - Image ready for drawing');
+                        
+                        // Trigger any additional UI updates needed
+                        const uploadArea = document.getElementById('uploadArea');
+                        const imagePreview = document.getElementById('imagePreview');
+                        
+                        if (uploadArea && imagePreview) {
+                            uploadArea.classList.add('hidden');
+                            imagePreview.classList.remove('hidden');
+                        }
+                        
+                        // Ensure drawing tools are properly reset and available
+                        ensureDrawingToolsAvailable();
+                    }
+                }, 200);
+                
+                // Update button states
+                if (typeof updateQuoteButton === 'function') {
+                    updateQuoteButton();
+                }
+                
+                console.log('Street View image successfully set as currentImage and drawn to canvas');
+                
+                // Visual confirmation - briefly flash the canvas
+                const canvasElement = document.getElementById('designCanvas');
+                if (canvasElement) {
+                    canvasElement.style.border = '3px solid #10b981';
+                    setTimeout(() => {
+                        canvasElement.style.border = 'none';
+                    }, 1000);
+                }
+            };
+            
+            img.onerror = function() {
+                console.error('Failed to load captured image');
+                alert('Failed to process captured image. Please try again.');
+            };
+            
+            // Set image source from canvas
+            const dataURL = canvas.toDataURL('image/png', 1.0);
+            console.log('Canvas dataURL length:', dataURL.length);
+            img.src = dataURL;
+            
+            // Reset capture button
+            if (captureBtn) {
+                captureBtn.innerHTML = '✅ Captured!';
+                setTimeout(() => {
+                    captureBtn.innerHTML = originalText;
+                    captureBtn.disabled = false;
+                }, 2000);
+            }
+        }
+        
+        window.closeStreetView = function closeStreetView() {
+            document.getElementById('streetViewMainContainer').style.display = 'none';
+            document.getElementById('canvasPlaceholder').style.display = 'block';
+            if (streetViewPanorama) {
+                streetViewPanorama.setVisible(false);
+            }
+        }
+        
+        window.enableCropMode = function enableCropMode() {
+            cropMode = true;
+            const cropOverlay = document.getElementById('cropOverlay');
+            const cropSelection = document.getElementById('cropSelection');
+            
+            cropOverlay.style.display = 'block';
+            
+            // Initialize crop selection in center with 16:9 aspect ratio
+            const container = document.getElementById('streetViewMainContainer');
+            const defaultWidth = 640;
+            const defaultHeight = defaultWidth / CROP_ASPECT_RATIO; // = 360 (16:9)
+            const centerX = container.offsetWidth / 2 - (defaultWidth / 2);
+            const centerY = container.offsetHeight / 2 - (defaultHeight / 2);
+            
+            cropSelection.style.left = centerX + 'px';
+            cropSelection.style.top = centerY + 'px';
+            cropSelection.style.width = defaultWidth + 'px';
+            cropSelection.style.height = defaultHeight + 'px';
+            cropSelection.style.display = 'block';
+            
+            // Add event listeners for drag and resize
+            setupCropControls();
+        }
+        
+        function setupCropControls() {
+            const cropSelection = document.getElementById('cropSelection');
+            const cropHandle = document.querySelector('.crop-handle');
+            
+            // Drag functionality
+            cropSelection.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            
+            // Resize functionality
+            cropHandle.addEventListener('mousedown', startResize);
+        }
+        
+        function startDrag(e) {
+            if (e.target.classList.contains('crop-handle')) return;
+            isDragging = true;
+            const rect = document.getElementById('cropSelection').getBoundingClientRect();
+            const container = document.getElementById('streetViewMainContainer').getBoundingClientRect();
+            cropStartX = e.clientX - rect.left + container.left;
+            cropStartY = e.clientY - rect.top + container.top;
+            e.preventDefault();
+        }
+        
+        function startResize(e) {
+            isResizing = true;
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function drag(e) {
+            if (!cropMode) return;
+            
+            const cropSelection = document.getElementById('cropSelection');
+            const container = document.getElementById('streetViewMainContainer');
+            
+            if (isDragging) {
+                const newX = e.clientX - cropStartX;
+                const newY = e.clientY - cropStartY;
+                
+                // Keep within bounds
+                const maxX = container.offsetWidth - cropSelection.offsetWidth;
+                const maxY = container.offsetHeight - cropSelection.offsetHeight;
+                
+                cropSelection.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
+                cropSelection.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
+            } else if (isResizing) {
+                const rect = cropSelection.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                // Calculate width based on horizontal mouse movement
+                const newWidth = e.clientX - rect.left;
+                
+                // FORCE 16:9 ratio - this is the critical line
+                const newHeight = newWidth / CROP_ASPECT_RATIO;
+                
+                // Minimum and maximum sizes (maintain 16:9 ratio)
+                const minWidth = 200;
+                const minHeight = minWidth / CROP_ASPECT_RATIO;
+                const maxWidth = container.offsetWidth - (rect.left - containerRect.left);
+                const maxHeight = container.offsetHeight - (rect.top - containerRect.top);
+                
+                // Ensure the crop box fits within container bounds while maintaining 16:9
+                const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+                const constrainedHeight = constrainedWidth / CROP_ASPECT_RATIO;
+                
+                // Check if height constraint requires width adjustment
+                if (constrainedHeight > maxHeight) {
+                    const finalHeight = Math.min(maxHeight, constrainedHeight);
+                    const finalWidth = finalHeight * CROP_ASPECT_RATIO;
+                    
+                    cropSelection.style.width = finalWidth + 'px';
+                    cropSelection.style.height = finalHeight + 'px';
+                } else {
+                    cropSelection.style.width = constrainedWidth + 'px';
+                    cropSelection.style.height = constrainedHeight + 'px';
+                }
+            }
+        }
+        
+        function stopDrag() {
+            isDragging = false;
+            isResizing = false;
+        }
+        
+        window.captureCroppedView = function captureCroppedView() {
+            if (!streetViewPanorama) {
+                alert('No Street View loaded to capture.');
+                return;
+            }
+            
+            const panoramaDiv = document.getElementById('streetViewPanorama');
+            const cropSelection = document.getElementById('cropSelection');
+            const captureBtn = document.querySelector('button[onclick=\"captureCroppedView()\"]');
+            const originalText = captureBtn.innerHTML;
+            
+            captureBtn.innerHTML = '🎯 Cropping...';
+            captureBtn.disabled = true;
+            
+            // Get crop dimensions relative to the panorama div
+            const panoramaRect = panoramaDiv.getBoundingClientRect();
+            const cropRect = {
+                x: parseInt(cropSelection.style.left) || 0,
+                y: parseInt(cropSelection.style.top) || 0,
+                width: parseInt(cropSelection.style.width) || 400,
+                height: parseInt(cropSelection.style.height) || 300
+            };
+            
+            console.log('Crop selection rect:', cropRect);
+            console.log('Panorama div dimensions:', panoramaDiv.offsetWidth, 'x', panoramaDiv.offsetHeight);
+            
+            // Ensure crop dimensions are valid
+            if (cropRect.width <= 0 || cropRect.height <= 0) {
+                alert('Invalid crop selection. Please adjust the crop area.');
+                captureBtn.innerHTML = originalText;
+                captureBtn.disabled = false;
+                return;
+            }
+            
+            // Capture full panorama first
+            html2canvas(panoramaDiv, {
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null,
+                scale: 1,
+                logging: false,
+                width: panoramaDiv.offsetWidth,
+                height: panoramaDiv.offsetHeight
+            }).then(fullCanvas => {
+                console.log('Full canvas captured - Dimensions:', fullCanvas.width, 'x', fullCanvas.height);
+                
+                // Create cropped canvas with fixed 1920x1080 resolution
+                const croppedCanvas = document.createElement('canvas');
+                const ctx = croppedCanvas.getContext('2d');
+                
+                // Always set canvas to 1920x1080 regardless of crop box size
+                croppedCanvas.width = 1920;
+                croppedCanvas.height = 1080;
+                
+                console.log('Cropping from source rect:', cropRect.x, cropRect.y, cropRect.width, cropRect.height);
+                console.log('To destination canvas: 1920 x 1080 (fixed resolution)');
+                
+                // Ensure we don't crop outside the source canvas bounds
+                const sourceX = Math.max(0, Math.min(cropRect.x, fullCanvas.width - 1));
+                const sourceY = Math.max(0, Math.min(cropRect.y, fullCanvas.height - 1));
+                const sourceWidth = Math.min(cropRect.width, fullCanvas.width - sourceX);
+                const sourceHeight = Math.min(cropRect.height, fullCanvas.height - sourceY);
+                
+                // Draw cropped portion scaled to fill 1920x1080
+                ctx.drawImage(
+                    fullCanvas,
+                    sourceX, sourceY, sourceWidth, sourceHeight,
+                    0, 0, 1920, 1080
+                );
+                
+                console.log('Cropped image created successfully at 1920x1080 resolution');
+                
+                // Verify the cropped canvas has content
+                if (croppedCanvas.width === 1920 && croppedCanvas.height === 1080) {
+                    // Test if canvas has actual image data
+                    const imageData = ctx.getImageData(0, 0, 1920, 1080);
+                    const hasContent = imageData.data.some(value => value !== 0);
+                    
+                    if (hasContent) {
+                        console.log('✅ Cropped image verified - 1920x1080 with image data');
+                        // Process the cropped image
+                        processCapture(croppedCanvas, captureBtn, originalText);
+                        cancelCropMode();
+                    } else {
+                        console.error('❌ Cropped canvas appears empty');
+                        alert('Failed to capture crop area - image appears empty. Please try again.');
+                        captureBtn.innerHTML = originalText;
+                        captureBtn.disabled = false;
+                    }
+                } else {
+                    console.error('❌ Invalid cropped canvas dimensions - expected 1920x1080');
+                    alert('Failed to create crop - invalid dimensions. Please try again.');
+                    captureBtn.innerHTML = originalText;
+                    captureBtn.disabled = false;
+                }
+                
+            }).catch(error => {
+                console.error('Failed to capture cropped Street View:', error);
+                captureBtn.innerHTML = originalText;
+                captureBtn.disabled = false;
+                alert('Failed to capture cropped Street View. Please try again.');
+            });
+        }
+        
+        window.cancelCropMode = function cancelCropMode() {
+            cropMode = false;
+            document.getElementById('cropOverlay').style.display = 'none';
+            document.getElementById('cropSelection').style.display = 'none';
+        }
+        
+        // Ensure drawing tools are properly available after image capture
+        function ensureDrawingToolsAvailable() {
+            // Reset drawing state to ensure tools are available
+            isDrawingActive = false;
+            currentPath = [];
+            
+            // Show the "Start Drawing Lights" button
+            const startBtn = document.getElementById('startDrawingBtn');
+            if (startBtn) {
+                startBtn.style.display = 'block';
+                startBtn.disabled = false;
+            }
+            
+            // Hide the drawing actions (they'll show when user starts drawing)
+            const drawingActions = document.getElementById('drawingActions');
+            if (drawingActions) {
+                drawingActions.style.display = 'none';
+            }
+            
+            // Reset instructions
+            const instructionsEl = document.getElementById('drawingInstructions');
+            if (instructionsEl) {
+                instructionsEl.textContent = 'Click "Start Drawing Lights" then draw lines on your house roofline';
+            }
+            
+            // Reset canvas cursor
+            if (canvas) {
+                canvas.style.cursor = 'default';
+                canvas.classList.remove('drawing-active');
+            }
+            
+            // Reset point counter
+            const pointCountEl = document.getElementById('pointCount');
+            if (pointCountEl) pointCountEl.textContent = '0';
+            
+            // Disable action buttons
+            const finishBtn = document.getElementById('finishLineBtn');
+            if (finishBtn) finishBtn.disabled = true;
+            
+            const undoBtn = document.getElementById('undoPointBtn');
+            if (undoBtn) undoBtn.disabled = true;
+            
+            console.log('✅ Drawing tools reset and available for use');
+        }
+        
+        function updateQuoteButton() {
+            // Function to update quote button state
+            // This can be enhanced later for form validation
+            console.log('Quote button state updated');
+        }
+
+        // Monitor form inputs for quote button state
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('.form-input')) {
+                updateQuoteButton();
+            }
+        });
+        
+        // Suppress common browser extension error messages
+        window.addEventListener('error', function(e) {
+            // Check if error is from browser extensions
+            const message = e.message || '';
+            const filename = e.filename || '';
+            
+            // Common extension-related errors to suppress
+            const extensionPatterns = [
+                /extension/i,
+                /chrome-extension/i,
+                /moz-extension/i,
+                /safari-web-extension/i,
+                /grammarly/i,
+                /lastpass/i,
+                /adblock/i,
+                /ublock/i,
+                /metamask/i,
+                /honey/i,
+                /coupon/i,
+                /password/i,
+                /autofill/i,
+                /content.*script/i
+            ];
+            
+            const shouldSuppressError = extensionPatterns.some(pattern => 
+                pattern.test(message) || pattern.test(filename)
+            );
+            
+            if (shouldSuppressError) {
+                console.log('Suppressed browser extension error:', message);
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Suppress unhandled promise rejections from extensions
+        window.addEventListener('unhandledrejection', function(e) {
+            const reason = e.reason || '';
+            const message = typeof reason === 'string' ? reason : reason.message || '';
+            
+            const extensionPatterns = [
+                /extension/i,
+                /chrome-extension/i,
+                /moz-extension/i,
+                /safari-web-extension/i,
+                /content.*script/i
+            ];
+            
+            const shouldSuppressRejection = extensionPatterns.some(pattern => 
+                pattern.test(message)
+            );
+            
+            if (shouldSuppressRejection) {
+                console.log('Suppressed browser extension promise rejection:', message);
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
