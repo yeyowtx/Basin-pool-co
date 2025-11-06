@@ -19,10 +19,9 @@
   - 3+ Story: 1.6x multiplier
 
 - **Difficulty Dropdown**: Impact on labor costs
-  - Easy: 0.8x multiplier (simple rooflines)
-  - Medium: 1.0x multiplier (standard complexity)
-  - Hard: 1.3x multiplier (complex rooflines)
-  - Extreme: 1.6x multiplier (very complex rooflines)
+  - Easy: 1.0x multiplier (simple rooflines)
+  - Medium: 2.0x multiplier (standard complexity)
+  - Hard: 3.0x multiplier (complex rooflines)
 
 - **Profit Margin Input**: Percentage field (default 35%)
   - Applied to total material + labor costs
@@ -58,7 +57,7 @@ const basePricing = {
 
 const complexityMultipliers = {
     stories: { 1: 1.0, 2: 1.3, 3: 1.6 },
-    difficulty: { easy: 0.8, medium: 1.0, hard: 1.3, extreme: 1.6 }
+    difficulty: { easy: 1.0, medium: 2.0, hard: 3.0 }
 };
 ```
 
@@ -192,13 +191,15 @@ python3 -m http.server 8080
 - **Mounting Clips Revolution**: Measurement-based calculation with configurable spacing
 - **Clean UI Design**: Removed emojis, simplified interfaces, professional appearance
 - **Accurate Calculations**: Clips now calculate as (distance × 12) ÷ spacing
+- **Complexity Multiplier Update**: Simplified to exactly 3 discrete options (1x Easy, 2x Medium, 3x Hard)
+- **Measurement Accuracy**: Fixed critical bug where Ridge measurements incorrectly applied pitch multipliers
 
 ### **🧮 Current Material Calculator Features**
 - **LED Color Mixing**: Professional color selection with percentage splits
 - **C9 Wire System**: 1000ft spool tracking with 15% buffer configuration
 - **SPT-1 Wire System**: Extension wire with male/female plugs and splitters
 - **Mounting Clips**: Automatic calculation based on spacing (default 18")
-- **Crew-Based Labor**: Configurable crews with complexity multipliers (1x-3x)
+- **Crew-Based Labor**: Configurable crews with 3 complexity levels (1x, 2x, 3x)
 - **Sales Intelligence**: Target/minimum margin system for negotiations
 - **Inventory Management**: Real-time stock tracking with SKU references
 - **Real-time Updates**: All changes instantly update calculations
@@ -264,6 +265,8 @@ laborCost = totalDist * crewRate * crewCount * complexityMultiplier;
 - ✅ Simplified wire configuration UI for better usability
 - ✅ Added automatic inventory adjustment functions
 - ✅ Enhanced labor complexity with real-world examples
+- ✅ CRITICAL: Fixed Ridge measurements incorrectly applying pitch multipliers (only Hip should use slope)
+- ✅ Updated complexity multiplier to exactly 3 discrete options per user requirements
 
 ---
 

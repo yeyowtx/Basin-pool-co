@@ -297,12 +297,39 @@
             background: #fef2f2;
         }
         
+        .convert-btn {
+            background: none;
+            border: 1px solid #e5e7eb;
+            color: inherit;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            min-width: 20px;
+            height: 20px;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+        
+        .convert-btn:hover {
+            opacity: 1;
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
         .result-item.perimeter {
             border-left-color: #ef4444;
         }
         
         .result-item.ridge {
             border-left-color: #3b82f6;
+        }
+        
+        .result-item.hip {
+            border-left-color: #f59e0b;
         }
         
         .result-item.ground {
@@ -694,15 +721,42 @@
                     <button class="type-btn ridge" onclick="setType('ridge')">
                         🔵 Ridge
                     </button>
+                    <button class="type-btn hip" onclick="setType('hip')">
+                        🔸 Hip
+                    </button>
                     <button class="type-btn ground" onclick="setType('ground')">
                         🟢 Ground
                     </button>
                 </div>
                 
+                <!-- Roof Pitch Slider - Only shows when ridge/hip is selected -->
+                <div id="roof-pitch-container" style="display: none; margin-bottom: 16px; padding: 12px; background: #eff6ff; border-radius: 6px; border: 1px solid #bfdbfe;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #1e40af;">
+                        Roof Pitch: <span id="pitch-display">6/12</span>
+                    </label>
+                    <input type="range" id="roof-pitch-slider" min="3" max="12" step="1" value="6" 
+                           style="width: 100%; margin-bottom: 4px;"
+                           oninput="updateRoofPitch(this.value)">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #6b7280;">
+                        <span>3/12 (Flat)</span>
+                        <span>6/12 (Standard)</span>
+                        <span>12/12 (Steep)</span>
+                    </div>
+                    <div style="font-size: 10px; color: #6b7280; margin-top: 4px; text-align: center;">
+                        Hip measurements will be adjusted for this pitch
+                    </div>
+                </div>
+                
                 <div class="controls">
-                    <button class="start-btn" id="start-btn" onclick="startMeasuring()">
-                        ⚡ Start Measuring
-                    </button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <button class="start-btn" id="start-btn" onclick="startMeasuring()" style="flex: 1;">
+                            Measure
+                        </button>
+                        <button class="start-btn" id="convert-hip-btn" onclick="toggleHipConvertMode()" 
+                                style="flex: 1; background: #e67e22; color: white; display: none;">
+                            Convert to Hip
+                        </button>
+                    </div>
                     <div class="control-row" id="control-row" style="display: none;">
                         <button class="control-btn" onclick="undoPoint()">↩️ Undo</button>
                         <button class="control-btn" onclick="clearCurrent()">🗑️ Clear</button>
@@ -830,10 +884,14 @@
         let mouseMoveListener = null;
         let livePreviewLine = null;
         
+        // Segment conversion state
+        let isSegmentSelectionMode = false;
+        
         // Colors
         const COLORS = {
             perimeter: '#EF4444',
             ridge: '#3B82F6',
+            hip: '#F59E0B',
             ground: '#10B981'
         };
         
@@ -928,6 +986,12 @@
             spt1FemalePlugs: 0, // quantity of female plugs needed
             spt1Splitters: 0, // quantity of slide-on splitters needed
             complexityMultiplier: 1.0,
+            roofPitch: 6, // roof pitch for ridge calculations (6 = 6/12 pitch)
+            // Project Management Details (optional)
+            projectStories: '',
+            projectAccess: '',
+            projectRoof: '',
+            projectProperty: '',
             // Wire Inventory Tracking
             c9SpoolInventory: 0, // number of 1000ft C9 spools in stock
             spt1WireInventory: 0 // feet of SPT-1 wire in stock (100ft increments)
@@ -1017,6 +1081,31 @@
             // Update active button
             document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`.type-btn.${type}`).classList.add('active');
+            
+            // Reset any special modes
+            if (hipConvertMode) {
+                exitHipConvertMode();
+            }
+            
+            // Show/hide roof pitch slider ONLY for Hip
+            const roofPitchContainer = document.getElementById('roof-pitch-container');
+            if (type === 'hip') {
+                roofPitchContainer.style.display = 'block';
+                // Set slider to saved roof pitch value
+                document.getElementById('roof-pitch-slider').value = projectConfig.roofPitch;
+                document.getElementById('pitch-display').textContent = `${projectConfig.roofPitch}/12`;
+            } else {
+                roofPitchContainer.style.display = 'none';
+            }
+            
+            // Show/hide Convert to Hip button ONLY when Hip is selected
+            const convertHipBtn = document.getElementById('convert-hip-btn');
+            if (type === 'hip') {
+                convertHipBtn.style.display = 'block';
+                updateHipConvertUI(); // Update button text to "Click"
+            } else {
+                convertHipBtn.style.display = 'none';
+            }
         }
         
         // Professional measurement initialization
@@ -1180,26 +1269,33 @@
             updateUI();
         }
         
-        // Draw all saved measurements
-        function drawAllMeasurements() {
-            // Clear existing
+        // Clear saved measurements from map
+        function clearSavedMeasurements() {
             savedPolylines.forEach(p => p.setMap(null));
             savedMarkers.forEach(m => m.setMap(null));
             savedPolylines = [];
             savedMarkers = [];
+        }
+        
+        // Draw all saved measurements
+        function drawAllMeasurements() {
+            // Clear existing
+            clearSavedMeasurements();
             
-            measurements.forEach(measurement => {
+            measurements.forEach((measurement, measurementIndex) => {
                 const color = COLORS[measurement.type];
                 
-                // Polyline
+                // Simple polyline
                 const polyline = new google.maps.Polyline({
                     path: measurement.points.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
                     geodesic: true,
                     strokeColor: color,
                     strokeOpacity: 1,
                     strokeWeight: 3,
-                    map: map
+                    map: map,
+                    clickable: false
                 });
+                
                 savedPolylines.push(polyline);
                 
                 // Markers
@@ -1305,7 +1401,8 @@
             measurements.forEach((measurement, index) => {
                 const typeIcons = {
                     'perimeter': '🔴',
-                    'ridge': '🔵', 
+                    'ridge': '🔵',
+                    'hip': '🔸', 
                     'ground': '🟢'
                 };
                 
@@ -1318,6 +1415,8 @@
                     </div>
                     <div class="measurement-controls">
                         <span class="result-value">${measurement.distance.toFixed(1)} ft</span>
+                        
+                        
                         <button class="delete-btn" onclick="deleteMeasurement(${index})" title="Delete measurement">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
@@ -1329,11 +1428,47 @@
             
             // Show total if there are measurements
             if (measurements.length > 0) {
-                const totalDist = measurements.reduce((sum, m) => sum + m.distance, 0);
+                const flatDist = measurements.filter(m => !['ridge', 'hip'].includes(m.type)).reduce((sum, m) => sum + m.distance, 0);
+                const ridgeDist = measurements.filter(m => m.type === 'ridge').reduce((sum, m) => sum + m.distance, 0);
+                const hipDist = measurements.filter(m => m.type === 'hip').reduce((sum, m) => sum + m.distance, 0);
+                
+                // Apply pitch multiplier ONLY to hip distances (ridge is flat)
+                const rise = projectConfig.roofPitch;
+                const run = 12;
+                const pitchMultiplier = Math.sqrt(1 + Math.pow(rise / run, 2));
+                const adjustedRidgeDist = ridgeDist; // Ridge stays flat - no multiplier  
+                const adjustedHipDist = hipDist * pitchMultiplier; // Only hip gets pitch
+                
+                const totalMeasured = flatDist + ridgeDist + hipDist;
+                const totalActual = flatDist + adjustedRidgeDist + adjustedHipDist;
+                
                 html += `<div class="result-item total">
                     <span class="result-label">Total Distance</span>
-                    <span class="result-value">${totalDist.toFixed(1)} ft</span>
+                    <span class="result-value">${totalMeasured.toFixed(1)} ft measured</span>
                 </div>`;
+                
+                // Show adjusted total if there are ridge or hip measurements
+                if (ridgeDist > 0 || hipDist > 0) {
+                    html += `<div class="result-item total" style="border-top: 1px solid #e5e7eb; margin-top: 4px; padding-top: 8px;">
+                        <span class="result-label">Actual Distance</span>
+                        <span class="result-value">${totalActual.toFixed(1)} ft (${rise}/12 pitch)</span>
+                    </div>`;
+                    
+                    // Show breakdown for ridge and hip adjustments
+                    let adjustmentDetails = [];
+                    if (ridgeDist > 0) {
+                        adjustmentDetails.push(`Ridge: ${ridgeDist.toFixed(1)}ft → ${adjustedRidgeDist.toFixed(1)}ft`);
+                    }
+                    if (hipDist > 0) {
+                        adjustmentDetails.push(`Hip: ${hipDist.toFixed(1)}ft → ${adjustedHipDist.toFixed(1)}ft`);
+                    }
+                    
+                    if (adjustmentDetails.length > 0) {
+                        html += `<div style="font-size: 11px; color: #6b7280; text-align: center; margin-top: 4px;">
+                            ${adjustmentDetails.join(', ')} (+${((pitchMultiplier - 1) * 100).toFixed(1)}%)
+                        </div>`;
+                    }
+                }
             }
             
             document.getElementById('distance-results').innerHTML = html || '<div class="no-measurements">No measurements yet</div>';
@@ -1360,9 +1495,495 @@
             }
         }
         
+        // Show/hide segment selection helper
+        function showSegmentSelectionHelper() {
+            // Add helper text near the map
+            let helper = document.getElementById('segment-helper');
+            if (!helper) {
+                helper = document.createElement('div');
+                helper.id = 'segment-helper';
+                helper.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #fbbf24;
+                    color: #92400e;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    z-index: 1000;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                `;
+                helper.textContent = '🔸 Hip Mode: Click on a line segment to convert it to hip measurement';
+                document.getElementById('map').parentElement.appendChild(helper);
+            }
+            helper.style.display = 'block';
+        }
+        
+        function hideSegmentSelectionHelper() {
+            const helper = document.getElementById('segment-helper');
+            if (helper) {
+                helper.style.display = 'none';
+            }
+        }
+        
+        // Hip Convert Mode System
+        let hipConvertMode = false;
+        let selectedSegments = [];
+        
+        function toggleHipConvertMode() {
+            if (hipConvertMode) {
+                // If we have selections, convert them
+                if (selectedSegments.length > 0) {
+                    convertSelectedSegments();
+                } else {
+                    exitHipConvertMode();
+                }
+            } else {
+                enterHipConvertMode();
+            }
+        }
+        
+        function enterHipConvertMode() {
+            if (measurements.length === 0) {
+                alert('Please add some measurements first, then you can convert segments to hip measurements.');
+                return;
+            }
+            
+            hipConvertMode = true;
+            selectedSegments = [];
+            
+            // Update UI - button should now show "Convert to Hip"
+            updateHipConvertUI();
+            
+            // Add segment selection highlights
+            highlightSelectableSegments();
+        }
+        
+        function exitHipConvertMode() {
+            hipConvertMode = false;
+            selectedSegments = [];
+            
+            // Clean up UI
+            updateHipConvertUI(); // This will change button back to "Click"
+            
+            // Redraw measurements normally
+            drawAllMeasurements();
+        }
+        
+        function updateHipConvertUI() {
+            const convertBtn = document.getElementById('convert-hip-btn');
+            
+            if (hipConvertMode) {
+                if (selectedSegments.length > 0) {
+                    convertBtn.textContent = `Convert to Hip (${selectedSegments.length})`;
+                    convertBtn.style.background = '#059669';
+                } else {
+                    convertBtn.textContent = 'Convert to Hip';
+                    convertBtn.style.background = '#059669';
+                }
+            } else {
+                convertBtn.textContent = 'Click';
+                convertBtn.style.background = '#e67e22';
+            }
+        }
+        
+        
+        function highlightSelectableSegments() {
+            // Clear existing measurements and redraw with selection highlights
+            clearSavedMeasurements();
+            
+            measurements.forEach((measurement, measurementIndex) => {
+                if (measurement.type === 'hip') return; // Skip existing hip measurements
+                
+                const color = COLORS[measurement.type];
+                
+                // Draw each segment separately for individual selection
+                for (let i = 0; i < measurement.points.length - 1; i++) {
+                    const segmentPoints = [measurement.points[i], measurement.points[i + 1]];
+                    const segmentId = `${measurementIndex}-${i}`;
+                    
+                    const isSelected = selectedSegments.some(s => s.id === segmentId);
+                    const segmentColor = isSelected ? '#e67e22' : color;
+                    const strokeWeight = isSelected ? 5 : 3;
+                    
+                    const polyline = new google.maps.Polyline({
+                        path: segmentPoints.map(pt => new google.maps.LatLng(pt.lat, pt.lng)),
+                        geodesic: true,
+                        strokeColor: segmentColor,
+                        strokeOpacity: 1,
+                        strokeWeight: strokeWeight,
+                        map: map,
+                        clickable: true
+                    });
+                    
+                    // Add click listener for segment selection
+                    polyline.addListener('click', () => {
+                        toggleSegmentSelection(measurementIndex, i, polyline);
+                    });
+                    
+                    savedPolylines.push(polyline);
+                }
+                
+                // Add markers
+                measurement.points.forEach(point => {
+                    const marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(point.lat, point.lng),
+                        map: map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 2,
+                            fillColor: color,
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 1
+                        },
+                        clickable: false
+                    });
+                    savedMarkers.push(marker);
+                });
+            });
+        }
+        
+        function toggleSegmentSelection(measurementIndex, segmentIndex, polyline) {
+            const segmentId = `${measurementIndex}-${segmentIndex}`;
+            const existingIndex = selectedSegments.findIndex(s => s.id === segmentId);
+            
+            if (existingIndex >= 0) {
+                // Deselect
+                selectedSegments.splice(existingIndex, 1);
+            } else {
+                // Select
+                selectedSegments.push({
+                    id: segmentId,
+                    measurementIndex: measurementIndex,
+                    segmentIndex: segmentIndex
+                });
+            }
+            
+            // Update UI
+            highlightSelectableSegments();
+            updateHipConvertUI();
+        }
+        
+        function convertSelectedSegments() {
+            if (selectedSegments.length === 0) {
+                alert('Please select at least one segment to convert.');
+                return;
+            }
+            
+            // Sort segments by measurement index and segment index (reverse order for safe removal)
+            selectedSegments.sort((a, b) => {
+                if (a.measurementIndex !== b.measurementIndex) {
+                    return b.measurementIndex - a.measurementIndex;
+                }
+                return b.segmentIndex - a.segmentIndex;
+            });
+            
+            // Convert each selected segment
+            selectedSegments.forEach(segment => {
+                convertSegmentToHipDirect(segment.measurementIndex, segment.segmentIndex);
+            });
+            
+            // Exit convert mode
+            exitHipConvertMode();
+            
+            // Update calculations
+            updateDistanceResults();
+            updateMaterialEstimate();
+        }
+        
+        
+        // Find nearest segment to click point with improved accuracy
+        function findNearestSegment(clickLatLng, points) {
+            let closestSegment = 0;
+            let minDistance = Infinity;
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const segmentStart = new google.maps.LatLng(points[i].lat, points[i].lng);
+                const segmentEnd = new google.maps.LatLng(points[i + 1].lat, points[i + 1].lng);
+                
+                // Calculate distance from click point to line segment midpoint
+                // This provides better accuracy for segment selection
+                const segmentMidpoint = google.maps.geometry.spherical.interpolate(segmentStart, segmentEnd, 0.5);
+                const distanceToMidpoint = google.maps.geometry.spherical.computeDistanceBetween(clickLatLng, segmentMidpoint);
+                
+                if (distanceToMidpoint < minDistance) {
+                    minDistance = distanceToMidpoint;
+                    closestSegment = i;
+                }
+            }
+            
+            return closestSegment;
+        }
+        
+        // Show segment conversion modal
+        function showSegmentConversionModal(measurementIndex, segmentIndex) {
+            const measurement = measurements[measurementIndex];
+            const segmentStart = measurement.points[segmentIndex];
+            const segmentEnd = measurement.points[segmentIndex + 1];
+            
+            // Calculate segment distance for display
+            const segmentDistance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(segmentStart.lat, segmentStart.lng),
+                new google.maps.LatLng(segmentEnd.lat, segmentEnd.lng)
+            ) * 3.28084; // Convert to feet
+            
+            // Create modal HTML
+            const modalHTML = `
+                <div id="segmentModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                     background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        <h3 style="margin: 0 0 15px 0; color: #2c3e50;">Convert Segment to Hip</h3>
+                        <p style="margin: 0 0 20px 0; color: #666;">
+                            Convert this ${segmentDistance.toFixed(1)}ft segment from <strong>${measurement.type}</strong> to <strong>hip</strong> measurement?
+                        </p>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button onclick="closeSegmentModal()" style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">
+                                Cancel
+                            </button>
+                            <button onclick="convertSegmentToHip(${measurementIndex}, ${segmentIndex})" 
+                                    style="padding: 8px 16px; border: none; background: #e67e22; color: white; border-radius: 4px; cursor: pointer;">
+                                Convert to Hip
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to document
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        // Close segment conversion modal
+        function closeSegmentModal() {
+            const modal = document.getElementById('segmentModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Convert specific segment to hip measurement
+        function convertSegmentToHip(measurementIndex, segmentIndex) {
+            const measurement = measurements[measurementIndex];
+            const points = measurement.points;
+            
+            // Get the segment coordinates
+            const segmentStart = points[segmentIndex];
+            const segmentEnd = points[segmentIndex + 1];
+            
+            // Calculate segment distance
+            const segmentDistance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(segmentStart.lat, segmentStart.lng),
+                new google.maps.LatLng(segmentEnd.lat, segmentEnd.lng)
+            ) * 3.28084; // Convert to feet
+            
+            // Create new hip measurement with just this segment
+            const newHipMeasurement = {
+                type: 'hip',
+                points: [segmentStart, segmentEnd],
+                distance: segmentDistance
+            };
+            
+            // Add the new hip measurement
+            measurements.push(newHipMeasurement);
+            
+            // Remove this segment from the original measurement
+            if (points.length === 2) {
+                // If this was a 2-point line, remove the entire measurement
+                measurements.splice(measurementIndex, 1);
+            } else {
+                // Split the original measurement around the removed segment
+                const beforeSegment = points.slice(0, segmentIndex + 1);
+                const afterSegment = points.slice(segmentIndex + 1);
+                
+                // Update original measurement with the before portion (if it exists)
+                if (beforeSegment.length >= 2) {
+                    measurement.points = beforeSegment;
+                    measurement.distance = calculatePolylineDistance(beforeSegment);
+                } else {
+                    // No valid before portion, remove this measurement
+                    measurements.splice(measurementIndex, 1);
+                }
+                
+                // Create new measurement for the after portion (if it exists)
+                if (afterSegment.length >= 2) {
+                    const afterMeasurement = {
+                        type: measurement.type,
+                        points: afterSegment,
+                        distance: calculatePolylineDistance(afterSegment)
+                    };
+                    measurements.push(afterMeasurement);
+                }
+            }
+            
+            // Redraw all measurements
+            drawAllMeasurements();
+            updateDistanceResults();
+            updateMaterialEstimate();
+            
+            // Close modal
+            closeSegmentModal();
+            
+            // Exit segment selection mode
+            isSegmentSelectionMode = false;
+            currentType = null;
+            
+            // Update UI feedback
+            document.querySelectorAll('.measurement-btn').forEach(btn => btn.classList.remove('active'));
+            updateUIFeedback();
+        }
+        
+        // Direct segment to hip conversion (no modal, used in bulk mode)
+        function convertSegmentToHipDirect(measurementIndex, segmentIndex) {
+            const measurement = measurements[measurementIndex];
+            if (!measurement) return;
+            
+            const points = measurement.points;
+            
+            // Get the segment coordinates
+            const segmentStart = points[segmentIndex];
+            const segmentEnd = points[segmentIndex + 1];
+            
+            // Calculate segment distance
+            const segmentDistance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(segmentStart.lat, segmentStart.lng),
+                new google.maps.LatLng(segmentEnd.lat, segmentEnd.lng)
+            ) * 3.28084; // Convert to feet
+            
+            // Create new hip measurement with just this segment
+            const newHipMeasurement = {
+                type: 'hip',
+                points: [segmentStart, segmentEnd],
+                distance: segmentDistance
+            };
+            
+            // Add the new hip measurement
+            measurements.push(newHipMeasurement);
+            
+            // Remove this segment from the original measurement
+            if (points.length === 2) {
+                // If this was a 2-point line, remove the entire measurement
+                measurements.splice(measurementIndex, 1);
+            } else {
+                // Split the original measurement around the removed segment
+                const beforeSegment = points.slice(0, segmentIndex + 1);
+                const afterSegment = points.slice(segmentIndex + 1);
+                
+                // Update original measurement with the before portion (if it exists)
+                if (beforeSegment.length >= 2) {
+                    measurement.points = beforeSegment;
+                    measurement.distance = calculatePolylineDistance(beforeSegment);
+                } else {
+                    // No valid before portion, remove this measurement
+                    measurements.splice(measurementIndex, 1);
+                }
+                
+                // Create new measurement for the after portion (if it exists)
+                if (afterSegment.length >= 2) {
+                    const afterMeasurement = {
+                        type: measurement.type,
+                        points: afterSegment,
+                        distance: calculatePolylineDistance(afterSegment)
+                    };
+                    measurements.push(afterMeasurement);
+                }
+            }
+        }
+        
+        // Calculate distance for polyline
+        function calculatePolylineDistance(points) {
+            let totalDistance = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                const start = new google.maps.LatLng(points[i].lat, points[i].lng);
+                const end = new google.maps.LatLng(points[i + 1].lat, points[i + 1].lng);
+                totalDistance += google.maps.geometry.spherical.computeDistanceBetween(start, end);
+            }
+            return totalDistance * 3.28084; // Convert to feet
+        }
+        
+        // Update UI feedback for measurement mode
+        function updateUIFeedback() {
+            let feedbackDiv = document.getElementById('measurement-feedback');
+            if (!feedbackDiv) {
+                // Create feedback element if it doesn't exist - try multiple selectors
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) {
+                    const measurementTools = sidebar.querySelector('.card');
+                    if (measurementTools) {
+                        measurementTools.insertAdjacentHTML('afterend', `
+                            <div id="measurement-feedback" style="padding: 10px; margin-bottom: 20px; background: #f8f9fa; border-radius: 8px; text-align: center; font-size: 14px; color: #666; display: none;">
+                            </div>
+                        `);
+                        feedbackDiv = document.getElementById('measurement-feedback');
+                    }
+                }
+            }
+            
+            if (feedbackDiv) {
+                if (isSegmentSelectionMode) {
+                    feedbackDiv.textContent = '🔸 Click on any line segment to convert it to a hip measurement';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.style.background = '#fff3cd';
+                    feedbackDiv.style.color = '#856404';
+                } else {
+                    feedbackDiv.style.display = 'none';
+                }
+            }
+        }
+        
+        // Convert measurement type (for line conversion)
+        function convertMeasurementType(index, newType) {
+            if (measurements[index]) {
+                // Update the measurement type
+                measurements[index].type = newType;
+                
+                // Redraw all measurements with new colors
+                drawAllMeasurements();
+                
+                // Update distance results display
+                updateDistanceResults();
+                
+                // Recalculate materials with new type
+                updateMaterialEstimate();
+            }
+        }
+        
+        // Update roof pitch and recalculate ridge multiplier
+        function updateRoofPitch(pitchValue) {
+            projectConfig.roofPitch = parseInt(pitchValue);
+            
+            // Calculate pitch multiplier using rise over run
+            const rise = projectConfig.roofPitch;
+            const run = 12;
+            const pitchMultiplier = Math.sqrt(1 + Math.pow(rise / run, 2));
+            
+            // Update display
+            document.getElementById('pitch-display').textContent = `${rise}/12`;
+            document.getElementById('pitch-multiplier').textContent = `${pitchMultiplier.toFixed(2)}x`;
+            
+            // Recalculate materials with new pitch
+            updateMaterialEstimate();
+        }
+        
         // Update material estimate with hardware-specific cards
         function updateMaterialEstimate() {
-            const totalDist = measurements.reduce((sum, m) => sum + m.distance, 0);
+            // Calculate distances separately for flat and sloped measurements
+            const flatDist = measurements.filter(m => !['ridge', 'hip'].includes(m.type)).reduce((sum, m) => sum + m.distance, 0);
+            const ridgeDist = measurements.filter(m => m.type === 'ridge').reduce((sum, m) => sum + m.distance, 0);
+            const hipDist = measurements.filter(m => m.type === 'hip').reduce((sum, m) => sum + m.distance, 0);
+            
+            // Apply pitch multiplier ONLY to hip distances (ridge is flat)
+            const rise = projectConfig.roofPitch;
+            const run = 12;
+            const pitchMultiplier = Math.sqrt(1 + Math.pow(rise / run, 2));
+            const adjustedRidgeDist = ridgeDist; // Ridge stays flat - no multiplier
+            const adjustedHipDist = hipDist * pitchMultiplier; // Only hip gets pitch
+            
+            // Total distance for material calculations
+            const totalDist = flatDist + adjustedRidgeDist + adjustedHipDist;
             
             if (totalDist === 0) {
                 document.getElementById('material-items').innerHTML = '<div class="no-measurements">Start measuring to see material estimates</div>';
@@ -1926,15 +2547,74 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 10px; color: #6b7280; margin-top: 2px;">
                             <span>1x (Easy)</span>
-                            <span>2x (Difficult)</span>
+                            <span>2x (Medium)</span>
+                            <span>3x (Hard)</span>
                         </div>
-                        <input type="range" min="1.0" max="2.0" step="0.1" value="${projectConfig.complexityMultiplier}" 
+                        <input type="range" min="1" max="3" step="1" value="${projectConfig.complexityMultiplier}" 
                                class="config-input" style="margin-top: 4px; width: 100%;"
                                oninput="
                                    projectConfig.complexityMultiplier = parseFloat(this.value); 
                                    document.getElementById('complexity-multiplier-label').textContent = 'How difficult is this project? (' + this.value + 'x)'; 
                                    updateMaterialEstimate();
                                ">
+                    </div>
+                </div>
+                
+                <!-- Expandable Project Details -->
+                <div class="config-row">
+                    <button onclick="toggleProjectDetails()" style="width: 100%; padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; color: #374151; display: flex; align-items: center; justify-content: space-between;">
+                        <span>📋 Project Details (Optional)</span>
+                        <span id="project-details-arrow">▼</span>
+                    </button>
+                    
+                    <div id="project-details-section" style="display: none; margin-top: 12px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        <div class="project-detail-group">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 11px; color: #374151;">Stories:</label>
+                            <select id="project-stories" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;" onchange="updateProjectDetails()">
+                                <option value="">Select...</option>
+                                <option value="1">1 Story</option>
+                                <option value="2">2 Story</option>
+                                <option value="3+">3+ Story</option>
+                            </select>
+                        </div>
+                        
+                        <div class="project-detail-group" style="margin-top: 8px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 11px; color: #374151;">Height Access:</label>
+                            <select id="project-access" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;" onchange="updateProjectDetails()">
+                                <option value="">Select...</option>
+                                <option value="ladder">Ladder (Ground level)</option>
+                                <option value="scaffolding">Scaffolding Required</option>
+                                <option value="lift">Lift Equipment</option>
+                                <option value="extreme">Extreme Access</option>
+                            </select>
+                        </div>
+                        
+                        <div class="project-detail-group" style="margin-top: 8px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 11px; color: #374151;">Roof Material:</label>
+                            <select id="project-roof" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;" onchange="updateProjectDetails()">
+                                <option value="">Select...</option>
+                                <option value="asphalt">Asphalt Shingles</option>
+                                <option value="metal">Metal Roof</option>
+                                <option value="tile">Tile Roof</option>
+                                <option value="slate">Slate/Specialty</option>
+                            </select>
+                        </div>
+                        
+                        <div class="project-detail-group" style="margin-top: 8px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 11px; color: #374151;">Property Access:</label>
+                            <select id="project-property" style="width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;" onchange="updateProjectDetails()">
+                                <option value="">Select...</option>
+                                <option value="open">Open Access</option>
+                                <option value="limited">Limited Access</option>
+                                <option value="restricted">Restricted/Gated</option>
+                                <option value="extreme">No Vehicle Access</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-top: 12px; padding: 8px; background: #eff6ff; border-radius: 4px;">
+                            <div style="font-size: 11px; color: #1e40af; font-weight: 500;">Project Summary:</div>
+                            <div id="project-summary" style="font-size: 10px; color: #6b7280; margin-top: 2px;">Fill details above for project management info</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2553,6 +3233,73 @@
                 inventoryContent.style.display = 'block';
                 configContent.style.display = 'none';
             }
+        }
+        
+        // Toggle project details section
+        function toggleProjectDetails() {
+            const section = document.getElementById('project-details-section');
+            const arrow = document.getElementById('project-details-arrow');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                arrow.textContent = '▲';
+            } else {
+                section.style.display = 'none';
+                arrow.textContent = '▼';
+            }
+        }
+        
+        // Update project details and summary
+        function updateProjectDetails() {
+            // Get values from dropdowns
+            projectConfig.projectStories = document.getElementById('project-stories').value;
+            projectConfig.projectAccess = document.getElementById('project-access').value;
+            projectConfig.projectRoof = document.getElementById('project-roof').value;
+            projectConfig.projectProperty = document.getElementById('project-property').value;
+            
+            // Generate summary text
+            let summary = [];
+            
+            if (projectConfig.projectStories) {
+                summary.push(`${projectConfig.projectStories} story building`);
+            }
+            
+            if (projectConfig.projectAccess) {
+                const accessMap = {
+                    'ladder': 'ladder access',
+                    'scaffolding': 'scaffolding required',
+                    'lift': 'lift equipment needed',
+                    'extreme': 'extreme access challenges'
+                };
+                summary.push(accessMap[projectConfig.projectAccess]);
+            }
+            
+            if (projectConfig.projectRoof) {
+                const roofMap = {
+                    'asphalt': 'asphalt shingles',
+                    'metal': 'metal roof',
+                    'tile': 'tile roof',
+                    'slate': 'slate/specialty roof'
+                };
+                summary.push(roofMap[projectConfig.projectRoof]);
+            }
+            
+            if (projectConfig.projectProperty) {
+                const propertyMap = {
+                    'open': 'open access',
+                    'limited': 'limited access',
+                    'restricted': 'restricted/gated',
+                    'extreme': 'no vehicle access'
+                };
+                summary.push(propertyMap[projectConfig.projectProperty]);
+            }
+            
+            // Update summary display
+            const summaryText = summary.length > 0 ? 
+                summary.join(', ') : 
+                'Fill details above for project management info';
+            
+            document.getElementById('project-summary').textContent = summaryText;
         }
         
         function adjustC9Inventory(amount) {
