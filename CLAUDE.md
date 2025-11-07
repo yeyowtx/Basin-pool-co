@@ -87,10 +87,16 @@ python3 -m http.server 8104
 # Open: http://localhost:8104/index.html
 ```
 
-### **File Sync Command**
+### **File Management Commands**
 ```bash
 # Sync main file to all worktrees
 ./sync-worktrees.sh
+
+# Compare two worktrees for differences
+./compare-worktrees.sh main roof-worktree-cards
+
+# Safely merge worktrees with conflict resolution
+./merge-worktrees.sh roof-worktree-cards roof-worktree-maps
 ```
 
 ## 🎨 **CSS Classes - Material Calculator**
@@ -145,20 +151,65 @@ python3 -m http.server 8104
 - Replace 🔴/🔵/🟢 → colored text or symbols
 - Replace 💡 → "Calculator" or bulb symbol
 
+## 🔄 **MERGE STRATEGY: SAFE WORKTREE MERGING**
+
+### **🚨 CRITICAL: Always Use Safe Merge Process**
+**NEVER manually copy files between worktrees!** Use the provided scripts to prevent data loss.
+
+### **📋 Merge Workflow**
+1. **Compare First**: `./compare-worktrees.sh worktree1 worktree2`
+   - Shows exact differences between files
+   - Detects features (check marks, emojis, base64 images)
+   - Saves difference reports for review
+
+2. **Backup Everything**: Automatic in merge script
+   - Creates timestamped backups in `.merge-backups/`
+   - Git commits before and after merge
+   - Preserves original files for recovery
+
+3. **Smart Merge**: `./merge-worktrees.sh source target`
+   - Uses git merge-file for intelligent 3-way merge
+   - Handles automatic merges when possible
+   - Opens VS Code for manual conflict resolution
+   - Updates main file and syncs all worktrees
+
+### **🛡️ Merge Safety Features**
+- **Automatic Backups**: Every merge creates full backups
+- **Conflict Detection**: Identifies merge conflicts before applying
+- **Manual Resolution**: VS Code integration for complex conflicts
+- **Rollback Capability**: Easy recovery from `.merge-backups/`
+- **Sync Verification**: All worktrees stay synchronized
+
+### **📊 Example Merge Process**
+```bash
+# 1. Compare changes
+./compare-worktrees.sh main roof-worktree-cards
+# Shows: Cards has check mark feature, main doesn't
+
+# 2. Merge cards into main
+./merge-worktrees.sh roof-worktree-cards main
+# Result: Main now has check mark + all other features
+
+# 3. Sync to all worktrees
+./sync-worktrees.sh
+# Result: All worktrees now identical with merged features
+```
+
 ## 🏆 **CURRENT STATUS: READY FOR DEVELOPMENT**
 
 ### **✅ Setup Complete**
 - Master file identified: `/Users/apple/index.html`
 - Backup system active with git + timestamped copies
 - Local server running on port 8104
-- All worktrees will be synced to this master file
+- Safe merge system with conflict resolution
+- All worktrees synchronized and protected
 
 ### **🎯 Next Tasks**
 1. Implement check mark next to total cost
 2. Add reverse margin calculation logic
 3. Create guide icon with help content
 4. Remove all emoji characters
-5. Test across all worktrees
+5. Test across all worktrees with safe merge system
 
 ### **🔧 Technical Notes**
 - Keep existing Google Maps integration
