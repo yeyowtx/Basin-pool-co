@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Holiday Light Design Tool</title>
     <style>
         * {
@@ -588,7 +588,6 @@
             background: #f8f9fa;
             z-index: 2000;
             flex-direction: column;
-            overflow: hidden; /* Prevent scroll during input focus */
         }
         
         .mobile-search-header {
@@ -672,36 +671,6 @@
             align-items: center;
             padding: 16px 20px;
             gap: 12px;
-        }
-        
-        /* Critical iOS Safari input styles to prevent zoom */
-        .search-input-wrapper input,
-        #mobileAddressSearch {
-            font-size: 16px !important; /* CRITICAL: 16px prevents iOS zoom */
-            -webkit-text-size-adjust: 100% !important;
-            -webkit-appearance: none !important;
-            -webkit-tap-highlight-color: transparent !important;
-            border: none;
-            outline: none;
-            background: transparent;
-            flex: 1;
-            padding: 0;
-            color: #1f2937;
-        }
-        
-        /* Prevent zoom on focus */
-        .search-input-wrapper input:focus,
-        #mobileAddressSearch:focus {
-            font-size: 16px !important;
-        }
-        
-        /* Override Google Places autocomplete styles */
-        gmp-place-autocomplete-element,
-        gmp-place-autocomplete-element input {
-            font-size: 16px !important;
-            -webkit-text-size-adjust: 100% !important;
-            -webkit-appearance: none !important;
-            -webkit-tap-highlight-color: transparent !important;
         }
         
         .search-icon-small {
@@ -1024,60 +993,6 @@
             flex-direction: column;
         }
         
-        /* Landscape Drawing Optimizations */
-        .mobile-drawing-interface {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 9999 !important;
-        }
-        
-        .mobile-drawing-interface .drawing-container {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 60px;
-            overflow: hidden;
-        }
-        
-        .mobile-drawing-interface canvas {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            touch-action: none !important;
-        }
-        
-        .mobile-drawing-interface .drawing-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        
-        .mobile-drawing-interface .drawing-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
         .drawing-header {
             background: white;
             color: #1f2937;
@@ -1322,7 +1237,7 @@
         .mb-4 { margin-bottom: 16px; }
     </style>
     
-    <!-- Google Maps API with Places Library (2025 New API) -->
+    <!-- Google Maps API with Places Library -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk&libraries=places&loading=async" async defer></script>
 </head>
 <body>
@@ -1391,9 +1306,9 @@
     <!-- Mobile Crop Interface -->
     <div class="mobile-crop-interface" id="mobileCropInterface" style="display:none;">
         <div class="crop-header">
-            <button class="cancel-button" onclick="cancelCrop()">Cancel</button>
-            <span class="crop-title">Adjust Crop Area</span>
-            <button class="done-button" onclick="completeMobileCrop()">✓</button>
+            <button class="cancel-button" onclick="cancelCrop()">← Back</button>
+            <span class="crop-title">Crop Your View</span>
+            <button class="done-button" onclick="completeMobileCrop()">Done</button>
         </div>
         <div class="crop-container" id="cropContainer">
             <canvas id="cropCanvas"></canvas>
@@ -1405,6 +1320,10 @@
                     <div class="crop-handle bottom-right"></div>
                 </div>
             </div>
+        </div>
+        <div class="crop-controls">
+            <button class="crop-control" onclick="rotateCrop()">🔄 Rotate</button>
+            <button class="crop-control" onclick="resetCrop()">↻ Reset</button>
         </div>
     </div>
     
@@ -2099,9 +2018,9 @@
             }
         }
         
-        // NEW MOBILE INTERFACE FUNCTIONS (Google Maps Style - 2025 API)
+        // NEW MOBILE INTERFACE FUNCTIONS (Google Maps Style)
         let mobileAutocomplete = null;
-        let placesLibrary = null;
+        let mobileSessionToken = null;
         
         // Mobile Interface State Management
         let currentMobileInterface = null; // 'search', 'streetview', 'crop', 'drawing'
@@ -2117,174 +2036,56 @@
             }
             
             // Initialize Google Places Autocomplete when Maps API is loaded
-            initializePlacesWithRetry();
-        }
-        
-        // Initialize Google Places 2025 API with retry logic
-        async function initializePlacesWithRetry(attempts = 0) {
-            try {
-                if (typeof google !== 'undefined' && google.maps) {
-                    console.log('Google Maps API loaded, importing Places library...');
-                    // Import Places library (2025 new way)
-                    placesLibrary = await google.maps.importLibrary("places");
-                    console.log('Places library imported successfully');
-                    initializeMobilePlacesAutocomplete();
-                } else {
-                    if (attempts < 10) {
-                        console.log(`Google Maps API not ready, retrying... (${attempts + 1}/10)`);
-                        setTimeout(() => initializePlacesWithRetry(attempts + 1), 500);
-                    } else {
-                        console.error('Google Maps API failed to load after 10 attempts');
-                        updateMobileProgress('Google Maps failed to load. Please try refreshing or use photo upload.');
-                    }
-                }
-            } catch (error) {
-                console.error('Error importing Places library:', error);
-                if (attempts < 5) {
-                    setTimeout(() => initializePlacesWithRetry(attempts + 1), 1000);
-                } else {
-                    updateMobileProgress('Address search unavailable. Please use photo upload instead.');
-                }
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                initializeMobilePlacesAutocomplete();
+            } else {
+                // Retry after Maps API loads
+                setTimeout(initializeMobileInterfaces, 1000);
             }
         }
         
-        // Google Places Autocomplete (2025 NEW API)
+        // Google Places Autocomplete (2025 API)
         function initializeMobilePlacesAutocomplete() {
             const mobileSearchInput = document.getElementById('mobileAddressSearch');
+            if (!mobileSearchInput) return;
             
-            if (!mobileSearchInput) {
-                console.error('Mobile search input not found');
-                return;
-            }
+            // Create session token for cost optimization
+            mobileSessionToken = new google.maps.places.AutocompleteSessionToken();
             
-            console.log('Setting up simple autocomplete like roof measurement tool');
-            
-            // Use the same simple approach as roof measurement tool
-            let autocompleteService;
-            let suggestionTimeout;
-            
-            // Initialize Google Places AutocompleteService
-            if (google.maps.places && google.maps.places.AutocompleteService) {
-                autocompleteService = new google.maps.places.AutocompleteService();
-            }
-            
-            // Input event handler
-            mobileSearchInput.addEventListener('input', function(e) {
-                clearTimeout(suggestionTimeout);
-                const query = e.target.value.trim();
-                
-                if (query.length < 3) {
-                    hideMobileSuggestions();
-                    return;
-                }
-                
-                // Debounced search like roof measurement tool
-                suggestionTimeout = setTimeout(() => {
-                    searchAddressSuggestions(query);
-                }, 300);
+            // Initialize Autocomplete
+            mobileAutocomplete = new google.maps.places.Autocomplete(mobileSearchInput, {
+                types: ['address'],
+                componentRestrictions: { country: 'US' },
+                fields: ['formatted_address', 'geometry.location', 'name'],
+                sessionToken: mobileSessionToken
             });
             
-            // Enter key handler
-            mobileSearchInput.addEventListener('keydown', function(e) {
+            // Handle place selection
+            mobileAutocomplete.addListener('place_changed', function() {
+                const place = mobileAutocomplete.getPlace();
+                
+                if (place.geometry && place.geometry.location) {
+                    // Valid address selected
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    
+                    // Load Street View for this location
+                    loadMobileStreetViewAtLocation(lat, lng, place.formatted_address);
+                } else {
+                    // Invalid place
+                    alert('Please select a valid address from the suggestions.');
+                }
+            });
+            
+            // Handle Enter key
+            mobileSearchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const address = e.target.value.trim();
-                    if (address) {
-                        hideMobileSuggestions();
-                        tryGeocodeAddress(address);
+                    // Trigger the first autocomplete prediction
+                    const firstPrediction = document.querySelector('.pac-item:first-child');
+                    if (firstPrediction) {
+                        google.maps.event.trigger(firstPrediction, 'click');
                     }
-                }
-            });
-            
-            console.log('Simple autocomplete setup complete');
-        }
-        
-        // Simple address suggestions (like roof measurement tool)
-        function searchAddressSuggestions(query) {
-            if (!google.maps.places || !google.maps.places.AutocompleteService) {
-                console.log('AutocompleteService not available');
-                return;
-            }
-            
-            const service = new google.maps.places.AutocompleteService();
-            
-            service.getPlacePredictions({
-                input: query,
-                componentRestrictions: { country: 'us' },
-                types: ['address']
-            }, (predictions, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-                    console.log('Address suggestions found:', predictions.length);
-                    showMobileSuggestions(predictions);
-                } else {
-                    console.log('No suggestions found');
-                    hideMobileSuggestions();
-                }
-            });
-        }
-        
-        // Show suggestions dropdown
-        function showMobileSuggestions(predictions) {
-            const suggestionsContainer = document.getElementById('mobileSuggestions');
-            if (!suggestionsContainer) {
-                console.log('Suggestions container not found');
-                return;
-            }
-            
-            suggestionsContainer.innerHTML = '';
-            
-            predictions.slice(0, 5).forEach(prediction => {
-                const suggestionItem = document.createElement('div');
-                suggestionItem.className = 'suggestion-item';
-                suggestionItem.textContent = prediction.description;
-                suggestionItem.onclick = () => selectMobileSuggestion(prediction.description);
-                suggestionsContainer.appendChild(suggestionItem);
-            });
-            
-            suggestionsContainer.style.display = 'block';
-            console.log('Showing', predictions.length, 'suggestions');
-        }
-        
-        // Hide suggestions
-        function hideMobileSuggestions() {
-            const suggestionsContainer = document.getElementById('mobileSuggestions');
-            if (suggestionsContainer) {
-                suggestionsContainer.style.display = 'none';
-            }
-        }
-        
-        // Select a suggestion
-        function selectMobileSuggestion(address) {
-            console.log('Selected address:', address);
-            
-            const searchInput = document.getElementById('mobileAddressSearch');
-            if (searchInput) {
-                searchInput.value = address;
-            }
-            
-            hideMobileSuggestions();
-            tryGeocodeAddress(address);
-        }
-        
-        // Fallback geocoding function
-        function tryGeocodeAddress(address) {
-            if (!google.maps || !google.maps.Geocoder) {
-                alert('Address lookup is not available. Please use photo upload instead.');
-                return;
-            }
-            
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: address }, function(results, status) {
-                if (status === 'OK' && results[0]) {
-                    const location = results[0].geometry.location;
-                    const lat = location.lat();
-                    const lng = location.lng();
-                    const formattedAddress = results[0].formatted_address;
-                    
-                    console.log('Geocoded address:', formattedAddress);
-                    loadMobileStreetViewAtLocation(lat, lng, formattedAddress);
-                } else {
-                    alert('Address not found. Please try a different address or use photo upload.');
                 }
             });
         }
@@ -2292,7 +2093,7 @@
         // Mobile Interface Navigation
         function showMobileInterface(interfaceType) {
             // Hide all interfaces
-            const interfaces = ['mobileSearchInterface', 'mobileStreetViewInterface', 'mobileCropInterface', 'mobileDrawingInterface'];
+            const interfaces = ['mobileSearchInterface', 'mobileStreetviewInterface', 'mobileCropInterface', 'mobileDrawingInterface'];
             interfaces.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -2316,7 +2117,7 @@
                         if (searchInput) searchInput.focus();
                     }, 100);
                     break;
-                case 'streetView':
+                case 'streetview':
                     // Initialize Street View if not already done
                     if (!streetViewPanorama) {
                         // Will be initialized when location is loaded
@@ -2337,7 +2138,7 @@
             updateMobileProgress('Loading Street View...');
             
             // Switch to Street View interface
-            showMobileInterface('streetView');
+            showMobileInterface('streetview');
             
             // Initialize Street View
             const panoramaDiv = document.getElementById('mobileStreetViewContainer');
@@ -2346,23 +2147,19 @@
                 return;
             }
             
-            // Create Street View panorama (clean mobile version)
+            // Create Street View panorama
             streetViewPanorama = new google.maps.StreetViewPanorama(panoramaDiv, {
                 position: { lat, lng },
                 pov: { heading: 0, pitch: 5 },
                 zoom: 1,
                 visible: true,
                 addressControl: false,
-                linksControl: false,           // Hide navigation links
-                panControl: false,             // Hide pan controls (use touch)
-                zoomControl: false,            // Hide zoom controls (use pinch)
+                linksControl: true,
+                panControl: true,
+                zoomControl: true,
                 fullscreenControl: false,
-                imageDateControl: false,       // Hide date control
-                motionTracking: false,         // Disable motion tracking
-                motionTrackingControl: false,  // Hide motion tracking control
-                clickToGo: false,              // Disable click to move
-                scrollwheel: false,            // Disable scroll wheel
-                disableDoubleClickZoom: true   // Disable double click zoom
+                clickToGo: true,
+                scrollwheel: true
             });
             
             // Handle Street View load
@@ -2380,39 +2177,21 @@
             });
         }
         
-        // Capture Street View for mobile using Google Street View API
+        // Capture Street View for mobile
         function captureMobileStreetView() {
-            if (!streetViewPanorama) return;
+            const panoramaDiv = document.getElementById('mobileStreetViewContainer');
+            if (!panoramaDiv) return;
             
             updateMobileProgress('Capturing image...');
             
-            try {
-                // Get current panorama position and view
-                const position = streetViewPanorama.getPosition();
-                const pov = streetViewPanorama.getPov();
-                
-                if (!position) {
-                    alert('Unable to capture current Street View. Please try again.');
-                    return;
-                }
-                
-                // Create Street View static image URL (Google's official way to capture)
-                const size = '640x640'; // High resolution
-                const heading = Math.round(pov.heading);
-                const pitch = Math.round(pov.pitch);
-                const fov = 90; // Field of view
-                
-                const imageUrl = `https://maps.googleapis.com/maps/api/streetview?` +
-                    `size=${size}&` +
-                    `location=${position.lat()},${position.lng()}&` +
-                    `heading=${heading}&` +
-                    `pitch=${pitch}&` +
-                    `fov=${fov}&` +
-                    `key=AIzaSyB-Q8DaNs6F6sT93ukB-GibpSZvrQ57vAk`;
-                
-                // Load the captured image
+            // Use html2canvas to capture Street View
+            html2canvas(panoramaDiv, {
+                useCORS: true,
+                allowTaint: true,
+                scale: 1,
+                logging: false
+            }).then(canvas => {
                 const img = new Image();
-                img.crossOrigin = 'anonymous';
                 img.onload = function() {
                     // Store captured image
                     currentImage = img;
@@ -2420,21 +2199,12 @@
                     // Move to crop interface
                     showMobileInterface('crop');
                     initializeMobileCrop(img);
-                    updateMobileProgress('Image captured! Adjust your crop area.');
                 };
-                img.onerror = function() {
-                    console.error('Failed to load Street View image');
-                    alert('Failed to capture Street View. Please try again.');
-                    updateMobileProgress('Capture failed. Try adjusting the view.');
-                };
-                
-                img.src = imageUrl;
-                
-            } catch (error) {
-                console.error('Street View capture error:', error);
+                img.src = canvas.toDataURL();
+            }).catch(error => {
+                console.error('Street View capture failed:', error);
                 alert('Failed to capture Street View. Please try again.');
-                updateMobileProgress('Capture failed. Try again.');
-            }
+            });
         }
         
         // Initialize mobile crop interface
@@ -2501,8 +2271,13 @@
                 cropY = (canvas.height - cropHeight) / 2;
             }
             
-            // Use existing crop box from HTML
-            const cropBox = document.getElementById('cropBox');
+            // Create crop box
+            let cropBox = document.querySelector('.crop-box');
+            if (!cropBox) {
+                cropBox = document.createElement('div');
+                cropBox.className = 'crop-box';
+                overlay.appendChild(cropBox);
+            }
             
             // Position crop box
             cropBox.style.left = cropX + 'px';
@@ -2512,205 +2287,14 @@
             
             // Store crop dimensions for later use
             window.mobileCropBox = { x: cropX, y: cropY, width: cropWidth, height: cropHeight };
-            
-            // Add touch interaction for crop box
-            setupCropBoxTouchInteraction();
-        }
-        
-        // Setup touch interaction for crop box manipulation and resizing
-        function setupCropBoxTouchInteraction() {
-            const cropBox = document.getElementById('cropBox');
-            const cropOverlay = document.querySelector('.crop-overlay');
-            const canvas = document.getElementById('cropCanvas');
-            const handles = document.querySelectorAll('.crop-handle');
-            
-            if (!cropBox || !cropOverlay || !canvas) return;
-            
-            let isDragging = false;
-            let isResizing = false;
-            let activeHandle = null;
-            let startX, startY, startLeft, startTop, startWidth, startHeight;
-            const aspectRatio = 16 / 9; // Maintain 16:9 ratio
-            
-            // Touch events for crop box dragging (moving)
-            cropBox.addEventListener('touchstart', function(e) {
-                if (e.target.classList.contains('crop-handle')) return; // Let handles handle their own events
-                
-                e.preventDefault();
-                isDragging = true;
-                
-                const touch = e.touches[0];
-                startX = touch.clientX;
-                startY = touch.clientY;
-                
-                const rect = cropBox.getBoundingClientRect();
-                const canvasRect = canvas.getBoundingClientRect();
-                startLeft = rect.left - canvasRect.left;
-                startTop = rect.top - canvasRect.top;
-                startWidth = rect.width;
-                startHeight = rect.height;
-            });
-            
-            // Touch events for corner handles (resizing)
-            handles.forEach(handle => {
-                handle.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    isResizing = true;
-                    activeHandle = this;
-                    
-                    const touch = e.touches[0];
-                    startX = touch.clientX;
-                    startY = touch.clientY;
-                    
-                    const rect = cropBox.getBoundingClientRect();
-                    const canvasRect = canvas.getBoundingClientRect();
-                    startLeft = rect.left - canvasRect.left;
-                    startTop = rect.top - canvasRect.top;
-                    startWidth = rect.width;
-                    startHeight = rect.height;
-                });
-            });
-            
-            // Touch move events
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging && !isResizing) return;
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                const deltaX = touch.clientX - startX;
-                const deltaY = touch.clientY - startY;
-                const canvasRect = canvas.getBoundingClientRect();
-                
-                if (isDragging) {
-                    // Moving the crop box
-                    const newLeft = Math.max(0, Math.min(canvas.offsetWidth - startWidth, startLeft + deltaX));
-                    const newTop = Math.max(0, Math.min(canvas.offsetHeight - startHeight, startTop + deltaY));
-                    
-                    cropBox.style.left = newLeft + 'px';
-                    cropBox.style.top = newTop + 'px';
-                    
-                    window.mobileCropBox = { 
-                        x: newLeft, 
-                        y: newTop, 
-                        width: startWidth, 
-                        height: startHeight 
-                    };
-                    
-                } else if (isResizing && activeHandle) {
-                    // Resizing the crop box
-                    let newWidth = startWidth;
-                    let newHeight = startHeight;
-                    let newLeft = startLeft;
-                    let newTop = startTop;
-                    
-                    // Determine resize direction based on active handle
-                    if (activeHandle.classList.contains('bottom-right')) {
-                        // Resize from bottom-right corner
-                        newWidth = Math.max(100, startWidth + deltaX);
-                        newHeight = newWidth / aspectRatio;
-                        
-                        // Ensure it doesn't exceed canvas bounds
-                        if (newLeft + newWidth > canvas.offsetWidth) {
-                            newWidth = canvas.offsetWidth - newLeft;
-                            newHeight = newWidth / aspectRatio;
-                        }
-                        if (newTop + newHeight > canvas.offsetHeight) {
-                            newHeight = canvas.offsetHeight - newTop;
-                            newWidth = newHeight * aspectRatio;
-                        }
-                    } else if (activeHandle.classList.contains('bottom-left')) {
-                        // Resize from bottom-left corner
-                        newWidth = Math.max(100, startWidth - deltaX);
-                        newHeight = newWidth / aspectRatio;
-                        newLeft = startLeft + (startWidth - newWidth);
-                        
-                        // Ensure it doesn't go beyond canvas bounds
-                        if (newLeft < 0) {
-                            newLeft = 0;
-                            newWidth = startLeft + startWidth;
-                            newHeight = newWidth / aspectRatio;
-                        }
-                    } else if (activeHandle.classList.contains('top-right')) {
-                        // Resize from top-right corner
-                        newWidth = Math.max(100, startWidth + deltaX);
-                        newHeight = newWidth / aspectRatio;
-                        newTop = startTop + (startHeight - newHeight);
-                        
-                        // Ensure bounds
-                        if (newTop < 0) {
-                            newTop = 0;
-                            newHeight = startTop + startHeight;
-                            newWidth = newHeight * aspectRatio;
-                        }
-                    } else if (activeHandle.classList.contains('top-left')) {
-                        // Resize from top-left corner
-                        newWidth = Math.max(100, startWidth - deltaX);
-                        newHeight = newWidth / aspectRatio;
-                        newLeft = startLeft + (startWidth - newWidth);
-                        newTop = startTop + (startHeight - newHeight);
-                        
-                        // Ensure bounds
-                        if (newLeft < 0) {
-                            newLeft = 0;
-                            newWidth = startLeft + startWidth;
-                            newHeight = newWidth / aspectRatio;
-                            newTop = startTop + startHeight - newHeight;
-                        }
-                        if (newTop < 0) {
-                            newTop = 0;
-                            newHeight = startTop + startHeight;
-                            newWidth = newHeight * aspectRatio;
-                            newLeft = startLeft + startWidth - newWidth;
-                        }
-                    }
-                    
-                    // Apply the new dimensions
-                    cropBox.style.left = newLeft + 'px';
-                    cropBox.style.top = newTop + 'px';
-                    cropBox.style.width = newWidth + 'px';
-                    cropBox.style.height = newHeight + 'px';
-                    
-                    window.mobileCropBox = { 
-                        x: newLeft, 
-                        y: newTop, 
-                        width: newWidth, 
-                        height: newHeight 
-                    };
-                }
-            });
-            
-            // Touch end events
-            document.addEventListener('touchend', function(e) {
-                if (isDragging || isResizing) {
-                    e.preventDefault();
-                    isDragging = false;
-                    isResizing = false;
-                    activeHandle = null;
-                }
-            });
         }
         
         // Complete crop and move to drawing
         function completeMobileCrop() {
-            console.log('completeMobileCrop called');
             const canvas = document.getElementById('cropCanvas');
             const cropBox = window.mobileCropBox;
             
-            console.log('Canvas:', canvas);
-            console.log('CropBox:', cropBox);
-            
-            if (!canvas) {
-                console.error('No canvas found');
-                alert('Error: Canvas not found');
-                return;
-            }
-            
-            if (!cropBox) {
-                console.error('No cropBox found');
-                alert('Error: Crop area not defined. Please adjust the crop area first.');
-                return;
-            }
+            if (!canvas || !cropBox) return;
             
             // Create cropped canvas
             const croppedCanvas = document.createElement('canvas');
@@ -2725,92 +2309,40 @@
                 0, 0, 1920, 1080
             );
             
-            // Instead of creating Image from base64 (CSP blocked), use canvas directly
-            console.log('✅ Cropped canvas created successfully');
-            
-            // Create an Image object using createImageBitmap (CSP safe)
-            createImageBitmap(croppedCanvas).then(function(imageBitmap) {
-                console.log('✅ ImageBitmap created successfully');
-                
-                // Create a new canvas with the bitmap data
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = 1920;
-                tempCanvas.height = 1080;
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(imageBitmap, 0, 0);
-                
-                // Set as currentImage (using canvas as image)
-                currentImage = tempCanvas;
-                
-                console.log('✅ Moving to drawing interface');
-                
-                // Force landscape orientation for better drawing experience
-                forceLandscapeOrientation();
+            // Convert to image
+            const croppedImg = new Image();
+            croppedImg.onload = function() {
+                currentImage = croppedImg;
                 
                 // Move to drawing interface
                 showMobileInterface('drawing');
                 initializeMobileDrawing();
-                
-            }).catch(function(error) {
-                console.error('Failed to create ImageBitmap:', error);
-                
-                // Fallback: use canvas directly
-                currentImage = croppedCanvas;
-                showMobileInterface('drawing');
-                initializeMobileDrawing();
-            });
+            };
+            croppedImg.src = croppedCanvas.toDataURL();
         }
-        
         
         // Initialize mobile drawing interface
         function initializeMobileDrawing() {
-            console.log('initializeMobileDrawing called');
-            
-            // AGGRESSIVE landscape orientation forcing
-            forceLandscapeLock();
-            
-            // Also add to the CSS viewport
-            forceLandscapeViewport();
-            
             // Move canvas to mobile drawing container
-            const canvas = document.getElementById('designCanvas');
+            const canvas = document.getElementById('canvas');
             const mobileContainer = document.querySelector('.drawing-container');
             
-            console.log('Canvas found:', !!canvas);
-            console.log('Mobile container found:', !!mobileContainer);
-            console.log('Current image:', !!currentImage);
-            
             if (canvas && mobileContainer && currentImage) {
-                console.log('All elements found, moving canvas');
                 // Temporarily move canvas to mobile container
                 mobileContainer.appendChild(canvas);
                 
-                // Setup canvas for full landscape screen
+                // Setup canvas with cropped image
                 const ctx = canvas.getContext('2d');
+                canvas.width = 1920;
+                canvas.height = 1080;
                 
-                // Set canvas to fill landscape screen
-                const screenWidth = Math.max(window.innerWidth, window.innerHeight);
-                const screenHeight = Math.min(window.innerWidth, window.innerHeight);
+                // Draw background image
+                ctx.drawImage(currentImage, 0, 0, 1920, 1080);
                 
-                canvas.width = screenWidth;
-                canvas.height = screenHeight;
-                
-                console.log('Canvas dimensions set to:', screenWidth, 'x', screenHeight);
-                
-                // Draw background image to fill entire canvas
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
-                
-                // Update canvas style for landscape mobile
-                canvas.style.width = '100vw';
-                canvas.style.height = '100vh';
-                canvas.style.position = 'absolute';
-                canvas.style.top = '0';
-                canvas.style.left = '0';
-                canvas.style.zIndex = '1';
-                canvas.style.objectFit = 'cover';
-                
-                console.log('✅ Canvas setup complete for landscape drawing');
+                // Update canvas style for mobile
+                canvas.style.width = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.maxHeight = 'calc(100vh - 200px)';
                 canvas.style.objectFit = 'contain';
                 
                 // Enable drawing mode
@@ -2909,7 +2441,7 @@
         }
         
         function backToStreetView() {
-            showMobileInterface('streetView');
+            showMobileInterface('streetview');
         }
         
         function backToCrop() {
@@ -2920,7 +2452,7 @@
             // If came from photo upload, go back to search
             // If came from street view, go back to street view
             if (streetViewPanorama) {
-                showMobileInterface('streetView');
+                showMobileInterface('streetview');
             } else {
                 showMobileInterface('search');
             }
@@ -2928,130 +2460,6 @@
         
         // Street View panorama instance
         let streetViewPanorama = null;
-        
-        // AGGRESSIVE landscape orientation lock
-        function forceLandscapeLock() {
-            console.log('🔄 FORCING landscape orientation...');
-            
-            // Method 1: Screen Orientation API
-            if (screen.orientation && screen.orientation.lock) {
-                console.log('📱 Attempting Screen Orientation Lock...');
-                screen.orientation.lock('landscape').then(function() {
-                    console.log('✅ Screen successfully locked to landscape!');
-                }).catch(function(error) {
-                    console.error('❌ Screen lock failed:', error);
-                    console.log('🔄 Trying fallback methods...');
-                    fallbackLandscapeForcing();
-                });
-            } else {
-                console.log('⚠️ Screen Orientation API not available');
-                fallbackLandscapeForcing();
-            }
-            
-            // Method 2: CSS Transform approach for immediate visual effect
-            if (window.innerHeight > window.innerWidth) {
-                console.log('📱 Device is in portrait, applying CSS rotation...');
-                applyPortraitToLandscapeCSS();
-            }
-        }
-        
-        function fallbackLandscapeForcing() {
-            console.log('🔄 Using fallback landscape forcing methods...');
-            
-            // Force CSS landscape layout
-            document.documentElement.style.transform = 'rotate(90deg)';
-            document.documentElement.style.transformOrigin = 'center center';
-            document.documentElement.style.width = '100vh';
-            document.documentElement.style.height = '100vw';
-            
-            // Listen for any orientation change
-            window.addEventListener('orientationchange', function() {
-                setTimeout(function() {
-                    console.log('Orientation changed, checking...');
-                    if (window.innerWidth > window.innerHeight) {
-                        console.log('✅ Now in landscape!');
-                        // Remove CSS transform if now actually in landscape
-                        document.documentElement.style.transform = '';
-                        document.documentElement.style.width = '';
-                        document.documentElement.style.height = '';
-                    }
-                }, 500);
-            });
-        }
-        
-        function applyPortraitToLandscapeCSS() {
-            console.log('🔄 Applying CSS portrait-to-landscape transform...');
-            const body = document.body;
-            body.style.transform = 'rotate(90deg)';
-            body.style.transformOrigin = 'center center';
-            body.style.width = '100vh';
-            body.style.height = '100vw';
-            body.style.position = 'fixed';
-            body.style.top = '0';
-            body.style.left = '0';
-        }
-        
-        function forceLandscapeViewport() {
-            console.log('🔄 Forcing landscape viewport...');
-            
-            // Update viewport meta tag
-            let viewportMeta = document.querySelector('meta[name="viewport"]');
-            if (!viewportMeta) {
-                viewportMeta = document.createElement('meta');
-                viewportMeta.name = 'viewport';
-                document.head.appendChild(viewportMeta);
-            }
-            
-            viewportMeta.setAttribute('content', 
-                'width=device-height, height=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-            );
-        }
-        
-        // Force landscape orientation and optimize image for landscape drawing
-        function forceLandscapeOrientation() {
-            console.log('🔄 Optimizing for landscape drawing...');
-            
-            // Lock to landscape orientation using Screen Orientation API (quietly)
-            if (screen.orientation && screen.orientation.lock) {
-                try {
-                    // Allow both landscape orientations but block portrait
-                    screen.orientation.lock('landscape').then(function() {
-                        console.log('✅ Screen locked to landscape mode');
-                        optimizeImageForLandscape();
-                    }).catch(function(error) {
-                        console.log('⚠️ Could not lock orientation, continuing anyway');
-                        optimizeImageForLandscape();
-                    });
-                } catch (error) {
-                    console.log('⚠️ Screen orientation lock not supported, continuing anyway');
-                    optimizeImageForLandscape();
-                }
-            } else {
-                optimizeImageForLandscape();
-            }
-        }
-        
-        // Optimize captured image for landscape viewing
-        function optimizeImageForLandscape() {
-            console.log('🖼️ Optimizing image for landscape display...');
-            
-            // Apply landscape CSS optimizations
-            document.body.classList.add('force-landscape');
-            
-            // Update viewport for landscape (no user-scalable restriction)
-            let viewportMeta = document.querySelector('meta[name="viewport"]');
-            if (viewportMeta) {
-                viewportMeta.setAttribute('content', 
-                    'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
-                );
-            }
-            
-            // If the image needs rotation to fit better in landscape, handle it
-            if (currentImage && window.innerWidth > window.innerHeight) {
-                console.log('✅ Image ready for landscape drawing mode');
-            }
-        }
-        
         
         // Fix WebGL context for Street View capture (based on GitHub/Stack Overflow research)
         const originalGetContext = HTMLCanvasElement.prototype.getContext;

@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Light Mockup Builder - Designing Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f5f5;
+            color: #2d2d2d;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 256px;
+            background-color: #2d2d2d;
+            border-right: 1px solid #404040;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .logo {
+            height: 32px;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-items {
+            flex: 1;
+            padding: 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            color: #a3a3a3;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #404040;
+            color: white;
+        }
+
+        .nav-item.active {
+            background-color: #ECFF00;
+            color: #2d2d2d;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 256px;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 24px;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Sidebar Controls */
+        .controls-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .step-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ECFF00;
+            color: #2d2d2d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .step-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .step-info p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-header {
+            padding: 16px 16px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #2d2d2d;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: #ECFF00;
+            background-color: #fafafa;
+        }
+
+        .upload-icon {
+            width: 32px;
+            height: 32px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upload-subtitle {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Uploaded Image Preview */
+        .image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e5e5;
+        }
+
+        /* Design Controls */
+        .btn-primary {
+            background: #2d2d2d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background: #3d3d3d;
+        }
+
+        .setting-group {
+            background: linear-gradient(to right, #f9f9f9, #f0f0f0);
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .setting-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .setting-badge {
+            background: #ECFF00;
+            color: #2d2d2d;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bulb-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .bulb-dot {
+            width: 8px;
+            height: 8px;
+            background: #2d2d2d;
+            border-radius: 50%;
+        }
+
+        /* Color Pattern Controls */
+        .color-pattern {
+            margin: 16px 0;
+        }
+
+        .pattern-options {
+            margin: 12px 0;
+        }
+
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #e5e5e5;
+            cursor: pointer;
+        }
+
+        .color-input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .color-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Visual Effects */
+        .slider-container {
+            margin: 12px 0;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-value {
+            background: #ECFF00;
+            color: #2d2d2d;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .slider-preview {
+            background: #e5e5e5;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .slider-track {
+            width: 100%;
+            height: 8px;
+            background: #e5e5e5;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slider-thumb {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid #ECFF00;
+            border-radius: 50%;
+            position: absolute;
+            top: -6px;
+            cursor: pointer;
+        }
+
+        .toggle-container {
+            margin: 12px 0;
+        }
+
+        .toggle-switch {
+            width: 100%;
+            height: 32px;
+            background: #ECFF00;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #2d2d2d;
+            flex: 1;
+        }
+
+        .toggle-indicator {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        /* Canvas Area */
+        .canvas-container {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .canvas-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .canvas-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .canvas-badge {
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .control-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: white;
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .canvas-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .canvas-area {
+            padding: 8px;
+            background: #f5f5f5;
+            min-height: 600px;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            height: 600px;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-element {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .canvas-placeholder {
+            text-align: center;
+            color: #999;
+        }
+
+        .canvas-placeholder svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Light Elements */
+        .light-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .light-dot.red { background: #ff4444; }
+        .light-dot.green { background: #44ff44; }
+        .light-dot.blue { background: #4444ff; }
+        .light-dot.yellow { background: #ffff44; }
+        .light-dot.white { background: #ffffff; border: 1px solid #ddd; }
+        .light-dot.warm-white { background: #fff8dc; }
+
+        /* Export Section */
+        .export-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .export-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-outline {
+            background: #f5f5f5;
+            color: #2d2d2d;
+            border: 1px solid #d1d5db;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .btn-outline:hover {
+            background: #e5e5e5;
+        }
+
+        .btn-danger {
+            color: #ef4444;
+            border-color: #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fef2f2;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Animation effects */
+        .glow-effect {
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+        }
+
+        .night-mode {
+            filter: brightness(0.3) contrast(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🏠 Roof Line Pro</div>
+            </div>
+            
+            <div class="nav-items">
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <div>
+                        <div>Dashboard</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Overview and quick actions</div>
+                    </div>
+                </a>
+                
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📏</span>
+                    <div>
+                        <div>Measurement</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Measure roof lines and calculate materials</div>
+                    </div>
+                </a>
+                
+                <a href="#" class="nav-item active">
+                    <span class="nav-icon">🎨</span>
+                    <div>
+                        <div>Mockup Builder</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Create visual lighting mockups for customers</div>
+                    </div>
+                </a>
+                
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📁</span>
+                    <div>
+                        <div>Customer Jobs</div>
+                        <div style="font-size: 12px; opacity: 0.7;">View and manage saved jobs</div>
+                    </div>
+                </a>
+                
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📦</span>
+                    <div>
+                        <div>Material Library</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Manage lights, clips, and wire types with pricing</div>
+                    </div>
+                </a>
+                
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">💳</span>
+                    <div>
+                        <div>Billing</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Subscription and payment management</div>
+                    </div>
+                </a>
+                
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <div>
+                        <div>Settings</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Account and company information</div>
+                    </div>
+                </a>
+            </div>
+            
+            <div style="padding: 16px; border-top: 1px solid #404040;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <div style="width: 32px; height: 32px; background: #ECFF00; border-radius: 50%; display: flex; align-items: center; justify-content: center;">👤</div>
+                    <div style="color: white; font-size: 14px;">
+                        <div>Laurencio</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Incredible Lighting</div>
+                    </div>
+                </div>
+                <button class="nav-item" style="width: 100%; border: none; background: none; text-align: left;">
+                    <span class="nav-icon">🚪</span>
+                    Sign Out
+                </button>
+                <div style="text-align: center; font-size: 10px; color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #404040;">
+                    Professional Christmas Light<br>Installation Planning
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1>Mockup Builder</h1>
+                <p>Create visual lighting mockups to show customers exactly how their home will look</p>
+            </header>
+
+            <div class="content">
+                <!-- Controls Sidebar -->
+                <div class="controls-sidebar">
+                    <!-- Step 1: Upload -->
+                    <div class="step-card">
+                        <div class="card-content">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <div class="step-info">
+                                    <h3>Upload</h3>
+                                    <p>Add your house photo</p>
+                                </div>
+                            </div>
+                            
+                            <div id="uploadArea" class="upload-area">
+                                <div class="upload-icon">📁</div>
+                                <div class="upload-text">Choose your photo</div>
+                                <div class="upload-subtitle">JPG, PNG up to 10MB</div>
+                                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                            </div>
+                            
+                            <div id="imagePreview" class="image-preview" style="display: none;">
+                                <img id="previewImg" class="preview-image" alt="Preview">
+                                <div class="preview-actions">
+                                    <button class="btn-secondary" onclick="replaceImage()">Replace</button>
+                                    <button class="btn-secondary" onclick="removeImage()">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Design -->
+                    <div class="step-card">
+                        <div class="card-header">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <div class="step-info">
+                                    <h3>Design</h3>
+                                    <p>Add lighting elements</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-content">
+                            <div class="card-header">⚡ Quick Start</div>
+                            <button id="startDrawing" class="btn-primary">💡 Start Drawing Lights</button>
+                        </div>
+                        
+                        <div class="card-content">
+                            <div class="card-header">⚙️ Bulb Settings</div>
+                            
+                            <div class="setting-group">
+                                <div class="setting-header">
+                                    <span class="setting-label">Bulb Size</span>
+                                    <span class="setting-badge">Large (C9)</span>
+                                </div>
+                                <div class="setting-description">
+                                    <div style="width: 12px; height: 12px; background: #2d2d2d; border-radius: 50%;"></div>
+                                    Professional grade C9 bulbs for optimal visibility
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <div class="setting-header">
+                                    <span class="setting-label">Bulb Spacing</span>
+                                    <span class="setting-badge">12" Tight</span>
+                                </div>
+                                <div class="setting-description">
+                                    <div class="bulb-dots">
+                                        <div class="bulb-dot"></div>
+                                        <div class="bulb-dot"></div>
+                                        <div class="bulb-dot"></div>
+                                    </div>
+                                    Optimal spacing for professional installation
+                                </div>
+                            </div>
+                            
+                            <div class="color-pattern">
+                                <div class="setting-label">Color Pattern</div>
+                                <div class="pattern-options">
+                                    <div class="radio-group">
+                                        <input type="radio" id="alternating" name="pattern" value="alternating" checked>
+                                        <label for="alternating">Alternating Pattern</label>
+                                    </div>
+                                    
+                                    <div class="radio-group">
+                                        <div class="color-swatch" style="background: #22c55e;" data-color="green"></div>
+                                        <input type="text" class="color-input" value="darkgreen" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="color-buttons">
+                                    <button class="btn-small" onclick="addColor()">+ Add Color</button>
+                                    <button class="btn-small" onclick="resetPattern()">Reset Pattern</button>
+                                </div>
+                                
+                                <div style="margin-top: 12px;">
+                                    <div style="color: #22c55e; font-size: 12px; margin-bottom: 8px;">● Pattern Preview</div>
+                                    <div style="font-size: 11px; color: #666;">Type color names: red, blue, green, pink, teal, darkgreen, lightblue, warm, cool, etc.</div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 4px;">Click points on canvas to create alternating color light strings</div>
+                                </div>
+                                
+                                <button class="btn-small" style="width: 100%; margin-top: 8px;" onclick="undoLastElement()">Undo Last Element</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Finish -->
+                    <div class="step-card">
+                        <div class="card-header">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <div class="step-info">
+                                    <h3>Finish</h3>
+                                    <p>Effects & export</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-content">
+                            <div class="card-header">✨ Visual Effects</div>
+                            
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span class="setting-label">Night Mode Darkness</span>
+                                    <span class="slider-value" id="darknessValue">0%</span>
+                                </div>
+                                
+                                <div class="slider-preview" id="darknessPreview">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span>☀️</span>
+                                        <span style="font-size: 12px; font-weight: 600;">Bright Day</span>
+                                    </div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <div style="width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                                        <div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite 0.2s;"></div>
+                                        <div style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 1s infinite 0.4s;"></div>
+                                        <div style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; animation: pulse 1s infinite 0.6s;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="slider-track" onclick="updateDarkness(event)">
+                                    <div class="slider-thumb" id="darknessThumb" style="left: 0%;"></div>
+                                </div>
+                                
+                                <p style="font-size: 12px; color: #666; margin-top: 8px;">Adjust darkness level to showcase how lights look at different times</p>
+                            </div>
+                            
+                            <div class="toggle-container">
+                                <div class="slider-header">
+                                    <span class="setting-label">Glow Effect</span>
+                                    <span class="slider-value">ON</span>
+                                </div>
+                                
+                                <div class="slider-preview">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span>💡</span>
+                                        <span style="font-size: 12px; font-weight: 600;">Realistic light glow enabled</span>
+                                    </div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <div style="width: 12px; height: 12px; background: #fbbf24; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                                        <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite 0.3s;"></div>
+                                        <div style="width: 12px; height: 12px; background: #22c55e; border-radius: 50%; animation: pulse 1s infinite 0.6s;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="toggle-switch" onclick="toggleGlow()">
+                                    <span class="toggle-label">Glow Enabled</span>
+                                    <div class="toggle-indicator" id="glowToggle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-content">
+                            <div class="card-header">💾 Export Design</div>
+                            
+                            <input type="text" class="export-input" placeholder="Enter project name..." id="projectName">
+                            
+                            <div class="export-actions">
+                                <button class="btn-primary" onclick="saveMockupImage()">
+                                    💾 Save Mockup Image
+                                </button>
+                                <button class="btn-outline" onclick="saveToCustomerJob()">
+                                    👥 Save to Customer Job
+                                </button>
+                                <button class="btn-secondary btn-danger" onclick="clearAll()">
+                                    🗑️ Clear All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Area -->
+                <div class="canvas-container">
+                    <div class="canvas-header">
+                        <div>
+                            <div class="canvas-title">
+                                <span>🎨</span>
+                                <span style="font-weight: 600;">Canvas</span>
+                                <span class="canvas-badge">Selection Mode</span>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                Click elements to select • Hold Ctrl for multi-select • Drag to move
+                            </div>
+                        </div>
+                        
+                        <div class="canvas-controls">
+                            <div class="control-group">
+                                <button class="control-btn" onclick="undo()" disabled title="Undo">↶</button>
+                                <button class="control-btn" onclick="redo()" disabled title="Redo">↷</button>
+                            </div>
+                            
+                            <div class="control-group">
+                                <button class="control-btn" onclick="zoomOut()" title="Zoom Out">🔍-</button>
+                                <button class="control-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+                                <button class="control-btn" onclick="zoomIn()" title="Zoom In">🔍+</button>
+                            </div>
+                            
+                            <div class="control-group">
+                                <button class="control-btn btn-danger" onclick="deleteAllLines()" disabled title="Delete All Lines">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-stats">
+                        <span>Elements: <span id="elementCount">0</span></span>
+                        <span>Zoom: <span id="zoomLevel">100%</span></span>
+                        <span class="desktop-only">• Hold Ctrl+Click to pan</span>
+                        <span class="mobile-only">• Pinch to zoom • Single finger to pan</span>
+                    </div>
+                    
+                    <div class="canvas-area">
+                        <div class="canvas-wrapper" id="canvasWrapper">
+                            <canvas id="mockupCanvas" class="canvas-element" width="800" height="600"></canvas>
+                            
+                            <div class="canvas-placeholder" id="canvasPlaceholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" x2="12" y1="3" y2="15"/>
+                                </svg>
+                                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Upload a house photo to get started</p>
+                                <p style="font-size: 14px;">Click "Upload House Photo" in the sidebar</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global State
+        let currentImage = null;
+        let isDrawing = false;
+        let drawingMode = false;
+        let lights = [];
+        let currentColorPattern = ['green'];
+        let colorIndex = 0;
+        let glowEnabled = true;
+        let darknessLevel = 0;
+        let zoomLevel = 1;
+        let canvasOffset = { x: 0, y: 0 };
+        let undoStack = [];
+        let redoStack = [];
+
+        // Canvas setup
+        const canvas = document.getElementById('mockupCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWrapper = document.getElementById('canvasWrapper');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateUI();
+        });
+
+        function setupEventListeners() {
+            // File upload
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+            
+            uploadArea.addEventListener('click', () => imageInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('drop', handleDrop);
+            imageInput.addEventListener('change', handleImageSelect);
+
+            // Canvas events
+            canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            canvas.addEventListener('click', handleCanvasClick);
+
+            // Drawing mode
+            document.getElementById('startDrawing').addEventListener('click', toggleDrawingMode);
+        }
+
+        // File Upload Functions
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.style.borderColor = '#ECFF00';
+            e.currentTarget.style.backgroundColor = '#fafafa';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                loadImage(files[0]);
+            }
+            resetUploadAreaStyle();
+        }
+
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                loadImage(file);
+            }
+        }
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImage = img;
+                    showImagePreview(e.target.result);
+                    drawCanvas();
+                    document.getElementById('canvasPlaceholder').style.display = 'none';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showImagePreview(src) {
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'block';
+            document.getElementById('previewImg').src = src;
+        }
+
+        function replaceImage() {
+            document.getElementById('imageInput').click();
+        }
+
+        function removeImage() {
+            currentImage = null;
+            document.getElementById('uploadArea').style.display = 'block';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('canvasPlaceholder').style.display = 'flex';
+            clearCanvas();
+        }
+
+        function resetUploadAreaStyle() {
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.style.borderColor = '#d1d5db';
+            uploadArea.style.backgroundColor = 'transparent';
+        }
+
+        // Drawing Functions
+        function toggleDrawingMode() {
+            drawingMode = !drawingMode;
+            const btn = document.getElementById('startDrawing');
+            if (drawingMode) {
+                btn.textContent = '✋ Stop Drawing';
+                btn.style.background = '#ef4444';
+                canvas.style.cursor = 'crosshair';
+            } else {
+                btn.textContent = '💡 Start Drawing Lights';
+                btn.style.background = '#2d2d2d';
+                canvas.style.cursor = 'default';
+            }
+        }
+
+        function handleCanvasClick(e) {
+            if (!drawingMode || !currentImage) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width * canvas.width;
+            const y = (e.clientY - rect.top) / rect.height * canvas.height;
+
+            addLight(x, y);
+        }
+
+        function addLight(x, y) {
+            const color = currentColorPattern[colorIndex % currentColorPattern.length];
+            const light = {
+                x: x,
+                y: y,
+                color: color,
+                id: Date.now() + Math.random()
+            };
+            
+            lights.push(light);
+            colorIndex++;
+            
+            saveState();
+            drawCanvas();
+            updateUI();
+        }
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply darkness filter
+            if (darknessLevel > 0) {
+                ctx.filter = `brightness(${1 - darknessLevel / 100})`;
+            } else {
+                ctx.filter = 'none';
+            }
+
+            // Draw background image
+            if (currentImage) {
+                const scale = Math.min(canvas.width / currentImage.width, canvas.height / currentImage.height);
+                const width = currentImage.width * scale;
+                const height = currentImage.height * scale;
+                const x = (canvas.width - width) / 2;
+                const y = (canvas.height - height) / 2;
+                
+                ctx.drawImage(currentImage, x, y, width, height);
+            }
+
+            // Reset filter for lights
+            ctx.filter = 'none';
+
+            // Draw lights
+            lights.forEach(light => {
+                drawLight(light);
+            });
+        }
+
+        function drawLight(light) {
+            const colors = {
+                red: '#ff4444',
+                green: '#44ff44',
+                blue: '#4444ff',
+                yellow: '#ffff44',
+                white: '#ffffff',
+                warm: '#fff8dc',
+                cool: '#e0ffff',
+                darkgreen: '#006400',
+                lightblue: '#87ceeb',
+                pink: '#ffc0cb',
+                teal: '#008080'
+            };
+
+            const color = colors[light.color] || colors.white;
+            
+            ctx.save();
+            
+            // Glow effect
+            if (glowEnabled) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
+            
+            // Draw light bulb
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(light.x, light.y, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw border for white lights
+            if (light.color === 'white') {
+                ctx.strokeStyle = '#ddd';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+
+        function clearCanvas() {
+            lights = [];
+            drawCanvas();
+            updateUI();
+        }
+
+        // Color Pattern Functions
+        function addColor() {
+            const colorName = prompt('Enter color name (red, blue, green, yellow, white, warm, cool, etc.):');
+            if (colorName && colorName.trim()) {
+                currentColorPattern.push(colorName.trim().toLowerCase());
+                updatePatternDisplay();
+            }
+        }
+
+        function resetPattern() {
+            currentColorPattern = ['green'];
+            colorIndex = 0;
+            updatePatternDisplay();
+        }
+
+        function updatePatternDisplay() {
+            // Update the color swatch display
+            // This could be enhanced to show all colors in the pattern
+        }
+
+        // Visual Effects Functions
+        function updateDarkness(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percentage = Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100));
+            
+            darknessLevel = percentage;
+            document.getElementById('darknessValue').textContent = Math.round(percentage) + '%';
+            document.getElementById('darknessThumb').style.left = percentage + '%';
+            
+            // Update preview
+            const preview = document.getElementById('darknessPreview');
+            if (percentage > 70) {
+                preview.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>🌙</span>
+                        <span style="font-size: 12px; font-weight: 600;">Deep Night</span>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <div style="width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; animation: pulse 1s infinite; filter: brightness(2);"></div>
+                        <div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite 0.2s; filter: brightness(2);"></div>
+                        <div style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 1s infinite 0.4s; filter: brightness(2);"></div>
+                        <div style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; animation: pulse 1s infinite 0.6s; filter: brightness(2);"></div>
+                    </div>
+                `;
+                preview.style.backgroundColor = '#1a1a1a';
+                preview.style.color = 'white';
+            } else if (percentage > 30) {
+                preview.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>🌆</span>
+                        <span style="font-size: 12px; font-weight: 600;">Twilight</span>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <div style="width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; animation: pulse 1s infinite; filter: brightness(1.5);"></div>
+                        <div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite 0.2s; filter: brightness(1.5);"></div>
+                        <div style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 1s infinite 0.4s; filter: brightness(1.5);"></div>
+                        <div style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; animation: pulse 1s infinite 0.6s; filter: brightness(1.5);"></div>
+                    </div>
+                `;
+                preview.style.backgroundColor = '#4a4a4a';
+                preview.style.color = 'white';
+            } else {
+                preview.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>☀️</span>
+                        <span style="font-size: 12px; font-weight: 600;">Bright Day</span>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <div style="width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                        <div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite 0.2s;"></div>
+                        <div style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 1s infinite 0.4s;"></div>
+                        <div style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; animation: pulse 1s infinite 0.6s;"></div>
+                    </div>
+                `;
+                preview.style.backgroundColor = '#e5e5e5';
+                preview.style.color = '#2d2d2d';
+            }
+            
+            drawCanvas();
+        }
+
+        function toggleGlow() {
+            glowEnabled = !glowEnabled;
+            const toggle = document.getElementById('glowToggle');
+            const valueDisplay = toggle.parentElement.parentElement.querySelector('.slider-value');
+            
+            if (glowEnabled) {
+                valueDisplay.textContent = 'ON';
+            } else {
+                valueDisplay.textContent = 'OFF';
+            }
+            
+            drawCanvas();
+        }
+
+        // Canvas Controls
+        function undo() {
+            if (undoStack.length > 0) {
+                redoStack.push([...lights]);
+                lights = undoStack.pop();
+                drawCanvas();
+                updateUI();
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                undoStack.push([...lights]);
+                lights = redoStack.pop();
+                drawCanvas();
+                updateUI();
+            }
+        }
+
+        function undoLastElement() {
+            if (lights.length > 0) {
+                saveState();
+                lights.pop();
+                colorIndex = Math.max(0, colorIndex - 1);
+                drawCanvas();
+                updateUI();
+            }
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(3, zoomLevel * 1.2);
+            updateZoom();
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(0.5, zoomLevel / 1.2);
+            updateZoom();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            canvas.style.transform = `scale(${zoomLevel})`;
+            document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
+        }
+
+        function deleteAllLines() {
+            if (lights.length > 0 && confirm('Are you sure you want to delete all lights?')) {
+                saveState();
+                clearCanvas();
+            }
+        }
+
+        // Export Functions
+        function saveMockupImage() {
+            const projectName = document.getElementById('projectName').value || 'Christmas Lights Mockup';
+            
+            // Create a temporary canvas for export
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = canvas.width;
+            exportCanvas.height = canvas.height;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            // Draw everything to export canvas
+            if (currentImage) {
+                const scale = Math.min(exportCanvas.width / currentImage.width, exportCanvas.height / currentImage.height);
+                const width = currentImage.width * scale;
+                const height = currentImage.height * scale;
+                const x = (exportCanvas.width - width) / 2;
+                const y = (exportCanvas.height - height) / 2;
+                
+                exportCtx.drawImage(currentImage, x, y, width, height);
+            }
+            
+            // Draw lights
+            lights.forEach(light => {
+                const colors = {
+                    red: '#ff4444', green: '#44ff44', blue: '#4444ff',
+                    yellow: '#ffff44', white: '#ffffff', warm: '#fff8dc',
+                    cool: '#e0ffff', darkgreen: '#006400', lightblue: '#87ceeb',
+                    pink: '#ffc0cb', teal: '#008080'
+                };
+                
+                const color = colors[light.color] || colors.white;
+                
+                exportCtx.save();
+                if (glowEnabled) {
+                    exportCtx.shadowColor = color;
+                    exportCtx.shadowBlur = 8;
+                }
+                
+                exportCtx.fillStyle = color;
+                exportCtx.beginPath();
+                exportCtx.arc(light.x, light.y, 4, 0, 2 * Math.PI);
+                exportCtx.fill();
+                exportCtx.restore();
+            });
+            
+            // Download image
+            exportCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${projectName}.png`;
+                link.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function saveToCustomerJob() {
+            alert('Save to Customer Job functionality would integrate with your CRM system.');
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear everything?')) {
+                removeImage();
+                lights = [];
+                undoStack = [];
+                redoStack = [];
+                colorIndex = 0;
+                drawingMode = false;
+                document.getElementById('projectName').value = '';
+                toggleDrawingMode();
+                updateUI();
+            }
+        }
+
+        // State Management
+        function saveState() {
+            undoStack.push([...lights]);
+            if (undoStack.length > 50) {
+                undoStack.shift();
+            }
+            redoStack = [];
+        }
+
+        function updateUI() {
+            document.getElementById('elementCount').textContent = lights.length;
+            
+            // Update button states
+            const undoBtn = document.querySelector('[onclick="undo()"]');
+            const redoBtn = document.querySelector('[onclick="redo()"]');
+            const deleteBtn = document.querySelector('[onclick="deleteAllLines()"]');
+            
+            undoBtn.disabled = undoStack.length === 0;
+            redoBtn.disabled = redoStack.length === 0;
+            deleteBtn.disabled = lights.length === 0;
+        }
+
+        // Mouse handling (for future enhancements)
+        function handleCanvasMouseDown(e) {
+            // Future: implement selection and dragging
+        }
+
+        function handleCanvasMouseMove(e) {
+            // Future: implement hover effects and dragging
+        }
+
+        function handleCanvasMouseUp(e) {
+            // Future: implement drag completion
+        }
+
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

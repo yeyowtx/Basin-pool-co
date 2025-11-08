@@ -1,26 +1,29 @@
-# CLAUDE.md - Incredible Lighting Measurement Tool
+# CLAUDE.md - Holiday Light Designer Mobile App
 
 ## 🏢 **Project Overview**
 **Company**: Incredible Lighting  
-**Industry**: Holiday Lighting Installation (expanding to permanent lighting)  
-**Target Users**: Internal sales/estimation team  
-**Live URL**: https://incrediblelighting.netlify.app
+**Industry**: Holiday Lighting Installation (customer-facing lead generation)  
+**Target Users**: Potential customers designing their own holiday light mockups  
+**Live URL**: https://holiday-light-designer.netlify.app
+**Purpose**: Customer-facing mobile-first Christmas light mockup builder for lead generation
 
 ## 🎯 **Project Goals & Vision**
 
 ### **Primary Objective**
-Create an all-in-one measurement and quoting tool that enables the internal team to generate accurate, competitive quotes remotely using only an address - eliminating manual measurement processes and multiple software tools.
+Create a customer-facing mobile Christmas light mockup builder that allows potential customers to design their own holiday lighting on their house using Street View, generating high-quality leads for Incredible Lighting.
 
 ### **Success Metrics**
-- **Measurement Accuracy**: Precise satellite-based measurements vs manual/in-person methods
-- **UI Usability**: Easy learning curve for all team members
-- **Quote Speed**: Dramatically faster quote generation process
-- **Closing Rate**: Increased conversion through rapid, accurate quotes
+- **Lead Generation**: Convert website visitors into qualified leads
+- **User Engagement**: Time spent designing and completion rates
+- **Mobile Experience**: Seamless mobile-first interface and functionality
+- **Conversion Rate**: Design completion to contact form submission
 
 ### **Competitive Advantage**
-- **All-in-One Solution**: Single tool for measurement, calculation, and quote generation
-- **Speed to Quote**: From lead address to accurate quote in minutes
-- **Few Competitors**: Very limited similar solutions in the market
+- **Mobile-First Design**: Optimized for smartphone usage
+- **Real Street View Integration**: Customers see their actual house
+- **Interactive Design Tool**: Draw lights directly on house image
+- **Professional Results**: Realistic light rendering with glow effects
+- **Lead Capture**: Seamless transition from design to quote request
 
 ## 📊 **Business Model & Impact**
 
@@ -57,122 +60,121 @@ Current pricing model (validated and working):
 
 ## 🛠️ **Technical Implementation Status**
 
-### ✅ **Completed Features**
-- **Sidebar Layout**: Professional tools panel (left) + map focus (right)
-- **Google Maps Integration**: Satellite imagery with address search
-- **Measurement Tools**: Perimeter (red), Ridge (blue), Ground (green) measurements
-- **Map-Integrated Zoom Tool**: Custom Google Maps control positioned next to rotate buttons
-- **Area Selection Zoom**: Click and drag to highlight specific areas for artificial zoom
-- **Artificial Zoom**: Beyond Google Maps limits (zoom level 25+) with visual feedback
-- **Real-time Calculations**: Live distance measurements using Google Maps geometry
-- **Business Logic**: Complete pricing engine with complexity multipliers
-- **Material Estimation**: LED lights, wire, clips, and labor calculations
-- **Configuration Panel**: Stories, difficulty, profit margin, crew count, spacing settings
-- **Professional UI**: Clean, learnable interface for internal team
-- **Netlify Deployment**: Production-ready hosting
+### ✅ **COMPLETED FEATURES (November 6, 2025)**
+
+#### **🌟 Mobile-First Christmas Light Mockup Builder**
+
+**📱 Complete Mobile Interface Flow:**
+1. **Mobile Search Interface**: Google Maps-style address search with autocomplete
+2. **Interactive Street View**: Full panorama with native Google controls
+3. **Image Capture System**: Google Static API + html2canvas fallback
+4. **16:9 Crop Interface**: Professional crop tool with touch controls  
+5. **Landscape Drawing Mode**: Full-screen landscape orientation with drawing tools
+6. **Realistic Light Rendering**: C9 bulbs with color customization and glow effects
+
+**🔧 Core Technical Features:**
+- **Google Places Autocomplete (2025 API)**: Updated to use PlaceAutocompleteElement 
+- **Street View Integration**: Interactive panorama with capture functionality
+- **CSP-Compliant Image Processing**: Uses createImageBitmap instead of base64
+- **Aggressive Landscape Lock**: Multi-method orientation forcing for drawing mode
+- **Touch-Optimized Drawing**: Canvas with proper coordinate transformation
+- **Real-Time Light Preview**: Instant color changes and realistic bulb rendering
+
+**📐 Image Processing Pipeline:**
+- **Street View Static API**: Primary capture method using current POV/position
+- **html2canvas Fallback**: Backup capture with UI element filtering  
+- **16:9 Crop Tool**: Touch-enabled crop interface with corner handles
+- **Landscape Optimization**: Auto-rotation and full-screen image display
+- **Canvas Integration**: Seamless transition to drawing interface
 
 ### 🔧 **Technical Architecture**
 ```
-Frontend: Vanilla HTML/CSS/JavaScript
-Maps: Google Maps JavaScript API with geometry library
-Hosting: Netlify (https://incrediblelighting.netlify.app)
-API Key: Configured for Google Maps integration
-Responsive: Desktop-first with mobile adaptation
+Frontend: Vanilla HTML/CSS/JavaScript (Mobile-First)
+APIs: Google Maps, Google Places (2025), Google Street View Static
+Image Processing: html2canvas, createImageBitmap (CSP-compliant)
+Hosting: Netlify (https://holiday-light-designer.netlify.app)
+File: customer-mockup-builder.html (Single file solution)
+Mobile Optimization: Touch events, orientation lock, responsive canvas
 ```
 
-### 📱 **User Interface**
-- **Left Panel**: Property address, measurement tools, zoom controls, distance results, material calculator
-- **Right Panel**: Full-screen satellite map with measurement overlays
-- **Live Stats**: Real-time measurement feedback during drawing
-- **Professional Design**: Clean, intuitive interface for team adoption
+### 📱 **Mobile User Interface**
+- **Search Interface**: Floating search bar with Google-style autocomplete
+- **Street View**: Full-screen interactive panorama with native controls
+- **Crop Interface**: 16:9 crop tool with touch handles and visual feedback
+- **Drawing Interface**: Landscape-optimized canvas with floating controls
+- **Light Controls**: Color picker, drawing tools, and preview options
 
 ## 💾 **CRITICAL CODE PRESERVATION**
 
-### 🏗️ **Complete HTML Structure**
+### 🏗️ **Mobile Interface Architecture**
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Roof Measurement Tool</title>
-    <style>
-        /* CRITICAL: Sidebar Layout CSS */
-        .container { display: flex; height: 100vh; }
-        .sidebar { width: 400px; background: white; border-right: 1px solid #e5e7eb; }
-        .map-container { flex: 1; position: relative; }
-        #map { width: 100%; height: 100%; }
-        
-        /* Measurement Tools */
-        .type-btn.perimeter { background: #ef4444; }
-        .type-btn.ridge { background: #3b82f6; }
-        .type-btn.ground { background: #10b981; }
-        .type-btn.zoom { background: #f59e0b; }
-    </style>
-</head>
+<!-- Mobile Christmas Light Designer -->
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <!-- Property Address Section -->
-            <div class="section">
-                <div class="section-title">Property Address</div>
-                <input type="text" class="address-input" id="address-input" value="5506 E County Rd 60, Midland, TX 79705, USA"/>
-                <button class="load-btn" onclick="searchAddress()">🏠 Load Property</button>
+    <!-- Mobile Search Interface -->
+    <div class="mobile-search-interface" id="mobileSearchInterface">
+        <div class="mobile-search-header">
+            <div class="mobile-brand">⚡ Incredible Lighting</div>
+        </div>
+        <div class="mobile-search-content">
+            <div class="search-instruction">
+                <div class="search-icon">🏠</div>
+                <h2>Find Your House</h2>
+                <p>Enter your address to get started</p>
             </div>
-            
-            <!-- Measurement Tools Section -->
-            <div class="section measurement-tools">
-                <div class="measurement-types">
-                    <button class="type-btn perimeter active" onclick="setType('perimeter')">🔴 Perimeter</button>
-                    <button class="type-btn ridge" onclick="setType('ridge')">🔵 Ridge</button>
-                    <button class="type-btn ground" onclick="setType('ground')">🟢 Ground</button>
-                </div>
-                
-                <!-- CRITICAL: NO ZOOM CONTROLS IN SIDEBAR -->
-                <!-- Zoom tool is now integrated as custom Google Maps control -->
-                
-                <button class="start-btn" id="start-btn" onclick="startMeasuring()">📏 Start Measuring</button>
-            </div>
-            
-            <!-- Material Calculator with Business Logic -->
-            <div class="section material-calculator">
-                <div class="calculator-config">
-                    <select id="stories">
-                        <option value="1">1 Story</option>
-                        <option value="2">2 Story</option>
-                        <option value="3">3+ Story</option>
-                    </select>
-                    <select id="difficulty">
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                        <option value="extreme">Extreme</option>
-                    </select>
-                    <input type="number" id="profit-margin" value="35">
-                    <select id="crew-count">
-                        <option value="1" selected>1 Crew</option>
-                        <option value="2">2 Crews</option>
-                        <option value="3">3 Crews</option>
-                        <option value="4">4 Crews</option>
-                    </select>
-                </div>
+            <div class="mobile-search-bar-container">
+                <input type="text" id="mobileAddressSearch" placeholder="Enter your address">
             </div>
         </div>
-        
-        <!-- CRITICAL: Map Container -->
-        <div class="map-container">
-            <div id="map" class="loading">Loading Google Maps...</div>
-            <div class="live-stats" id="live-stats">
-                <h4>Current Segment</h4>
-                <div class="stat">
-                    <span class="stat-label">Type:</span>
-                    <span class="stat-value" id="current-type">perimeter</span>
+    </div>
+
+    <!-- Mobile Street View Interface -->
+    <div class="mobile-streetview-interface" id="mobileStreetViewInterface">
+        <div class="streetview-header">
+            <button class="back-button">← Back</button>
+            <span class="streetview-address">Address</span>
+        </div>
+        <div class="streetview-container">
+            <div id="streetViewPanorama"></div>
+        </div>
+        <div class="streetview-controls">
+            <button class="capture-button" onclick="captureMobileStreetView()">
+                📷 Capture This View
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Crop Interface -->
+    <div class="mobile-crop-interface" id="mobileCropInterface">
+        <div class="crop-header">
+            <button class="cancel-button" onclick="cancelCrop()">Cancel</button>
+            <span class="crop-title">Adjust Crop Area</span>
+            <button class="done-button" onclick="completeMobileCrop()">✓</button>
+        </div>
+        <div class="crop-container" id="cropContainer">
+            <canvas id="cropCanvas"></canvas>
+            <div class="crop-overlay" id="cropOverlay">
+                <div class="crop-box" id="cropBox">
+                    <!-- Touch handles for resizing -->
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Mobile Drawing Interface -->
+    <div class="mobile-drawing-interface" id="mobileDrawingInterface">
+        <div class="drawing-header">
+            <button class="back-button">← Back</button>
+            <span class="drawing-title">Design Your Lights</span>
+            <button class="next-button">Next</button>
+        </div>
+        <div class="drawing-container">
+            <canvas id="designCanvas"></canvas>
+        </div>
+        <div class="drawing-controls">
+            <!-- Light drawing controls -->
+        </div>
+    </div>
 </body>
-</html>
 ```
 
 ### 🧮 **CRITICAL JavaScript Business Logic**
